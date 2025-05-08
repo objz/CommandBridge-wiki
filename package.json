@@ -29,6 +29,12 @@
   },
   "dependencies": {
     "@grimlink/eleventy-plugin-lucide-icons": "^2.0.2",
-    "eleventy-plugin-toc": "^1.1.5"
+    "@theatre/core": "^0.7.2",
+    "canvas-sketch": "^0.7.7",
+    "canvas-sketch-util": "^1.10.0",
+    "eleventy-plugin-toc": "^1.1.5",
+    "glsl-noise": "^0.0.0",
+    "theatre": "^0.2.3",
+    "three": "^0.176.0"
   }
 }

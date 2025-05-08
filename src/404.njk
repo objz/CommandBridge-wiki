@@ -1,21 +1,71 @@
 ---
 layout: layouts/base.njk
-title: This page doesn't exist
+title: Page Not Found
 description: >-
-  I'm told it's called a "404"... damn nerds. This page may not exist but Pages CMS does: it's a user-friendly CMS for static sites. Give it a try!
-image: "/media/sorry.gif"
+  Looks like you got lost in the void. But hey, at least it's pretty here.
 permalink: "404.html"
 ---
 
-<div class="max-w-xl mx-auto px-4 my-16 lg:px-8 lg:my-24">
-  <div class="prose text-center">
-    <img src="{{ image }}" width="100%">
-    <h1>{{ title }}</h1>
-    <p>{{ description }}</p>
-  </div>
-  <div class="flex max-md:flex-col md:gap-x-4 max-md:gap-y-4 justify-center">
-    <a class="btn-primary justify-center" href="/">Take me out of here!</a>
+<style>
+  .cb-bg {
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+  }
+</style>
+<div class="relative min-h-screen overflow-hidden">
+  <canvas id="cb-404-background" class="absolute inset-0 w-full h-full z-0"></canvas>
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-6 rounded-xl shadow-md border border-white/10 bg-white/10 dark:bg-black/20 cb-bg">
+    <h1 class="text-6xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-indigo-500">
+      404
+    </h1>
+    <p class="text-muted-foreground text-xl mb-2 ">You’ve wandered into unloaded chunks.</p>
+    <p class="text-muted-foreground mb-6">The page you were looking for isn’t here — or maybe it fell into the void.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/" class="button !text-base !h-12 !px-8">Return to Spawn</a>
+      <a href="/docs" class="button-outline !text-base !h-12 !px-8">Go to Docs</a>
+      <a href="https://modrinth.com/plugin/commandbridge"
+         target="_blank"
+         class="button-outline !text-base !h-12 !px-8">Modrinth</a>
+    </div>
   </div>
 </div>
+<script type="module">
+  import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
+  const bgCanvas = document.getElementById('cb-404-background');
+  const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  bgCamera.position.z = 2.5;
 
+  const geometry = new THREE.IcosahedronGeometry(1.2, 2);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000, wireframe: true });
+  const voidMesh = new THREE.Mesh(geometry, material);
+  bgScene.add(voidMesh);
+
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 5, 5);
+  bgScene.add(pointLight);
+
+function animate() {
+  requestAnimationFrame(animate);
+  voidMesh.rotation.x += 0.002;
+  voidMesh.rotation.y += 0.004;
+  bgRenderer.render(bgScene, bgCamera);
+}
+animate();
+
+function resizeRenderer() {
+  const pixelRatio = window.devicePixelRatio || 1;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  bgCamera.aspect = width / height;
+  bgCamera.updateProjectionMatrix();
+  bgRenderer.setSize(width, height);
+  bgRenderer.setPixelRatio(pixelRatio);
+}
+resizeRenderer();
+window.addEventListener('resize', resizeRenderer);
+
+</script>

@@ -1,13 +1,13 @@
 ---
 layout: layouts/base.njk
-title: CommandBridge Wiki
+title: About
+permalink: /
 promotion:
   text: Try CommandBridge now — unleash server automation
   url: https://modrinth.com/plugin/commandbridge
 description: A modern Minecraft plugin that enables robust server-side automation via structured commands and real-time HTTP integration.
 ---
 
-<!-- ——— Custom glint-arrow CSS ——— -->
 <style>
   @keyframes glint-right {
     0%,100% { transform: translateX(0);   opacity: .6; }
@@ -19,7 +19,7 @@ description: A modern Minecraft plugin that enables robust server-side automatio
   }
 
   .arrow-svg {
-    width: 8rem;            /* increase overall length */
+    width: 8rem;
     height: 1.5rem;
     stroke: #fff;
     stroke-width: 2;
@@ -30,7 +30,6 @@ description: A modern Minecraft plugin that enables robust server-side automatio
   .arrow-right { animation: glint-right 1.2s ease-in-out infinite; }
   .arrow-left  { animation: glint-left  1.2s ease-in-out infinite; }
 
-  /* stack vertically */
   .arrow-stack {
     display: flex;
     flex-direction: column;
@@ -38,16 +37,21 @@ description: A modern Minecraft plugin that enables robust server-side automatio
     justify-content: center;
     gap: 1.5rem;
   }
+  .cb-bg {
+    filter: blur(1.5px);
+    -webkit-filter: blur(1.5px);
+  }
 </style>
+<canvas id="cb-background"
+        class="absolute inset-0 w-full h-full z-0 block cb-bg">
+</canvas>
 <div class="relative min-h-screen overflow-hidden">
-  <canvas id="cb-background" class="absolute inset-0 w-full h-full z-0"></canvas>
   <div class="relative z-10 px-4 lg:px-8">
     <section class="max-w-6xl mx-auto py-32 grid lg:grid-cols-12 gap-12 items-center">
       <div class="lg:col-span-6 space-y-6">
         <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">CommandBridge</h1>
         <p class="text-muted-foreground text-lg">
-          Extend your Minecraft server with real-time HTTP triggers,
-          JSON command workflows, and powerful automation pipelines — all in a lightweight plugin.
+          CommandBridge connects Velocity and Paper servers to enable secure, real-time command execution and global scripting via YAML.
         </p>
         <div class="flex gap-4 flex-wrap">
           <a class="button !text-base !h-12 !px-8" href="/docs">Documentation</a>
@@ -61,9 +65,7 @@ description: A modern Minecraft plugin that enables robust server-side automatio
       </div>
       <div class="lg:col-span-6">
         <div class="relative w-full aspect-video rounded-xl shadow-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden">
-          <!-- Velocity ↔ Paper with animated arrows -->
           <div class="relative z-10 w-full h-full flex items-center justify-between px-20">
-            <!-- Velocity Logo -->
             <div class="w-38 h-38 flex items-center justify-center overflow-hidden">
               <img src="https://assets.papermc.io/brand/velocity_logo_blue.min.svg"
                    alt="Velocity"
@@ -72,24 +74,19 @@ description: A modern Minecraft plugin that enables robust server-side automatio
                    height="160" />
             </div>
             <div class="arrow-stack">
-              <!-- Top: → -->
               <svg class="arrow-svg arrow-right"
-                   viewBox="0 0 24 24"
+                   viewBox="0 0 40 24"
                    xmlns="http://www.w3.org/2000/svg">
-                <!-- shaft almost full-width -->
-                <path d="M1 12h22" />
-                <!-- arrowhead -->
-                <path d="M17 6l6 6-6 6" />
+                <path d="M1 12h40" />
+                <path d="M35 6l6 6-6 6" />
               </svg>
-              <!-- Bottom: ← -->
               <svg class="arrow-svg arrow-left"
-                   viewBox="0 0 24 24"
+                   viewBox="0 0 40 24"
                    xmlns="http://www.w3.org/2000/svg">
-                <path d="M23 12H1" />
+                <path d="M1 12H40" />
                 <path d="M7 6l-6 6 6 6" />
               </svg>
             </div>
-            <!-- Paper Logo -->
             <div class="w-28 h-28 flex items-center justify-center overflow-hidden">
               <img src="https://assets.papermc.io/brand/papermc_logo.512.png"
                    alt="Paper"
@@ -104,45 +101,40 @@ description: A modern Minecraft plugin that enables robust server-side automatio
     <section class="max-w-5xl mx-auto my-24 text-center">
       <h2 class="text-4xl font-semibold tracking-tight mb-12">What Makes It Unique?</h2>
       <div class="grid md:grid-cols-2 gap-8 text-left">
-        <div class="p-6 rounded-xl border bg-card shadow-sm">
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "zap" %}</div>
-          <h3 class="text-xl font-medium mt-4">Reactive Command Logic</h3>
+          <h3 class="text-xl font-medium mt-4">Run Commands Across Servers</h3>
           <p class="text-muted-foreground">
-            React to game events or external API calls with structured responses
-            that modify the game world, communicate with players, or trigger services.
+            Run a command on the proxy or backend and trigger actions on other servers instantly. Works in both directions.
           </p>
         </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm">
-          <div class="flex items-center gap-2">{% lucide "upload" %}</div>
-          <h3 class="text-xl font-medium mt-4">Webhook-Driven Automation</h3>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "activity" %}</div>
+          <h3 class="text-xl font-medium mt-4">Realtime WebSocket Sync</h3>
           <p class="text-muted-foreground">
-            Let your Minecraft server subscribe to CI/CD pipelines, Discord webhooks,
-            or even home automation events.
+            Servers stay connected using secure WebSocket channels. Commands sync even when no players are online.
           </p>
         </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm">
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "code" %}</div>
-          <h3 class="text-xl font-medium mt-4">Declarative Config Files</h3>
+          <h3 class="text-xl font-medium mt-4">Simple YAML Scripts</h3>
           <p class="text-muted-foreground">
-            Define everything from commands to endpoints in simple, declarative JSON files
-            with powerful templating support.
+            Define scripts that react to commands and send new ones to other servers. Each script handles one command.
           </p>
         </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm">
-          <div class="flex items-center gap-2">{% lucide "server" %}</div>
-          <h3 class="text-xl font-medium mt-4">Minimalist Runtime Footprint</h3>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "lock" %}</div>
+          <h3 class="text-xl font-medium mt-4">Secure by Design</h3>
           <p class="text-muted-foreground">
-            Designed to stay out of your way and use virtually no resources until invoked.
-            Perfect for survival, creative, or modded servers.
+            Connections are encrypted and require an authentication key. Only verified servers can join your network.
           </p>
         </div>
       </div>
     </section>
     <section class="max-w-4xl mx-auto my-32 text-center">
-      <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Automate Your Server?</h2>
+      <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Link Your Servers?</h2>
       <p class="text-muted-foreground mb-8 text-lg">
-        CommandBridge is already powering dozens of creative and production servers.
-        Start building with the docs or join the conversation on GitHub.
+        CommandBridge makes it easy to share commands between Velocity and Paper. Add the plugin, write a few scripts, and build powerful cross-server setups.
       </p>
       <a href="/docs" class="button !text-base !h-12 !px-8">Get Started</a>
     </section>
@@ -151,29 +143,29 @@ description: A modern Minecraft plugin that enables robust server-side automatio
 <script type="module">
   import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
-  const bgCanvas   = document.getElementById('cb-background');
+  const bgCanvas = document.getElementById('cb-background');
   const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
-  const bgScene    = new THREE.Scene();
-  const bgCamera   = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  bgCamera.position.z = 5;
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  bgCamera.position.z = 2.5;
 
-  const bgGeometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-  const bgMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffcc, wireframe: true });
-  const knot       = new THREE.Mesh(bgGeometry, bgMaterial);
-  bgScene.add(knot);
+  const geometry = new THREE.IcosahedronGeometry(1.2, 2);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000, wireframe: true });
+  const voidMesh = new THREE.Mesh(geometry, material);
+  bgScene.add(voidMesh);
 
-  const light = new THREE.PointLight(0xffffff, 1);
-  light.position.set(5, 5, 5);
-  bgScene.add(light);
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 5, 5);
+  bgScene.add(pointLight);
 
-  function animateBG() {
-    requestAnimationFrame(animateBG);
-    knot.rotation.x += 0.005;
-    knot.rotation.y += 0.01;
+  function animate() {
+    requestAnimationFrame(animate);
+    voidMesh.rotation.x += 0.002;
+    voidMesh.rotation.y += 0.004;
     bgRenderer.setSize(bgCanvas.clientWidth, bgCanvas.clientHeight, false);
     bgRenderer.render(bgScene, bgCamera);
   }
-  animateBG();
+  animate();
 
   window.addEventListener('resize', () => {
     bgCamera.aspect = window.innerWidth / window.innerHeight;

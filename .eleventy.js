@@ -10,7 +10,8 @@ module.exports = function(eleventyConfig) {
      "src/media": "/media",
      "src/assets": "/",
      "node_modules/alpinejs/dist/cdn.min.js": "js/alpine.js",
-     "node_modules/htmx.org/dist/htmx.min.js": "js/htmx.js"
+     "node_modules/htmx.org/dist/htmx.min.js": "js/htmx.js",
+     "src/lib": "/lib",
   });
 
   eleventyConfig.addShortcode("now", () => `${Date.now()}`);
