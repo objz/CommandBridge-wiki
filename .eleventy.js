@@ -137,7 +137,11 @@ eleventyConfig.addPairedShortcode("hint", function (content, style = "info") {
   };
 
   const s = styles[style] || styles.info;
-  const clean = md.renderInline(content.trim());
+  const rendered = md.render(content.trim());
+ 
+const stripped = rendered.match(/^<p>(.*?)<\/p>$/s)
+  ? rendered.replace(/^<p>(.*?)<\/p>$/s, '$1')
+  : rendered;
 
   const svgPath = path.join(__dirname, "src/media/svg", s.icon);
   let iconSvg = fs.readFileSync(svgPath, "utf-8");
@@ -148,16 +152,20 @@ eleventyConfig.addPairedShortcode("hint", function (content, style = "info") {
   );
 
 
+
 return `
   <div class="flex items-start gap-4 rounded-md p-4 ${s.bg} ${s.text}">
     <div class="flex-shrink-0 mt-[2px]">
       ${iconSvg}
     </div>
-    <div class="prose prose-sm dark:prose-invert">${md.renderInline(content.trim())}</div>
+    <div class="prose prose-sm dark:prose-invert text-inherit">${stripped}</div>
   </div>
 `;
 
+
 });
+
+
   return {
     dir: {
       input: "src",

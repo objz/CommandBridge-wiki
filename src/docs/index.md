@@ -1,5 +1,5 @@
 ---
-title: Getting started
+title: Welcome
 order: 1
 ---
 
