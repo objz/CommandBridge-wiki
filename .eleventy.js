@@ -2,6 +2,9 @@ const markdownIt = require("markdown-it");
 const markdownItAnchor = require("markdown-it-anchor");
 const pluginTOC = require("eleventy-plugin-toc")
 const lucideIcons = require("@grimlink/eleventy-plugin-lucide-icons");
+const nunjucks = require("nunjucks");
+const fs = require("fs");
+const path = require("path");
 
 const md = new markdownIt({ html: true });
 
@@ -107,11 +110,61 @@ module.exports = function(eleventyConfig) {
 
     return menu;
   });
-  
+
+
+eleventyConfig.addPairedShortcode("hint", function (content, style = "info") {
+  const styles = {
+    info: {
+      bg: "bg-blue-100 dark:bg-blue-900/40",
+      text: "text-blue-900 dark:text-blue-200",
+      icon: "info.svg",
+    },
+    warning: {
+      bg: "bg-orange-100 dark:bg-orange-400/20",
+      text: "text-yellow-900 dark:text-yellow-200",
+      icon: "warning.svg",
+    },
+    danger: {
+      bg: "bg-red-100 dark:bg-red-900/40",
+      text: "text-red-900 dark:text-red-200",
+      icon: "danger.svg",
+    },
+    success: {
+      bg: "bg-green-200 dark:bg-green-500/30",
+      text: "text-green-900 dark:text-green-200",
+      icon: "success.svg",
+    },
+  };
+
+  const s = styles[style] || styles.info;
+  const clean = md.renderInline(content.trim());
+
+  const svgPath = path.join(__dirname, "src/media/svg", s.icon);
+  let iconSvg = fs.readFileSync(svgPath, "utf-8");
+
+  iconSvg = iconSvg.replace(
+    /<svg([^>]+)>/,
+    `<svg$1 class="w-4 h-4 mt-[1px] flex-shrink-0 ${s.text}">`
+  );
+
+
+return `
+  <div class="flex items-start gap-4 rounded-md p-4 ${s.bg} ${s.text}">
+    <div class="flex-shrink-0 mt-[2px]">
+      ${iconSvg}
+    </div>
+    <div class="prose prose-sm dark:prose-invert">${md.renderInline(content.trim())}</div>
+  </div>
+`;
+
+});
   return {
     dir: {
       input: "src",
       output: "_site"
-    }
+    },
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
+    dataTemplateEngine: "njk",
   }
 };

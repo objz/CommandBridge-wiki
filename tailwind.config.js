@@ -1,6 +1,25 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{njk,html,md,js}"],
+
+
+
+
+
+safelist: [
+  "w-4", "h-4", "mt-[1px]", "flex", "gap-2", "gap-4", "rounded-md", "p-4", "pl-12", "pr-4",
+  // Info
+  "bg-blue-100", "dark:bg-blue-900/40", "text-blue-900", "dark:text-blue-200",
+  // Warning 
+  "bg-orange-100", "dark:bg-orange-400/20", "text-orange-900", "dark:text-orange-200",
+  // Danger
+  "bg-red-100", "dark:bg-red-900/40", "text-red-900", "dark:text-red-200",
+  // Success
+  "bg-green-200", "dark:bg-green-500/30", "text-green-900", "dark:text-green-200",
+  // Typography
+  "prose", "prose-sm", "dark:prose-invert"
+],
+
   theme: {
     container: {
       center: true,
