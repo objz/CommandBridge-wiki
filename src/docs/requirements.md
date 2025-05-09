@@ -3,7 +3,7 @@ title: Requirements
 order: 3
 ---
 
-{% hint "success" %}
+{% hint "info" %}
 Looking for the legacy version of CommandBridge? Visit the [old documentation](https://docs.old.huraxdax.club).
 {% endhint %}
 
