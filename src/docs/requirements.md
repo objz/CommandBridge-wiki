@@ -4,7 +4,7 @@ order: 3
 ---
 
 {% hint "info" %}
-Looking for the legacy version of CommandBridge? Visit the [old documentation](https://docs.old.huraxdax.club).
+Looking for the legacy version of CommandBridge? Visit the [old documentation](https://objz.github.io/CommandBridge/getting-started.html).
 {% endhint %}
 
 ### **Requirements**
