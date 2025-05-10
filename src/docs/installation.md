@@ -13,6 +13,8 @@ order: 2
 No need for separate JARs – CommandBridge will automatically detect whether it’s running on Velocity or Paper.
 {% endhint %}
 
+<div class="h-4"></div>
+
 ***
 
 ### **Upgrading to Version 2.0.0**
