@@ -18,9 +18,17 @@ These placeholders are always available — no plugins required.
 
 <div class="h-4"></div>
 
+
 {% hint "info" %}
 Platform-specific placeholders (like `%cb_world%` or `%cb_server%`) are automatically ignored when unsupported.
 {% endhint %}
+
+<div class="h-4"></div>
+
+{% hint "warning" %}
+Only `%args%` and `%arg[n]%` work for console executors; all other placeholders require a player executor.
+{% endhint %}
+
 
 <div class="h-4"></div>
 
