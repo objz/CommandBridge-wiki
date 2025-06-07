@@ -2,7 +2,7 @@
 <html
   lang="en"
   x-data="{
-    darkMode: localStorage.getItem('dark') ? localStorage.getItem('dark') === 'true' : window.matchMedia('(prefers-color-scheme: dark)').matches
+    darkMode: localStorage.getItem('dark') ? localStorage.getItem('dark') === 'true' : true
   }"
   x-init="$watch('darkMode', val => localStorage.setItem('dark', val))"
   x-bind:class="{ 'dark': darkMode }">
@@ -13,18 +13,17 @@
   <meta name="description" content="{{ description or site.description }}"/>
   <meta name="keywords" content="{{ keywords or site.keywords }}"/>
   <link rel="stylesheet" type="text/css" href="/styles.css?build={% now %}"/>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/x-icon" href="{{ site.url }}/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ site.url }}/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ site.url }}/favicon-16x16.png">
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{{ site.url }}/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="{{ site.url }}/favicon.svg">
   <meta property="og:type" content="{{ type or 'website' }}"/>
   <meta property="og:title" content="{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}"/>
   <meta property="og:description" content="{{ description or site.description }}"/>
   <meta property="og:url" content="{{ site.url + page.url }}"/>
   <meta property="og:image" content="{{ site.url }}/cover@2x.png"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:site" content="@pagescms"/>
   <meta name="twitter:url" content="{{ site.url + page.url }}"/>
   <meta name="twitter:title" content="{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}"/>
   <meta name="twitter:description" content="{{ description or site.description }}"/>

@@ -1,6 +1,6 @@
 ---
 title: Data Collection
-order: 8
+order: 9
 ---
 
 CommandBridge uses [bStats](https://bstats.org/) to collect **anonymous usage statistics**. This helps the developer understand how the plugin is used and improve it over time.

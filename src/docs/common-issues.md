@@ -1,6 +1,6 @@
 ---
 title: Common Issues
-order: 7
+order: 8
 ---
 
 Setting up a proxy and backend network can be error-prone. Here are common CommandBridge issues and how to resolve them.

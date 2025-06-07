@@ -1,6 +1,7 @@
 {
   "title": "CommandBridge",
-  "description": "The real-time command bridge for Minecraft servers",
+  "description": "A modern Minecraft plugin that enables robust server-side automation via structured commands and scriptings.",
   "url": "https://cb.objz.dev",
   "cover": "/assets/cover.png"
-} 
+}
+

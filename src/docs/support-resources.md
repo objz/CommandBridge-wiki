@@ -1,6 +1,6 @@
 ---
 title: Support Resources
-order: 6
+order: 7
 ---
 
 Need help with CommandBridge? Here’s where to get answers and stay up to date:
