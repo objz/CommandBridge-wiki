@@ -44,8 +44,6 @@ commands:
 Set `aliases: []` or remove the `aliases` key to disable aliases.
 {% endhint %}
 
----
-
 ### Command Fields
 
 | Field                            | Type              | Description                                                |
