@@ -7,6 +7,9 @@ CommandBridge scripts use **YAML** to define cross-server commands and their exe
 
 ```yaml
 name: "example"
+aliases:
+    - "ex"
+    - "sample"
 enabled: true
 ignore-permission-check: false
 hide-permission-warning: false
@@ -29,10 +32,17 @@ commands:
 | Field                     | Type    | Description                                                   |
 | ------------------------- | ------- | ------------------------------------------------------------- |
 | `name`                    | String  | Becomes the command (e.g. `alert` → `/alert`). No `/` needed. |
+| `aliases`                 | List    | Alternative names for the command (e.g. `ex`, `sample`).      |
 | `enabled`                 | Boolean | Whether the script is active.                                 |
 | `ignore-permission-check` | Boolean | Bypasses internal permission handling.                        |
 | `hide-permission-warning` | Boolean | Suppresses permission-denied messages.                        |
 | `commands`                | List    | One or more command actions to run.                           |
+
+<div class="h-4"></div>
+
+{% hint "info" %}
+Set `aliases: []` or remove the `aliases` key to disable aliases.
+{% endhint %}
 
 ---
 
