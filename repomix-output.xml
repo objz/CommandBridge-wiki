@@ -1,0 +1,2555 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+src/
+  _data/
+    site.json
+  _includes/
+    layouts/
+      base.njk
+      content.njk
+      docs.njk
+    partials/
+      docs/
+        footer.njk
+        navigation.njk
+      footer.njk
+      header.njk
+  assets/
+    favicon.svg
+    site.webmanifest
+  docs/
+    scripting/
+      example-alert.md
+      example-lobby.md
+      placeholders.md
+      syntax.md
+    common-issues.md
+    data-collection.md
+    docs.json
+    getting-started.md
+    index.md
+    installation.md
+    permissions.md
+    requirements.md
+    scripting.md
+    support-resources.md
+  media/
+    svg/
+      commandbridge.svg
+      danger.svg
+      info.svg
+      success.svg
+      warning.svg
+  styles/
+    carousel.css
+    main.css
+    prose.css
+  404.njk
+  index.njk
+.eleventy.js
+.gitignore
+LICENSE
+package.json
+README.md
+tailwind.config.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/_includes/layouts/content.njk">
+---
+layout: layouts/base.njk
+---
+
+<div class="max-w-4xl mx-auto px-4 my-8 lg:px-8 lg:my-12">
+  <div class="prose">
+    <h1 class="!mb-8">{{ title }}</h1>
+    {{ content | safe }}
+  </div>
+</div>
+</file>
+
+<file path="src/assets/favicon.svg">
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.412 0.794 501.187 501.95" xmlns:bx="https://boxy-svg.com" width="501.187px" height="501.95px"><defs><linearGradient id="color-0"><stop style="stop-color: rgb(39, 58, 102);" offset="0"/><stop style="stop-color: rgb(8, 17, 35);" offset="1"/></linearGradient><linearGradient id="color-0-0" href="#color-0" gradientUnits="userSpaceOnUse" x1="249.386" y1="-0.602" x2="249.386" y2="500.471" gradientTransform="matrix(0.699766, -0.711372, 1.00003, 0.983714, -175.220732, 180.486511)"/><filter id="inner-shadow-filter-0" color-interpolation-filters="sRGB" x="-50%" y="-50%" width="200%" height="200%"><feOffset dx="0" dy="0"/><feGaussianBlur stdDeviation="8"/><feComposite operator="out" in="SourceGraphic"/><feComponentTransfer result="choke"><feFuncA type="linear" slope="0.62"/></feComponentTransfer><feFlood flood-color="#38509cb3" result="color"/><feComposite operator="in" in="color" in2="choke" result="shadow"/><feComposite operator="over" in="shadow" in2="SourceGraphic"/></filter></defs><rect x="0.626" y="1.779" width="499.341" height="500" style="fill: url(&quot;#color-0-0&quot;); filter: url(&quot;#inner-shadow-filter-0&quot;); stroke: rgb(16, 23, 45); stroke-miterlimit: 2.55; stroke-width: 1.996px;" rx="92.425" ry="92.425"/><path d="M 230.951 356.62 L 335.726 229.892 C 340.716 221.909 335.726 214.924 325.748 214.924 L 275.855 214.924 C 265.876 214.924 264.261 211.99 265.876 201.952 L 273.859 142.08 C 275.855 132.101 269.086 126.654 260.887 137.091 L 161.101 257.832 C 156.112 265.815 161.101 270.804 171.08 270.804 L 220.973 270.804 C 230.951 270.804 233.945 273.797 230.951 283.776 L 215.983 352.628 C 213.988 362.607 218.977 366.598 225.962 361.609 L 230.951 356.62 Z" style="fill: rgb(71, 54, 211); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke-opacity: 0.58; stroke: rgb(130, 104, 240); stroke-width: 0.998px;"/><path d="M 177.988 370.937 C 179.821 371.935 183.489 373.93 186.834 375.538 C 190.18 377.147 193.204 378.369 196.324 379.623 C 199.445 380.878 202.661 382.165 206.361 383.355 C 210.06 384.545 214.242 385.639 218.231 386.443 C 222.22 387.248 226.016 387.762 229.748 388.213 C 233.479 388.663 237.147 389.049 241.296 389.178 C 245.446 389.307 250.078 389.178 254.904 388.888 C 259.729 388.599 264.747 388.148 269.026 387.569 C 273.304 386.99 276.843 386.282 280.799 385.285 C 284.756 384.288 289.131 383.001 293.763 381.522 C 298.396 380.042 303.286 378.369 307.886 376.374 C 312.486 374.38 316.797 372.064 320.915 369.683 C 325.032 367.303 328.957 364.858 333.203 361.673 C 337.449 358.489 342.017 354.564 345.877 350.99 C 349.738 347.415 352.89 344.191 356.268 340.327 C 359.646 336.464 363.249 331.96 366.369 327.488 C 369.489 323.017 372.127 318.577 374.25 314.653 C 376.373 310.728 377.982 307.318 379.397 304.023 C 380.813 300.728 382.035 297.546 383.129 294.219 C 384.223 290.891 385.188 287.417 386.217 283.556 C 387.247 279.696 388.341 275.45 389.145 271.364 C 389.949 267.278 390.463 263.354 390.753 259.654 C 391.042 255.955 391.107 252.481 391.171 248.91 C 391.236 245.339 391.3 241.672 391.171 238.198 C 391.042 234.724 390.721 231.443 390.399 228.476 C 390.077 225.509 389.756 222.857 389.627 220.084 C 389.498 217.31 389.563 214.415 390.109 211.777 C 390.656 209.139 391.686 206.759 392.844 204.829 C 394.002 202.899 395.289 201.419 396.865 199.971 C 398.442 198.523 400.307 197.108 402.43 195.885 C 404.553 194.663 406.934 193.633 409.025 193.086 C 411.116 192.539 412.917 192.475 414.526 192.572 C 416.134 192.669 417.55 192.926 419.126 193.505 C 420.702 194.084 422.439 194.985 424.209 196.014 C 425.978 197.043 427.78 198.201 429.227 199.456 C 430.675 200.71 431.768 202.061 432.701 203.284 C 433.634 204.506 434.406 205.6 435.146 207.145 C 435.886 208.689 436.594 210.683 437.205 212.452 C 437.816 214.222 438.331 215.766 438.685 217.406 C 439.039 219.047 439.232 220.784 439.489 222.972 C 439.747 225.159 440.068 227.797 440.261 230.885 C 440.454 233.973 440.518 237.512 440.55 241.158 C 440.582 244.804 440.582 248.557 440.486 251.945 C 440.39 255.333 440.197 258.357 439.907 261.864 C 439.618 265.37 439.232 269.359 438.653 273.927 C 438.074 278.495 437.301 283.642 436.079 289.497 C 434.856 295.352 433.184 301.914 431.447 307.64 C 429.709 313.366 427.908 318.256 425.779 322.979 C 423.651 327.702 421.195 332.259 418.51 337.151 C 415.825 342.043 412.91 347.269 409.241 352.923 C 405.573 358.576 401.151 364.657 396.804 370.003 C 392.457 375.349 388.186 379.962 383.864 384.202 C 379.542 388.443 375.169 392.313 370.998 395.73 C 366.827 399.148 362.858 402.113 357.053 406.058 C 351.249 410.002 343.611 414.927 334.766 419.475 C 325.921 424.023 315.87 428.194 305.292 431.486 C 294.714 434.777 283.608 437.189 273.005 438.622 C 262.401 440.054 252.3 440.506 243.707 440.381 C 235.113 440.255 228.028 439.551 220.364 438.244 C 212.7 436.938 204.458 435.028 197.172 432.968 C 189.885 430.908 183.553 428.697 177.322 425.983 C 171.091 423.269 164.96 420.053 160.06 417.339 C 155.161 414.626 151.492 412.415 148.703 410.706 C 145.914 408.998 144.004 407.792 142.622 407.038 C 141.24 406.284 140.386 405.982 139.531 405.932 C 138.677 405.881 137.823 406.082 136.944 406.509 C 136.064 406.936 135.16 407.59 132.823 409.901 C 130.486 412.213 126.717 416.183 124.434 418.228 C 122.15 420.273 121.352 420.393 120.352 420.453 C 119.352 420.513 118.149 420.513 116.97 420.212 C 115.79 419.912 114.634 419.31 113.593 418.547 C 112.552 417.784 111.627 416.859 110.749 415.125 C 109.87 413.391 109.037 410.847 107.233 404.633 C 105.43 398.42 102.655 388.538 99.688 378.062 C 96.722 367.586 93.564 356.518 91.873 350.113 C 90.182 343.708 89.958 341.968 90.183 340.396 C 90.407 338.824 91.081 337.421 92.209 336.316 C 93.338 335.211 94.92 334.406 96.52 333.872 C 98.12 333.339 99.737 333.079 101.837 333.116 C 103.937 333.154 106.519 333.491 110.112 334.024 C 113.705 334.557 118.308 335.287 124.399 336.242 C 130.49 337.196 138.069 338.375 145.058 339.498 C 152.047 340.621 158.447 341.687 163.416 342.445 C 168.384 343.203 171.921 343.652 174.307 344.101 C 176.692 344.551 177.927 345 179.05 345.757 C 180.173 346.515 181.183 347.582 181.632 348.817 C 182.082 350.052 181.969 351.455 181.52 352.943 C 181.071 354.431 180.285 356.003 179.274 357.518 C 178.264 359.034 177.029 360.494 176.046 361.672 C 175.064 362.851 174.334 363.749 174.082 364.704 C 173.829 365.658 174.053 366.668 174.478 367.551 C 174.903 368.433 175.529 369.186 175.841 369.563 C 176.154 369.94 176.154 369.94 176.154 369.94 C 176.154 369.94 176.154 369.94 177.988 370.937" style="fill: rgb(59, 42, 193); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke: rgb(130, 104, 240); stroke-opacity: 0.52; stroke-width: 0.998px;"/><path d="M 149.05 230.239 C 150.883 231.237 154.551 233.231 157.897 234.84 C 161.242 236.449 164.266 237.671 167.386 238.925 C 170.507 240.18 173.723 241.466 177.423 242.657 C 181.122 243.847 185.304 244.941 189.293 245.745 C 193.282 246.55 197.078 247.064 200.81 247.514 C 204.541 247.965 208.209 248.351 212.359 248.48 C 216.508 248.608 221.14 248.48 225.966 248.19 C 230.791 247.901 235.81 247.45 240.088 246.871 C 244.367 246.292 247.905 245.584 251.862 244.587 C 255.818 243.59 260.193 242.303 264.826 240.824 C 269.458 239.344 274.348 237.671 278.948 235.676 C 283.548 233.682 287.859 231.365 291.977 228.985 C 296.094 226.605 300.019 224.16 304.265 220.975 C 308.512 217.791 313.079 213.866 316.94 210.292 C 320.8 206.717 323.952 203.493 327.33 199.629 C 330.708 195.766 334.311 191.262 337.431 186.79 C 340.551 182.319 343.189 177.879 345.312 173.955 C 347.435 170.03 349.044 166.62 350.459 163.325 C 351.875 160.03 353.097 156.848 354.191 153.521 C 355.285 150.193 356.25 146.719 357.28 142.858 C 358.309 138.998 359.403 134.751 360.207 130.666 C 361.011 126.58 361.525 122.656 361.815 118.956 C 362.105 115.257 362.169 111.783 362.233 108.212 C 362.298 104.641 362.362 100.974 362.233 97.5 C 362.105 94.026 361.783 90.745 361.461 87.778 C 361.14 84.811 360.818 82.159 360.689 79.386 C 360.56 76.612 360.625 73.716 361.172 71.079 C 361.718 68.441 362.748 66.061 363.906 64.131 C 365.064 62.2 366.351 60.721 367.927 59.273 C 369.504 57.825 371.369 56.41 373.492 55.187 C 375.616 53.965 377.996 52.935 380.087 52.388 C 382.178 51.841 383.98 51.777 385.588 51.874 C 387.196 51.97 388.612 52.228 390.188 52.807 C 391.764 53.386 393.501 54.287 395.271 55.316 C 397.04 56.345 398.842 57.503 400.289 58.758 C 401.737 60.012 402.83 61.363 403.763 62.586 C 404.696 63.808 405.468 64.902 406.208 66.447 C 406.948 67.991 407.656 69.985 408.267 71.754 C 408.878 73.524 409.393 75.068 409.747 76.708 C 410.101 78.349 410.294 80.086 410.551 82.274 C 410.809 84.461 411.13 87.099 411.323 90.187 C 411.516 93.275 411.58 96.814 411.612 100.46 C 411.645 104.106 411.645 107.859 411.548 111.247 C 411.452 114.635 411.259 117.659 410.969 121.166 C 410.68 124.672 410.294 128.661 409.715 133.229 C 409.136 137.797 408.364 142.944 407.141 148.799 C 405.919 154.654 404.246 161.216 402.509 166.942 C 400.772 172.668 398.97 177.558 396.841 182.281 C 394.713 187.004 392.257 191.561 389.572 196.453 C 386.887 201.345 383.972 206.571 380.303 212.225 C 376.635 217.878 372.213 223.959 367.866 229.305 C 363.519 234.651 359.248 239.264 354.926 243.504 C 350.604 247.745 346.232 251.615 342.061 255.032 C 337.889 258.45 333.92 261.415 328.115 265.36 C 322.311 269.304 314.673 274.229 305.828 278.777 C 296.983 283.325 286.932 287.496 276.354 290.788 C 265.776 294.079 254.67 296.491 244.067 297.924 C 233.463 299.356 223.362 299.808 214.769 299.683 C 206.175 299.557 199.09 298.853 191.426 297.546 C 183.762 296.24 175.521 294.33 168.234 292.27 C 160.947 290.21 154.615 287.999 148.384 285.285 C 142.153 282.571 136.022 279.355 131.122 276.641 C 126.223 273.927 122.554 271.717 119.765 270.008 C 116.976 268.3 115.066 267.093 113.684 266.34 C 112.302 265.586 111.448 265.284 110.594 265.234 C 109.739 265.183 108.885 265.384 108.006 265.811 C 107.126 266.238 106.222 266.892 103.885 269.203 C 101.548 271.515 97.779 275.485 95.496 277.53 C 93.212 279.575 92.414 279.695 91.414 279.755 C 90.414 279.814 89.211 279.814 88.032 279.514 C 86.853 279.213 85.696 278.612 84.655 277.849 C 83.614 277.086 82.689 276.161 81.811 274.427 C 80.932 272.692 80.099 270.149 78.296 263.935 C 76.492 257.722 73.717 247.84 70.75 237.364 C 67.784 226.888 64.627 215.819 62.936 209.415 C 61.244 203.01 61.02 201.27 61.245 199.698 C 61.469 198.126 62.143 196.722 63.276 195.644 C 64.408 194.565 66 193.812 67.6 193.279 C 69.199 192.746 70.808 192.433 72.903 192.444 C 74.999 192.456 77.581 192.793 81.174 193.326 C 84.767 193.859 89.37 194.589 95.461 195.544 C 101.552 196.498 109.131 197.677 116.12 198.8 C 123.109 199.923 129.509 200.989 134.478 201.747 C 139.446 202.505 142.983 202.954 145.369 203.403 C 147.755 203.853 148.99 204.302 150.112 205.059 C 151.235 205.817 152.246 206.884 152.695 208.119 C 153.144 209.354 153.031 210.757 152.582 212.245 C 152.133 213.733 151.347 215.305 150.336 216.82 C 149.326 218.336 148.091 219.796 147.108 220.974 C 146.126 222.153 145.396 223.051 145.144 224.006 C 144.891 224.96 145.116 225.97 145.54 226.852 C 145.965 227.735 146.591 228.488 146.903 228.865 C 147.216 229.242 147.216 229.242 147.216 229.242 C 147.216 229.242 147.216 229.242 149.05 230.239" style="fill: rgb(76, 55, 216); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke: rgb(130, 104, 240); stroke-opacity: 0.68; stroke-width: 0.998px;" transform="matrix(-1, 0, 0, -1, 472.804, 351.54)" id="object-0"/></svg>
+</file>
+
+<file path="src/assets/site.webmanifest">
+{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+</file>
+
+<file path="src/docs/scripting/example-alert.md">
+---
+title: "Example: alert"
+order: 3
+---
+
+**Goal:** Broadcast a message on multiple servers with `/alert`.
+
+```yaml
+name: alert
+enabled: true
+ignore-permission-check: false
+hide-permission-warning: false
+commands:
+  - command: "say Attention: Maintenance in 5 minutes!"
+    delay: 0
+    target-client-ids:
+      - "lobby"
+      - "survival"
+      - "minigame"
+    target-executor: "console"
+    wait-until-player-is-online: false
+    check-if-executor-is-player: false
+    check-if-executor-is-on-server: false
+```
+
+#### What happens?
+
+* Registers `/alert` command.
+* Runs `say ...` on 3 Paper servers.
+* Executed immediately by each server console.
+
+> This command is triggered from the **Velocity proxy** and forwarded to the **Paper servers**.
+
+{% hint "warning" %}
+Set the permission `commandbridge.command.alert` on **Velocity**, not Paper.
+{% endhint %}
+</file>
+
+<file path="src/docs/scripting/example-lobby.md">
+---
+title: "Example: lobby"
+order: 4
+---
+
+**Goal:** Forward a proxy `/server lobby` command from a Paper server.
+
+```yaml
+name: lobby
+enabled: true
+ignore-permission-check: false
+hide-permission-warning: false
+commands:
+  - command: "server lobby"
+    delay: 0
+    target-executor: "player"
+    check-if-executor-is-player: true
+    check-if-executor-is-on-server: true
+```
+
+#### What happens?
+
+* Registers `/lobby` command.
+* Runs `server lobby` on the player.
+* Player is moved to the `lobby` server via proxy.
+
+> This command is triggered from the **Paper server** and automatically forwarded to **Velocity**.
+
+{% hint "warning" %}
+Set the permission `commandbridge.command.lobby` on **Paper**, not Velocity.
+{% endhint %}
+</file>
+
+<file path="src/docs/docs.json">
+{
+  "layout": "layouts/docs.njk",
+  "type": "article",
+  "tags": [ "docs" ]
+}
+</file>
+
+<file path="src/docs/getting-started.md">
+---
+title: Getting Started
+order: 4
+---
+
+In this documentation:
+
+- **Server** → the **Velocity proxy**
+- **Clients** → all connected **Paper servers**
+
+***
+
+### **File Structure Overview**
+
+After installing and restarting your servers, CommandBridge will generate the following files:
+
+#### On **each Paper server**:
+```
+
+plugins/CommandBridge/
+├── config.yml             # Client configuration
+└── scripts/
+    └── example.yml        # Example script
+
+```
+
+#### On the **Velocity proxy**:
+```
+
+plugins/CommandBridge/
+├── config.yml             # Server configuration
+├── secret.key             # Shared authentication key (server only)
+└── scripts/
+    └── example.yml        # Example script
+
+```
+
+<div class="h-4"></div>
+
+{% hint "danger" %}
+The `secret.key` file is only created on the Velocity proxy. **Keep it private** — anyone with this key can issue commands across your network.
+{% endhint %}
+
+<div class="h-4"></div>
+
+***
+
+### **Step 1: Configure Authentication**
+
+1. Open the `secret.key` file from the **Velocity server**.
+2. Copy the key and paste it into each **Paper server’s** `config.yml`:
+
+```yaml
+secret: "PASTE_KEY_HERE"
+```
+<div class="h-4"></div>
+
+---
+
+### **Step 2: Set Server and Client IDs**
+
+* On **each backend server**:
+  Set a unique `client-id` in `config.yml`:
+
+```yaml
+client-id: "lobby"
+```
+
+* On the **Velocity proxy**:
+  Set a `server-id` in `config.yml` (default is `"main"`):
+
+```yaml
+server-id: "main"
+```
+<div class="h-4"></div>
+
+---
+
+### **Step 3: Configure Velocity Network**
+
+In the Velocity `config.yml`:
+
+```yaml
+host: "0.0.0.0"      # Use 127.0.0.1 if running locally
+port: 3000           # Choose any free port
+san: "your.server.ip"  # Must match client-side remote host
+```
+<div class="h-4"></div>
+
+{% hint "warning" %}
+Do not include a port in the `san` value — use `"152.248.198.124"`, **not** `"152.248.198.124:3000"`.
+{% endhint %}
+
+Ensure the port is open and reachable from each Paper server.
+
+---
+
+### **Step 4: Configure Paper Servers**
+
+In each Paper server’s `config.yml`, configure connection to Velocity:
+
+```yaml
+remote: "152.248.198.124"  # Must match Velocity’s SAN
+port: 3000                 # Same port used on Velocity
+```
+<div class="h-4"></div>
+
+---
+
+### **Step 5: Start Your Network**
+
+1. **Start the Velocity proxy first**
+2. Then restart all Paper servers
+
+This ensures the proxy is listening before clients attempt to connect.
+
+---
+
+### **Connection Verification**
+
+On startup, the Velocity console should show:
+
+```
+[INFO] [CommandBridge]: Client authenticated successfully: /127.0.0.1:42918
+[INFO] [CommandBridge]: Added connected client: lobby
+```
+
+If all Paper clients show up as connected, your setup is complete!
+
+If not, check for:
+
+* Typos in config files
+* Incorrect or closed ports
+* Mismatched `secret`, `client-id`, or `san` values
+</file>
+
+<file path="src/docs/permissions.md">
+---
+title: Permissions
+order: 6
+---
+
+CommandBridge requires a **permissions plugin** on both Velocity and Paper servers. I recommend [LuckPerms](https://luckperms.net/).
+
+***
+
+### **Permission Nodes**
+
+| Permission | Description |
+|------------|-------------|
+| `commandbridge.admin` | Access to all admin commands like `/cb reload` |
+| `commandbridge.command.<name>` | Permission to use a specific command |
+
+Replace `<name>` with your script's name (e.g. `lobby`, `alert`, `test`).
+
+***
+
+### **Where to Set**
+
+**Simple rule:** Set permissions where the command runs.
+
+- **Admin permissions** → Set on Velocity only
+- **Velocity commands** → Set on Velocity with `lpv`
+- **Paper commands** → Set on Paper with `lp`
+
+#### Examples
+
+```bash
+# Admin access (Velocity only)
+lpv user playerName permission set commandbridge.admin true
+
+# Velocity: Grant /alert permission
+lpv user playerName permission set commandbridge.command.alert true
+
+# Paper: Grant /lobby permission  
+lp user playerName permission set commandbridge.command.lobby true
+```
+
+***
+
+### **Bypass Permissions**
+
+Add this to any script to skip permission checks:
+
+```yaml
+ignore-permission-check: true
+```
+<div class="h-4"></div>
+
+{% hint "warning" %}
+If you see "You do not have permission to use this command", check that the permission is set on the correct server (Velocity vs Paper) and that your permissions plugin is installed.
+{% endhint %}
+</file>
+
+<file path="src/docs/scripting.md">
+---
+title: Scripting
+order: 5
+---
+<img src="/media/overview.png" alt="CommandBridge Overview" class="rounded-xl mb-6">
+
+### Overview
+| Context              | Purpose                                             |
+| -------------------- | --------------------------------------------------- |
+| **Velocity scripts** | Run commands from the proxy on connected Paper servers. |
+| **Paper scripts**    | Run commands from a Paper server back to the Velocity proxy. |
+
+Scripts are defined as simple **YAML files** and live in the `plugins/CommandBridge/scripts/` folder of your server.
+
+{% hint "info" %}
+Scripts define **custom commands** your players or console can run across your network!
+{% endhint %}
+
+Each script file can register a command (like `/alert` or `/lobby`) and attach actions to be executed on target servers.
+</file>
+
+<file path="src/media/svg/commandbridge.svg">
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.412 0.794 501.187 501.95" xmlns:bx="https://boxy-svg.com" width="501.187px" height="501.95px"><defs><linearGradient id="color-0"><stop style="stop-color: rgb(39, 58, 102);" offset="0"/><stop style="stop-color: rgb(8, 17, 35);" offset="1"/></linearGradient><linearGradient id="color-0-0" href="#color-0" gradientUnits="userSpaceOnUse" x1="249.386" y1="-0.602" x2="249.386" y2="500.471" gradientTransform="matrix(0.699766, -0.711372, 1.00003, 0.983714, -175.220732, 180.486511)"/><filter id="inner-shadow-filter-0" color-interpolation-filters="sRGB" x="-50%" y="-50%" width="200%" height="200%"><feOffset dx="0" dy="0"/><feGaussianBlur stdDeviation="8"/><feComposite operator="out" in="SourceGraphic"/><feComponentTransfer result="choke"><feFuncA type="linear" slope="0.62"/></feComponentTransfer><feFlood flood-color="#38509cb3" result="color"/><feComposite operator="in" in="color" in2="choke" result="shadow"/><feComposite operator="over" in="shadow" in2="SourceGraphic"/></filter></defs><rect x="0.626" y="1.779" width="499.341" height="500" style="fill: url(&quot;#color-0-0&quot;); filter: url(&quot;#inner-shadow-filter-0&quot;); stroke: rgb(16, 23, 45); stroke-miterlimit: 2.55; stroke-width: 1.996px;" rx="92.425" ry="92.425"/><path d="M 230.951 356.62 L 335.726 229.892 C 340.716 221.909 335.726 214.924 325.748 214.924 L 275.855 214.924 C 265.876 214.924 264.261 211.99 265.876 201.952 L 273.859 142.08 C 275.855 132.101 269.086 126.654 260.887 137.091 L 161.101 257.832 C 156.112 265.815 161.101 270.804 171.08 270.804 L 220.973 270.804 C 230.951 270.804 233.945 273.797 230.951 283.776 L 215.983 352.628 C 213.988 362.607 218.977 366.598 225.962 361.609 L 230.951 356.62 Z" style="fill: rgb(71, 54, 211); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke-opacity: 0.58; stroke: rgb(130, 104, 240); stroke-width: 0.998px;"/><path d="M 177.988 370.937 C 179.821 371.935 183.489 373.93 186.834 375.538 C 190.18 377.147 193.204 378.369 196.324 379.623 C 199.445 380.878 202.661 382.165 206.361 383.355 C 210.06 384.545 214.242 385.639 218.231 386.443 C 222.22 387.248 226.016 387.762 229.748 388.213 C 233.479 388.663 237.147 389.049 241.296 389.178 C 245.446 389.307 250.078 389.178 254.904 388.888 C 259.729 388.599 264.747 388.148 269.026 387.569 C 273.304 386.99 276.843 386.282 280.799 385.285 C 284.756 384.288 289.131 383.001 293.763 381.522 C 298.396 380.042 303.286 378.369 307.886 376.374 C 312.486 374.38 316.797 372.064 320.915 369.683 C 325.032 367.303 328.957 364.858 333.203 361.673 C 337.449 358.489 342.017 354.564 345.877 350.99 C 349.738 347.415 352.89 344.191 356.268 340.327 C 359.646 336.464 363.249 331.96 366.369 327.488 C 369.489 323.017 372.127 318.577 374.25 314.653 C 376.373 310.728 377.982 307.318 379.397 304.023 C 380.813 300.728 382.035 297.546 383.129 294.219 C 384.223 290.891 385.188 287.417 386.217 283.556 C 387.247 279.696 388.341 275.45 389.145 271.364 C 389.949 267.278 390.463 263.354 390.753 259.654 C 391.042 255.955 391.107 252.481 391.171 248.91 C 391.236 245.339 391.3 241.672 391.171 238.198 C 391.042 234.724 390.721 231.443 390.399 228.476 C 390.077 225.509 389.756 222.857 389.627 220.084 C 389.498 217.31 389.563 214.415 390.109 211.777 C 390.656 209.139 391.686 206.759 392.844 204.829 C 394.002 202.899 395.289 201.419 396.865 199.971 C 398.442 198.523 400.307 197.108 402.43 195.885 C 404.553 194.663 406.934 193.633 409.025 193.086 C 411.116 192.539 412.917 192.475 414.526 192.572 C 416.134 192.669 417.55 192.926 419.126 193.505 C 420.702 194.084 422.439 194.985 424.209 196.014 C 425.978 197.043 427.78 198.201 429.227 199.456 C 430.675 200.71 431.768 202.061 432.701 203.284 C 433.634 204.506 434.406 205.6 435.146 207.145 C 435.886 208.689 436.594 210.683 437.205 212.452 C 437.816 214.222 438.331 215.766 438.685 217.406 C 439.039 219.047 439.232 220.784 439.489 222.972 C 439.747 225.159 440.068 227.797 440.261 230.885 C 440.454 233.973 440.518 237.512 440.55 241.158 C 440.582 244.804 440.582 248.557 440.486 251.945 C 440.39 255.333 440.197 258.357 439.907 261.864 C 439.618 265.37 439.232 269.359 438.653 273.927 C 438.074 278.495 437.301 283.642 436.079 289.497 C 434.856 295.352 433.184 301.914 431.447 307.64 C 429.709 313.366 427.908 318.256 425.779 322.979 C 423.651 327.702 421.195 332.259 418.51 337.151 C 415.825 342.043 412.91 347.269 409.241 352.923 C 405.573 358.576 401.151 364.657 396.804 370.003 C 392.457 375.349 388.186 379.962 383.864 384.202 C 379.542 388.443 375.169 392.313 370.998 395.73 C 366.827 399.148 362.858 402.113 357.053 406.058 C 351.249 410.002 343.611 414.927 334.766 419.475 C 325.921 424.023 315.87 428.194 305.292 431.486 C 294.714 434.777 283.608 437.189 273.005 438.622 C 262.401 440.054 252.3 440.506 243.707 440.381 C 235.113 440.255 228.028 439.551 220.364 438.244 C 212.7 436.938 204.458 435.028 197.172 432.968 C 189.885 430.908 183.553 428.697 177.322 425.983 C 171.091 423.269 164.96 420.053 160.06 417.339 C 155.161 414.626 151.492 412.415 148.703 410.706 C 145.914 408.998 144.004 407.792 142.622 407.038 C 141.24 406.284 140.386 405.982 139.531 405.932 C 138.677 405.881 137.823 406.082 136.944 406.509 C 136.064 406.936 135.16 407.59 132.823 409.901 C 130.486 412.213 126.717 416.183 124.434 418.228 C 122.15 420.273 121.352 420.393 120.352 420.453 C 119.352 420.513 118.149 420.513 116.97 420.212 C 115.79 419.912 114.634 419.31 113.593 418.547 C 112.552 417.784 111.627 416.859 110.749 415.125 C 109.87 413.391 109.037 410.847 107.233 404.633 C 105.43 398.42 102.655 388.538 99.688 378.062 C 96.722 367.586 93.564 356.518 91.873 350.113 C 90.182 343.708 89.958 341.968 90.183 340.396 C 90.407 338.824 91.081 337.421 92.209 336.316 C 93.338 335.211 94.92 334.406 96.52 333.872 C 98.12 333.339 99.737 333.079 101.837 333.116 C 103.937 333.154 106.519 333.491 110.112 334.024 C 113.705 334.557 118.308 335.287 124.399 336.242 C 130.49 337.196 138.069 338.375 145.058 339.498 C 152.047 340.621 158.447 341.687 163.416 342.445 C 168.384 343.203 171.921 343.652 174.307 344.101 C 176.692 344.551 177.927 345 179.05 345.757 C 180.173 346.515 181.183 347.582 181.632 348.817 C 182.082 350.052 181.969 351.455 181.52 352.943 C 181.071 354.431 180.285 356.003 179.274 357.518 C 178.264 359.034 177.029 360.494 176.046 361.672 C 175.064 362.851 174.334 363.749 174.082 364.704 C 173.829 365.658 174.053 366.668 174.478 367.551 C 174.903 368.433 175.529 369.186 175.841 369.563 C 176.154 369.94 176.154 369.94 176.154 369.94 C 176.154 369.94 176.154 369.94 177.988 370.937" style="fill: rgb(59, 42, 193); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke: rgb(130, 104, 240); stroke-opacity: 0.52; stroke-width: 0.998px;"/><path d="M 149.05 230.239 C 150.883 231.237 154.551 233.231 157.897 234.84 C 161.242 236.449 164.266 237.671 167.386 238.925 C 170.507 240.18 173.723 241.466 177.423 242.657 C 181.122 243.847 185.304 244.941 189.293 245.745 C 193.282 246.55 197.078 247.064 200.81 247.514 C 204.541 247.965 208.209 248.351 212.359 248.48 C 216.508 248.608 221.14 248.48 225.966 248.19 C 230.791 247.901 235.81 247.45 240.088 246.871 C 244.367 246.292 247.905 245.584 251.862 244.587 C 255.818 243.59 260.193 242.303 264.826 240.824 C 269.458 239.344 274.348 237.671 278.948 235.676 C 283.548 233.682 287.859 231.365 291.977 228.985 C 296.094 226.605 300.019 224.16 304.265 220.975 C 308.512 217.791 313.079 213.866 316.94 210.292 C 320.8 206.717 323.952 203.493 327.33 199.629 C 330.708 195.766 334.311 191.262 337.431 186.79 C 340.551 182.319 343.189 177.879 345.312 173.955 C 347.435 170.03 349.044 166.62 350.459 163.325 C 351.875 160.03 353.097 156.848 354.191 153.521 C 355.285 150.193 356.25 146.719 357.28 142.858 C 358.309 138.998 359.403 134.751 360.207 130.666 C 361.011 126.58 361.525 122.656 361.815 118.956 C 362.105 115.257 362.169 111.783 362.233 108.212 C 362.298 104.641 362.362 100.974 362.233 97.5 C 362.105 94.026 361.783 90.745 361.461 87.778 C 361.14 84.811 360.818 82.159 360.689 79.386 C 360.56 76.612 360.625 73.716 361.172 71.079 C 361.718 68.441 362.748 66.061 363.906 64.131 C 365.064 62.2 366.351 60.721 367.927 59.273 C 369.504 57.825 371.369 56.41 373.492 55.187 C 375.616 53.965 377.996 52.935 380.087 52.388 C 382.178 51.841 383.98 51.777 385.588 51.874 C 387.196 51.97 388.612 52.228 390.188 52.807 C 391.764 53.386 393.501 54.287 395.271 55.316 C 397.04 56.345 398.842 57.503 400.289 58.758 C 401.737 60.012 402.83 61.363 403.763 62.586 C 404.696 63.808 405.468 64.902 406.208 66.447 C 406.948 67.991 407.656 69.985 408.267 71.754 C 408.878 73.524 409.393 75.068 409.747 76.708 C 410.101 78.349 410.294 80.086 410.551 82.274 C 410.809 84.461 411.13 87.099 411.323 90.187 C 411.516 93.275 411.58 96.814 411.612 100.46 C 411.645 104.106 411.645 107.859 411.548 111.247 C 411.452 114.635 411.259 117.659 410.969 121.166 C 410.68 124.672 410.294 128.661 409.715 133.229 C 409.136 137.797 408.364 142.944 407.141 148.799 C 405.919 154.654 404.246 161.216 402.509 166.942 C 400.772 172.668 398.97 177.558 396.841 182.281 C 394.713 187.004 392.257 191.561 389.572 196.453 C 386.887 201.345 383.972 206.571 380.303 212.225 C 376.635 217.878 372.213 223.959 367.866 229.305 C 363.519 234.651 359.248 239.264 354.926 243.504 C 350.604 247.745 346.232 251.615 342.061 255.032 C 337.889 258.45 333.92 261.415 328.115 265.36 C 322.311 269.304 314.673 274.229 305.828 278.777 C 296.983 283.325 286.932 287.496 276.354 290.788 C 265.776 294.079 254.67 296.491 244.067 297.924 C 233.463 299.356 223.362 299.808 214.769 299.683 C 206.175 299.557 199.09 298.853 191.426 297.546 C 183.762 296.24 175.521 294.33 168.234 292.27 C 160.947 290.21 154.615 287.999 148.384 285.285 C 142.153 282.571 136.022 279.355 131.122 276.641 C 126.223 273.927 122.554 271.717 119.765 270.008 C 116.976 268.3 115.066 267.093 113.684 266.34 C 112.302 265.586 111.448 265.284 110.594 265.234 C 109.739 265.183 108.885 265.384 108.006 265.811 C 107.126 266.238 106.222 266.892 103.885 269.203 C 101.548 271.515 97.779 275.485 95.496 277.53 C 93.212 279.575 92.414 279.695 91.414 279.755 C 90.414 279.814 89.211 279.814 88.032 279.514 C 86.853 279.213 85.696 278.612 84.655 277.849 C 83.614 277.086 82.689 276.161 81.811 274.427 C 80.932 272.692 80.099 270.149 78.296 263.935 C 76.492 257.722 73.717 247.84 70.75 237.364 C 67.784 226.888 64.627 215.819 62.936 209.415 C 61.244 203.01 61.02 201.27 61.245 199.698 C 61.469 198.126 62.143 196.722 63.276 195.644 C 64.408 194.565 66 193.812 67.6 193.279 C 69.199 192.746 70.808 192.433 72.903 192.444 C 74.999 192.456 77.581 192.793 81.174 193.326 C 84.767 193.859 89.37 194.589 95.461 195.544 C 101.552 196.498 109.131 197.677 116.12 198.8 C 123.109 199.923 129.509 200.989 134.478 201.747 C 139.446 202.505 142.983 202.954 145.369 203.403 C 147.755 203.853 148.99 204.302 150.112 205.059 C 151.235 205.817 152.246 206.884 152.695 208.119 C 153.144 209.354 153.031 210.757 152.582 212.245 C 152.133 213.733 151.347 215.305 150.336 216.82 C 149.326 218.336 148.091 219.796 147.108 220.974 C 146.126 222.153 145.396 223.051 145.144 224.006 C 144.891 224.96 145.116 225.97 145.54 226.852 C 145.965 227.735 146.591 228.488 146.903 228.865 C 147.216 229.242 147.216 229.242 147.216 229.242 C 147.216 229.242 147.216 229.242 149.05 230.239" style="fill: rgb(76, 55, 216); filter: drop-shadow(rgba(0, 0, 0, 0.3) 10px 10px 7px); stroke: rgb(130, 104, 240); stroke-opacity: 0.68; stroke-width: 0.998px;" transform="matrix(-1, 0, 0, -1, 472.804, 351.54)" id="object-0"/></svg>
+</file>
+
+<file path="src/media/svg/success.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+</file>
+
+<file path="src/styles/carousel.css">
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-720px);
+  }
+}
+
+.infinite-scroll {
+  animation: scroll 20s linear infinite;
+}
+</file>
+
+<file path="src/styles/prose.css">
+.prose > * {
+  @apply first:!mt-0 last:!mb-0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply font-semibold tracking-tight scroll-m-16;
+}
+
+.prose h1,
+.prose h2,
+.prose h3 {
+  @apply my-6;
+}
+
+.prose h1 {
+  @apply text-3xl lg:text-4xl;
+}
+
+.prose h2 {
+  @apply text-xl lg:text-2xl;
+}
+
+.prose h3 {
+  @apply text-base lg:text-lg;
+}
+
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply text-base my-4;
+}
+
+.prose p,
+.prose blockquote,
+.prose ul,
+.prose ol {
+  @apply my-6 first:mt-0;
+}
+
+.prose code {
+  @apply text-[90%] bg-muted rounded-sm py-1 px-1.5;
+}
+
+.prose pre code {
+  @apply p-2 block break-words whitespace-pre-wrap;
+}
+
+.prose ul,
+.prose ol {
+  @apply pl-5 mb-4;
+}
+
+.prose ul li,
+.prose ol li {
+  @apply my-2 last:mb-0 first:mt-0;
+}
+
+.prose ul li > p,
+.prose ol li > p {
+  @apply m-0;
+}
+
+.prose ul li ul,
+.prose ul li ol,
+.prose ol li ul,
+.prose ol li ol {
+  @apply my-2;
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose a {
+  @apply text-primary underline hover:decoration-muted-foreground	 underline-offset-2;
+}
+
+.prose blockquote {
+  @apply pl-4 ml-1 border-l-2;
+}
+
+.prose img,
+.prose svg,
+.prose video,
+.prose canvas,
+.prose audio,
+.prose iframe,
+.prose embed,
+.prose object {
+  @apply inline-block;
+}
+
+.prose table {
+  @apply table text-sm;
+}
+
+.prose table tr {
+  @apply border-b;
+}
+
+.prose table th {
+  @apply text-muted-foreground text-xs font-medium text-left align-middle px-3 first:pl-0 last:pr-0 h-12;
+}
+
+.prose table td {
+  @apply align-middle px-3 py-3 first:pl-0 last:pr-0;
+}
+
+.prose table td strong code {
+  @apply font-medium text-[#005cc5];
+}
+
+html.dark .prose table td strong code {
+  @apply font-medium text-[#79c0ff];
+}
+</file>
+
+<file path=".gitignore">
+node_modules
+_site
+package-lock.json
+.*
+!.gitignore
+!.eleventy.js
+</file>
+
+<file path="src/_includes/layouts/docs.njk">
+---
+layout: layouts/base.njk
+---
+<div class="flex max-md:flex-col max-w-7xl mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8">
+  <div class="md:w-80 max-md:mb-4">
+    <div class="navigation md:pr-8 md:border-r" x-data="{ showNav: false }">
+      <button @click="showNav = !showNav" class="button-outline flex items-center gap-x-2 w-full md:hidden mb-2">
+        <span x-text="showNav ? 'Hide navigation' : 'Show navigation'"></span>
+        <template x-if="!showNav">{% lucide "chevrons-up-down", { "class" : "ml-auto h-4 w-4" } %}</template>
+        <template x-if="showNav">{% lucide "chevrons-down-up", { "class" : "ml-auto h-4 w-4" } %}</template>
+      </button>
+      <div class="max-md:max-h-0 overflow-hidden duration-200 transition-all" :style="showNav ? 'max-height: ' + $refs.navigation.offsetHeight + 'px' : ''">
+        <div x-ref="navigation" class="max-md:border max-md:rounded-md max-md:p-4 max-md:text-sm">
+          {% include "partials/docs/navigation.njk" %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="w-full">
+    <div class="prose">
+      <h1 class="!mb-8">{{ title }}</h1>
+      {{ content | safe }}
+    </div>
+    {% include "partials/docs/footer.njk" %}
+  </div>
+  
+  <div class="w-64 max-lg:hidden">
+    <div class="sticky top-16 text-sm">
+      <h2 class="font-semibold track-tight">Content:</h2>
+      {{ content | toc | safe }}
+    </div>
+  </div>
+</div>
+
+<link x-bind:href="darkMode ? 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github-dark.min.css' : 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github.min.css'" rel="stylesheet">
+<script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+<script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/languages/yaml.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', function() { hljs.highlightAll(); });</script>
+</file>
+
+<file path="src/_includes/partials/docs/footer.njk">
+{% if collections.docs %}
+  {% set nextPrevItems = collections.menu | getNextPrevMenu(page.url) %}
+  {% set previousDoc = nextPrevItems.previous %}
+  {% set nextDoc = nextPrevItems.next %}
+  {% if nextDoc or previousDoc %}
+    <footer class="flex gap-x-4 mt-8 pt-4 border-t">
+      {% if previousDoc %}
+        <a href="{{ previousDoc.url }}" class="button-outline flex items-center gap-x-2 truncate">
+          {% lucide "chevron-left", { "class": "h-4 w-4 shrink-0" } %}
+          <span class="max-w-1/2 truncate">{{ previousDoc.title }}</span>
+        </a>
+      {% endif %}
+      {% if nextDoc %}
+        <a href="{{ nextDoc.url }}" class="button-outline flex items-center gap-x-2 ml-auto truncate">
+          <span class="max-w-1/2 truncate">{{ nextDoc.title }}</span>
+          {% lucide "chevron-right", { "class": "h-4 w-4 shrink-0" } %}
+        </a>
+      {% endif %}
+      </footer>
+  {% endif %}
+{% endif %}
+</file>
+
+<file path="src/_includes/partials/docs/navigation.njk">
+{% macro renderMenu(items) %}
+  <ul class="flex flex-col gap-y-4">
+    {% for item in items %}
+      <li x-data="{ open: {{ 'true' if page.url.startsWith(item.url) else 'false' }} }">
+        <div class="flex gap-x-2 items-center">
+          <a href="{{ item.url }}" class="flex items-center rounded-lg font-mdedium text-sm text-muted-foreground hover:text-primary outline-none{{ ' text-primary font-medium' if item.url == page.url }}">
+            {{ item.title }}
+          </a>
+          {% if item.children.length %}
+            <button class="ml-auto text-muted-foreground hover:text-inherit transition-all duration-200" @click="open = !open" :class="open ? 'rotate-90' : ''">
+              {% lucide "chevron-right", { "class" : "h-4 w-4 shrink-0" } %}
+            </button>
+          {% endif %}
+        </div>
+        {% if item.children.length %}            
+          <div class="max-h-0 overflow-hidden duration-200 transition-all" :style="open ? 'max-height: ' + $el.scrollHeight + 'px' : ''" style="{{ 'max-height: 100%;' if page.url.startsWith(item.url) }}">
+            {% if item.children %}
+              {{ renderMenu(item.children) }}
+            {% endif %}
+          </div>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{{ renderMenu(collections.menu) }}
+</file>
+
+<file path="src/docs/scripting/placeholders.md">
+---
+title: Placeholders
+order: 2
+---
+
+### Built-in Placeholders
+
+These placeholders are always available — no plugins required.
+
+| Placeholder                  | Paper | Velocity | Description                                  |
+|-----------------------------|:-----:|:--------:|----------------------------------------------|
+| `%cb_player%`               | ✅    | ✅       | The triggering player’s name.                |
+| `%cb_uuid%`                 | ✅    | ✅       | The player’s UUID.                           |
+| `%cb_world%`                | ✅    | ❌       | The player’s current world.                  |
+| `%cb_server%`               | ❌    | ✅       | The player’s current Velocity server.        |
+| `%args%`                    | ✅    | ✅       | The full raw argument string.                |
+| `%arg[0]%`, `%arg[1]%`, …   | ✅    | ✅       | Individual arguments by index.               |
+
+<div class="h-4"></div>
+
+
+{% hint "info" %}
+Platform-specific placeholders (like `%cb_world%` or `%cb_server%`) are automatically ignored when unsupported.
+{% endhint %}
+
+<div class="h-4"></div>
+
+{% hint "warning" %}
+Only `%args%` and `%arg[n]%` work for console executors; all other placeholders require a player executor.
+{% endhint %}
+
+
+<div class="h-4"></div>
+
+***
+
+### Argument Placeholders
+
+Use `%args%` or `%arg[n]%` to insert player-provided input:
+
+- `%args%` → everything after the command name  
+- `%arg[0]%` → the first argument  
+- `%arg[1]%` → the second argument  
+- etc.
+
+Helpful for passing dynamic values into commands across servers.
+
+***
+
+### Example: Cross-Server Announcements
+
+Broadcast a custom message using `/announce <message>`:
+
+```yaml
+name: announce
+enabled: true
+ignore-permission-check: false
+hide-permission-warning: false
+commands:
+  - command: "say [Notice] %args%"
+    delay: 0
+    target-client-ids:
+      - "lobby"
+      - "survival"
+    target-executor: "console"
+    wait-until-player-is-online: false
+    check-if-executor-is-player: true
+    check-if-executor-is-on-server: true
+```
+
+If a player runs:
+
+```
+/announce Hello world
+```
+
+The result on each target server will be:
+
+> `[Notice] Hello world`
+
+---
+
+### PlaceholderAPI Integration
+
+CommandBridge supports full **PlaceholderAPI (PAPI)** support:
+
+* **On Paper:** install [`PlaceholderAPI`](https://www.spigotmc.org/resources/placeholderapi.6245/)
+* **On Velocity:** install [`PapiProxyBridge`](https://modrinth.com/plugin/papiproxybridge)
+
+Example usage:
+
+```yaml
+- command: "say Welcome %luckperms_prefix% %cb_player%!"
+```
+
+> Output: `Welcome [Admin] Alex!`
+
+{% hint "info" %}
+PAPI is optional, but recommended for dynamic metadata like prefixes, stats, or permissions.
+{% endhint %}
+</file>
+
+<file path="src/docs/common-issues.md">
+---
+title: Common Issues
+order: 8
+---
+
+Setting up a proxy and backend network can be error-prone. Here are common CommandBridge issues and how to resolve them.
+
+---
+
+### 1. Paper server can’t connect to Velocity
+
+**Symptom:** Velocity doesn’t show `Client authenticated successfully`. Paper logs may show connection errors or timeouts.
+
+**Checklist:**
+
+- **Secret mismatch:** Make sure the `secret` in each Paper `config.yml` matches the content of Velocity’s `secret.key`.
+- **Incorrect host/remote:** If both run on the same machine, use `127.0.0.1`. If they’re on separate machines, set Velocity’s `host` to `0.0.0.0` and Paper’s `remote` to the external IP or domain.
+- **Port closed or incorrect:** Ensure the port matches on both sides and is open. On hosted setups, open it via the control panel or firewall. If in use, pick a different one.
+- **SAN mismatch:** Velocity’s `san` must match the IP or domain Paper connects to. No port allowed — just the domain or IP.
+
+Restart Velocity first, then all Paper servers. Enable `debug: true` in `config.yml` for detailed logs if needed.
+
+---
+
+### 2. “Address already in use” on Velocity startup
+
+**Cause:** Another process is using the configured port.
+
+**Fix:** Change the `port` in Velocity and all Paper configs to an unused one (e.g. 3001, 3555), then restart all servers.
+
+---
+
+### 3. Clients connect, but commands don’t work
+
+**Symptom:** Velocity shows clients connected, but nothing happens when you run a command.
+
+**Checklist:**
+
+- **Script missing:** The script must exist on the correct side (Velocity or Paper) depending on where the command originates.
+- **Missing permissions:** Players need `commandbridge.command.<name>` unless `ignore-permission-check` is enabled.
+- **No permission plugin:** Make sure both Velocity and Paper have a permissions plugin (e.g. LuckPerms).
+- **Invalid target client ID:** The `client-id` in each Paper config must match what’s used in `target-client-ids`.
+- **Plugin not loaded:** Check `/plugins` (Paper) or `/cb version` (Velocity). Ensure the script file has `enabled: true`.
+
+---
+
+### 4. “You do not have permission to use this command”
+
+**Cause:** Permission checks are active and the sender lacks the required node.
+
+**Fix:**
+
+- Grant the correct permission (`commandbridge.command.<name>`), or  
+- Set `ignore-permission-check: true` in the script, or  
+- Hide the message with `hide-permission-warning: true` (command still won’t run).
+
+---
+
+### 5. Placeholders aren’t working
+
+**Symptom:** Placeholders like `%cb_player%` or `%luckperms_prefix%` are not replaced.
+
+**Checklist:**
+
+- **Built-in only:** Only `%cb_...%` placeholders work without PlaceholderAPI.
+- **PAPI missing:** Install PlaceholderAPI on Paper, and PapiProxyBridge on Velocity if using placeholders on proxy side.
+- **Debug logs:** With `debug: true`, logs will show if PAPI was detected.
+- **Syntax:** Use lowercase, exact names (e.g. `%cb_player%` not `%CB_PLAYER%`).
+
+---
+
+### 6. Still stuck?
+
+Enable debug logging and check the console output. If the issue persists, visit the [Support resources](support-resources.md) page to get help via Discord or GitHub.
+</file>
+
+<file path="src/docs/data-collection.md">
+---
+title: Data Collection
+order: 9
+---
+
+CommandBridge uses [bStats](https://bstats.org/) to collect **anonymous usage statistics**. This helps the developer understand how the plugin is used and improve it over time.
+
+### What’s Collected
+
+- Plugin version  
+- Minecraft version  
+- Server count and player count  
+- Other non-personal, technical data
+
+**No sensitive information is collected.** IP addresses, usernames, chat, and personal data are never tracked.
+
+---
+
+### How to Disable
+
+To opt out, edit the file at:
+
+```
+plugins/bStats/config.yml
+```
+
+Set:
+
+```yaml
+enabled: false
+```
+
+Repeat this on each server where you want to disable metrics.
+
+---
+
+![bStats](https://bstats.org/signatures/velocity/CommandBridge.svg)
+
+*Example chart showing the number of servers using CommandBridge over time.*
+
+---
+
+Using bStats is standard for many Minecraft plugins. It’s lightweight, fully anonymous, and doesn’t affect performance. But it’s optional — you’re always in control.
+
+*For more info, visit [bstats.org](https://bstats.org/).*
+</file>
+
+<file path="src/docs/installation.md">
+---
+title: Installation
+order: 2
+---
+
+### Setup **the Plugin**
+
+1. Download the latest **`CommandBridge-xxx-all.jar`** from the [releases page](https://modrinth.com/plugin/commandbridge/versions).
+2. Place the JAR file into the `plugins` folder on **both your Velocity and Paper servers**.
+3. Restart **both** the **Velocity and Paper** server and let the plugin generate its configs.
+
+{% hint "success" %}
+No need for separate JARs – CommandBridge will automatically detect whether it’s running on Velocity or Paper.
+{% endhint %}
+
+<div class="h-4"></div>
+
+***
+
+### **Upgrading to Version 2.0.0**
+
+If you’re upgrading from an older version of CommandBridge to version **2.0.0 or above**, follow these additional steps:
+
+1. **Convert Scripts Manually**:
+   * The script format has changed. You’ll need to manually convert your old scripts to the new format. You can see how to write the scripts [here](../scripts/overview.md).
+2. **Regenerate `config.yml`**:
+   * Delete your old `config.yml`.
+   * Start the server to let the plugin generate a new configuration file.
+   * Follow the [plugin setup guide](plugin-setup.md) on how to configure the plugin.
+</file>
+
+<file path="src/docs/support-resources.md">
+---
+title: Support Resources
+order: 7
+---
+
+Need help with CommandBridge? Here’s where to get answers and stay up to date:
+
+- **GitHub Issues**  
+  Found a bug or have a feature request? Open a ticket on the [GitHub issue tracker](https://github.com/objz/CommandBridge/issues). Be sure to include your plugin version, server logs, and clear reproduction steps.
+
+- **Discord**  
+  Join the [CommandBridge Discord server](https://discord.gg/QPqBYb44ce) for live support, feedback, or questions.
+
+- **Documentation**  
+  You're already here! Be sure to check the [Common Issues](/docs/common-issues) section and usage examples for quick answers.
+
+---
+
+### When asking for help, please include:
+
+- Your **CommandBridge**, **Minecraft**, **Velocity**, and **Paper** versions
+- Any relevant error messages or logs (use a pastebin if they’re long)
+- A brief description of what you’ve already tried
+
+I'm (objz) happy to help — don’t hesitate to reach out if you're stuck!
+</file>
+
+<file path="src/media/svg/danger.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+</file>
+
+<file path="src/media/svg/info.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+</file>
+
+<file path="src/media/svg/warning.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+</file>
+
+<file path="src/styles/main.css">
+@import './prose.css';
+@import './carousel.css';
+/* @import './highlightjs.css';
+@import './custom.css';
+@import './carousel.css';
+@import './modal.css'; */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85.8%;
+    --input: 0 0% 85.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 19.9%;
+    --input: 0 0% 19.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.button {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2;
+}
+
+.button-outline {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2;
+}
+
+.navigation ul ul {
+  @apply pl-4 pt-4;
+}
+
+.toc li {
+  @apply mt-2;
+}
+
+.toc a {
+  @apply text-primary underline hover:decoration-muted-foreground	 underline-offset-2;
+}
+
+.toc ol ol {
+  @apply pl-4;
+}
+</file>
+
+<file path="src/404.njk">
+---
+layout: layouts/base.njk
+title: Page Not Found
+description: >-
+  Looks like you got lost in the void. But hey, at least it's pretty here.
+permalink: "404.html"
+---
+
+<style>
+  .cb-bg {
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+  }
+</style>
+<div class="relative min-h-screen overflow-hidden">
+  <canvas id="cb-404-background" class="absolute inset-0 w-full h-full z-0"></canvas>
+  <div class="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-6 rounded-xl shadow-md border border-white/10 bg-white/10 dark:bg-black/20 cb-bg">
+    <h1 class="text-6xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-indigo-500">
+      404
+    </h1>
+    <p class="text-muted-foreground text-xl mb-2 ">You’ve wandered into unloaded chunks.</p>
+    <p class="text-muted-foreground mb-6">The page you were looking for isn’t here — or maybe it fell into the void.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="/" class="button !text-base !h-12 !px-8">Return to Spawn</a>
+      <a href="/docs" class="button-outline !text-base !h-12 !px-8">Go to Docs</a>
+      <a href="https://modrinth.com/plugin/commandbridge"
+         target="_blank"
+         class="button-outline !text-base !h-12 !px-8">Modrinth</a>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+
+  const bgCanvas = document.getElementById('cb-404-background');
+  const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  bgCamera.position.z = 2.5;
+
+  const geometry = new THREE.IcosahedronGeometry(1.2, 2);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000, wireframe: true });
+  const voidMesh = new THREE.Mesh(geometry, material);
+  bgScene.add(voidMesh);
+
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 5, 5);
+  bgScene.add(pointLight);
+
+function animate() {
+  requestAnimationFrame(animate);
+  voidMesh.rotation.x += 0.002;
+  voidMesh.rotation.y += 0.004;
+  bgRenderer.render(bgScene, bgCamera);
+}
+animate();
+
+function resizeRenderer() {
+  const pixelRatio = window.devicePixelRatio || 1;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  bgCamera.aspect = width / height;
+  bgCamera.updateProjectionMatrix();
+  bgRenderer.setSize(width, height);
+  bgRenderer.setPixelRatio(pixelRatio);
+}
+resizeRenderer();
+window.addEventListener('resize', resizeRenderer);
+
+</script>
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{njk,html,md,js}"],
+
+
+
+
+
+safelist: [
+  "w-4", "h-4", "mt-[1px]", "flex", "gap-2", "gap-4", "rounded-md", "p-4", "pl-12", "pr-4",
+  // Info
+  "bg-blue-100", "dark:bg-blue-900/40", "text-blue-900", "dark:text-blue-200",
+  // Warning 
+  "bg-orange-100", "dark:bg-orange-400/20", "text-orange-900", "dark:text-orange-200",
+  // Danger
+  "bg-red-100", "dark:bg-red-900/40", "text-red-900", "dark:text-red-200",
+  // Success
+  "bg-green-200", "dark:bg-green-500/30", "text-green-900", "dark:text-green-200",
+  // Typography
+  "prose", "prose-sm", "dark:prose-invert"
+],
+
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        inter: ["Inter", "sans-serif"],
+      },
+    },
+  },
+  darkMode: ["class"],
+}
+</file>
+
+<file path="src/_data/site.json">
+{
+  "title": "CommandBridge",
+  "description": "A modern Minecraft plugin that enables robust server-side automation via structured commands and scriptings.",
+  "url": "https://cb.objz.dev",
+  "cover": "/assets/cover.png"
+}
+</file>
+
+<file path="src/_includes/partials/footer.njk">
+<footer class="flex items-center gap-x-3 p-4 lg:p-6 text-xs text-muted-foreground mt-auto">
+  <span>© <a class="hover:text-primary" href="https://github.com/objz">objz</a></span>
+  <a class="hover:text-primary" href="https://pagescms.org/">via pagescms.org</a>
+  <a class="ml-auto hover:text-primary" href="https://github.com/objz/CommandBridge" target="_blank">
+    <svg fill="currentColor" class="h-4 w-4" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+  </a>
+  <a class="hover:text-primary" href="https://discord.gg/QPqBYb44ce" target="_blank">
+    <svg fill="currentColor" class="h-4 w-4" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+  </a>
+  <button class="hover:text-primary h-4 w-4" @click="darkMode = !darkMode">
+    <template x-if="darkMode">{% lucide "sun", { "class" : "h-4 w-4" } %}</template>
+    <template x-if="!darkMode">{% lucide "moon", { "class" : "h-4 w-4" } %}</template>
+  </button>
+</footer>
+</file>
+
+<file path="src/docs/scripting/syntax.md">
+---
+title: Syntax
+order: 1
+---
+
+CommandBridge scripts use **YAML** to define cross-server commands and their execution logic.
+
+```yaml
+name: "example"
+aliases:
+    - "ex"
+    - "sample"
+enabled: true
+ignore-permission-check: false
+hide-permission-warning: false
+commands:
+  - command: "say Hello"
+    delay: 0
+    target-executor: "console"
+    target-client-ids:
+      - "lobby"
+    wait-until-player-is-online: true
+    check-if-executor-is-player: true
+    check-if-executor-is-on-server: true
+```
+<div class="h-4"></div>
+
+---
+
+### Script Fields
+
+| Field                     | Type    | Description                                                   |
+| ------------------------- | ------- | ------------------------------------------------------------- |
+| `name`                    | String  | Becomes the command (e.g. `alert` → `/alert`). No `/` needed. |
+| `aliases`                 | List    | Alternative names for the command (e.g. `ex`, `sample`).      |
+| `enabled`                 | Boolean | Whether the script is active.                                 |
+| `ignore-permission-check` | Boolean | Bypasses internal permission handling.                        |
+| `hide-permission-warning` | Boolean | Suppresses permission-denied messages.                        |
+| `commands`                | List    | One or more command actions to run.                           |
+
+<div class="h-4"></div>
+
+{% hint "info" %}
+Set `aliases: []` or remove the `aliases` key to disable aliases.
+{% endhint %}
+
+### Command Fields
+
+| Field                            | Type              | Description                                                |
+| -------------------------------- | ----------------- | ---------------------------------------------------------- |
+| `command`                        | String            | The raw command to run (without `/`).                      |
+| `delay`                          | Integer (seconds) | Optional delay before execution.                           |
+| `target-executor`                | String            | Who runs it: `"player"` or `"console"`.                    |
+| `target-client-ids`              | List              | Target servers. **Only used by Velocity.**                 |
+| `wait-until-player-is-online`    | Boolean           | Delay execution until player is online. **Velocity only.** |
+| `check-if-executor-is-player`    | Boolean           | Only run if triggered by a player.                         |
+| `check-if-executor-is-on-server` | Boolean           | Only run if the triggering player is online.               |
+
+<div class="h-4"></div>
+
+{% hint "info" %}
+Fields like `target-client-ids` and `wait-until-player-is-online` are ignored on Paper.
+{% endhint %}
+</file>
+
+<file path="src/docs/requirements.md">
+---
+title: Requirements
+order: 3
+---
+
+{% hint "info" %}
+Looking for the legacy version of CommandBridge? Visit the [old documentation](https://objz.github.io/CommandBridge/getting-started.html).
+{% endhint %}
+
+### **Requirements**
+
+CommandBridge v2.0.0+ requires **Java 21** and is compatible with **Minecraft 1.20.x – 1.21.x**.
+
+A **permissions plugin** is also required on both the **Velocity proxy** and **Paper backend**.  
+I recommend using [LuckPerms](https://luckperms.net/) for its reliability and flexibility.
+
+***
+
+### **Platform Compatibility**
+
+CommandBridge runs a unified JAR across both proxy and backend servers.
+
+| Server Platform                         | Support Level        | Notes                                                                 |
+| -------------------------------------- | -------------------- | --------------------------------------------------------------------- |
+| **Velocity**                           | ✅ Fully Supported   | Native support for proxy-side command routing.                        |
+| **Paper**                              | ✅ Fully Supported   | Officially supported backend platform.                                |
+| **Spigot / Bukkit**                    | ✅ Compatible        | Works as long as Paper-specific APIs aren't required by your scripts. |
+| **Folia (Paper fork)**                 | ✅ Supported         | Officially supported. Compatible with regionized multithreading.     |
+| **Purpur / Tuinity / Other Paper Forks** | ⚠️ Should Work      | Based on Paper. Not extensively tested, but expected to work.         |
+| **Waterfall / Other Proxies**          | ⚠️ Should Work      | Likely compatible if Velocity is used as the backend bridge.         |
+| **Forge / Fabric / Other Modloaders**  | ❌ Not Supported     | Only works on plugin-based platforms (not modloaders).                |
+</file>
+
+<file path="LICENSE">
+GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  To protect your rights, we need to prevent others from denying you
+these rights or asking you to surrender the rights.  Therefore, you have
+certain responsibilities if you distribute copies of the software, or if
+you modify it: responsibilities to respect the freedom of others.
+
+  For example, if you distribute copies of such a program, whether
+gratis or for a fee, you must pass on to the recipients the same
+freedoms that you received.  You must make sure that they, too, receive
+or can get the source code.  And you must show them these terms so they
+know their rights.
+
+  Developers that use the GNU GPL protect your rights with two steps:
+(1) assert copyright on the software, and (2) offer you this License
+giving you legal permission to copy, distribute and/or modify it.
+
+  For the developers' and authors' protection, the GPL clearly explains
+that there is no warranty for this free software.  For both users' and
+authors' sake, the GPL requires that modified versions be marked as
+changed, so that their problems will not be attributed erroneously to
+authors of previous versions.
+
+  Some devices are designed to deny users access to install or run
+modified versions of the software inside them, although the manufacturer
+can do so.  This is fundamentally incompatible with the aim of
+protecting users' freedom to change the software.  The systematic
+pattern of such abuse occurs in the area of products for individuals to
+use, which is precisely where it is most unacceptable.  Therefore, we
+have designed this version of the GPL to prohibit the practice for those
+products.  If such problems arise substantially in other domains, we
+stand ready to extend this provision to those domains in future versions
+of the GPL, as needed to protect the freedom of users.
+
+  Finally, every program is threatened constantly by software patents.
+States should not allow patents to restrict development and use of
+software on general-purpose computers, but in those that do, we wish to
+avoid the special danger that patents applied to a free program could
+make it effectively proprietary.  To prevent this, the GPL assures that
+patents cannot be used to render the program non-free.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Use with the GNU Affero General Public License.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU Affero General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the special requirements of the GNU Affero General Public License,
+section 13, concerning interaction through a network will apply to the
+combination as such.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU General Public License from time to time.  Such new versions will
+be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    <one line to give the program's name and a brief idea of what it does.>
+    Copyright (C) <year>  <name of author>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If the program does terminal interaction, make it output a short
+notice like this when it starts in an interactive mode:
+
+    <program>  Copyright (C) <year>  <name of author>
+    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+    This is free software, and you are welcome to redistribute it
+    under certain conditions; type `show c' for details.
+
+The hypothetical commands `show w' and `show c' should show the appropriate
+parts of the General Public License.  Of course, your program's commands
+might be different; for a GUI interface, you would use an "about box".
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU GPL, see
+<https://www.gnu.org/licenses/>.
+
+  The GNU General Public License does not permit incorporating your program
+into proprietary programs.  If your program is a subroutine library, you
+may consider it more useful to permit linking proprietary applications with
+the library.  If this is what you want to do, use the GNU Lesser General
+Public License instead of this License.  But first, please read
+<https://www.gnu.org/licenses/why-not-lgpl.html>.
+</file>
+
+<file path="package.json">
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf _site",
+    "dev": "eleventy --serve & npx tailwindcss -i ./src/styles/main.css -o ./_site/styles.css --watch",
+    "build": "ELEVENTY_PRODUCTION=true eleventy && NODE_ENV=production npx tailwindcss -i ./src/styles/main.css -o ./_site/styles.css --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pages-cms/docs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pages-cms/docs/issues"
+  },
+  "homepage": "https://github.com/pages-cms/docs#readme",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "alpinejs": "^3.13.5",
+    "htmx.org": "^1.9.10",
+    "markdown-it-anchor": "^8.6.7",
+    "tailwindcss": "^3.4.0"
+  },
+  "dependencies": {
+    "@grimlink/eleventy-plugin-lucide-icons": "^2.0.2",
+    "@theatre/core": "^0.7.2",
+    "canvas-sketch": "^0.7.7",
+    "canvas-sketch-util": "^1.10.0",
+    "eleventy-plugin-toc": "^1.1.5",
+    "glsl-noise": "^0.0.0",
+    "lucide": "^0.507.0",
+    "lucide-static": "^0.508.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "theatre": "^0.2.3",
+    "three": "^0.176.0"
+  }
+}
+</file>
+
+<file path="README.md">
+This is the wiki repo for the plugin **CommandBridge**.
+
+- built with **Nunjucks** and **TailwindCSS**  
+- deployed using **Cloudflare Pages**  
+- contains all documentation for the plugin
+
+## Development
+
+Clone and start the dev server:
+
+```bash
+git clone https://github.com/objz/CommandBridge-wiki
+cd CommandBridge-wiki
+npm install
+npm run dev
+```
+</file>
+
+<file path="src/docs/index.md">
+---
+title: Welcome
+order: 1
+---
+
+{% hint "warning" %}  
+This documentation applies **only to CommandBridge plugin versions 2.0.0 and above**.
+If you are using an earlier version, please refer to the [legacy documentation](https://objz.github.io/CommandBridge/getting-started.html).  
+{% endhint %}
+### What This Documentation Covers
+
+* [x] Quick Installation  
+* [x] Configuration Guide  
+* [x] Troubleshooting  
+* [ ] How to escape vim
+
+### Why use CommandBridge?
+
+CommandBridge is the easiest way to enable **real-time, cross-server communication** between Velocity and Paper servers.  
+Seamlessly manage commands, automate tasks, and create a unified server experience.
+</file>
+
+<file path=".eleventy.js">
+const markdownIt = require("markdown-it");
+const markdownItAnchor = require("markdown-it-anchor");
+const pluginTOC = require("eleventy-plugin-toc")
+const lucideIcons = require("@grimlink/eleventy-plugin-lucide-icons");
+const nunjucks = require("nunjucks");
+const fs = require("fs");
+const path = require("path");
+
+const md = new markdownIt({ html: true });
+
+module.exports = function(eleventyConfig) {
+  eleventyConfig.addPassthroughCopy({
+     "src/media": "/media",
+     "src/assets": "/",
+     "node_modules/alpinejs/dist/cdn.min.js": "js/alpine.js",
+     "node_modules/htmx.org/dist/htmx.min.js": "js/htmx.js",
+     "src/lib": "/lib",
+  });
+
+  eleventyConfig.addShortcode("now", () => `${Date.now()}`);
+
+  eleventyConfig.addPlugin(lucideIcons);
+
+  eleventyConfig.setLibrary("md", markdownIt({ html: true }).use(markdownItAnchor, { tabIndex: false }));
+
+  eleventyConfig.addFilter("markdown", (content) => {
+    return md.render(content);
+  });
+  
+  eleventyConfig.addPlugin(pluginTOC, {
+    tags: ['h2', 'h3'],
+  });
+
+  eleventyConfig.addFilter("sortByOrderAndTitle", (values) => {
+    let vals = [...values];
+    return vals.sort((a, b) => {
+      // Sort by order first
+      const aOrder = typeof a.data.order === 'number' ? a.data.order : 0;
+      const bOrder = typeof b.data.order === 'number' ? b.data.order : 0;
+      const orderDiff = aOrder - bOrder;
+      if (orderDiff !== 0) return orderDiff;
+    
+      // If order is the same, sort by title
+      return a.data.title.localeCompare(b.data.title);
+    })
+  });
+
+  eleventyConfig.addFilter("sortByUrl", (values) => {
+    let vals = [...values];
+    return vals.sort((a, b) => Math.sign(a.url.localeCompare(b.url)));
+  });
+
+  eleventyConfig.addNunjucksFilter("getNextPrevMenu", function(menu, currentUrl) {
+    let flatMenu = [];
+    menu.forEach(item => {
+      flatMenu.push(item);
+      if (item.children) {
+        item.children.forEach(child => {
+          flatMenu.push(child);
+        });
+      }
+    });
+  
+    const currentIndex = flatMenu.findIndex(item => item.url === currentUrl);
+    const previousItem = currentIndex > 0 ? flatMenu[currentIndex - 1] : null;
+    const nextItem = currentIndex < flatMenu.length - 1 ? flatMenu[currentIndex + 1] : null;
+  
+    return { previous: previousItem, next: nextItem };
+  });
+  
+  eleventyConfig.addCollection("menu", function(collectionApi) {
+    const docs = collectionApi.getFilteredByGlob("src/docs/**/*.md");
+    let menu = [];
+
+    docs.sort((a, b) => {
+      // Sort by order first
+      const aOrder = typeof a.data.order === 'number' ? a.data.order : 0;
+      const bOrder = typeof b.data.order === 'number' ? b.data.order : 0;
+      const orderDiff = aOrder - bOrder;
+      if (orderDiff !== 0) return orderDiff;
+    
+      // If order is the same, sort by title
+      return a.data.title.localeCompare(b.data.title);
+    })
+    .forEach(doc => {
+      const urlSegments = doc.url.split('/').filter(Boolean);
+    
+      // Add top-level items
+      if (urlSegments.length === 1 || urlSegments.length === 2) {
+        let menuItem = {
+          title: doc.data.title,
+          url: doc.url,
+          children: []
+        };
+    
+        // Add children
+        docs.forEach(subDoc => {
+          const subUrlSegments = subDoc.url.split('/').filter(Boolean);
+          if (subUrlSegments.length === 3 && subUrlSegments[1] === urlSegments[1]) {
+            menuItem.children.push({
+              title: subDoc.data.title,
+              url: subDoc.url
+            });
+          }
+        });
+    
+        menu.push(menuItem);
+      }
+    });
+
+    return menu;
+  });
+
+
+eleventyConfig.addPairedShortcode("hint", function (content, style = "info") {
+  const styles = {
+    info: {
+      bg: "bg-blue-100 dark:bg-blue-900/40",
+      text: "text-blue-900 dark:text-blue-200",
+      icon: "info.svg",
+    },
+    warning: {
+      bg: "bg-orange-100 dark:bg-orange-400/20",
+      text: "text-yellow-900 dark:text-yellow-200",
+      icon: "warning.svg",
+    },
+    danger: {
+      bg: "bg-red-100 dark:bg-red-900/40",
+      text: "text-red-900 dark:text-red-200",
+      icon: "danger.svg",
+    },
+    success: {
+      bg: "bg-green-200 dark:bg-green-500/30",
+      text: "text-green-900 dark:text-green-200",
+      icon: "success.svg",
+    },
+  };
+
+  const s = styles[style] || styles.info;
+  const rendered = md.render(content.trim());
+ 
+const stripped = rendered.match(/^<p>(.*?)<\/p>$/s)
+  ? rendered.replace(/^<p>(.*?)<\/p>$/s, '$1')
+  : rendered;
+
+  const svgPath = path.join(__dirname, "src/media/svg", s.icon);
+  let iconSvg = fs.readFileSync(svgPath, "utf-8");
+
+  iconSvg = iconSvg.replace(
+    /<svg([^>]+)>/,
+    `<svg$1 class="w-4 h-4 mt-[1px] flex-shrink-0 ${s.text}">`
+  );
+
+
+
+return `
+  <div class="flex items-start gap-4 rounded-md p-4 ${s.bg} ${s.text}">
+    <div class="flex-shrink-0 mt-[2px]">
+      ${iconSvg}
+    </div>
+    <div class="prose prose-sm dark:prose-invert text-inherit">${stripped}</div>
+  </div>
+`;
+
+
+});
+
+
+  return {
+    dir: {
+      input: "src",
+      output: "_site"
+    },
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
+    dataTemplateEngine: "njk",
+  }
+};
+</file>
+
+<file path="src/_includes/layouts/base.njk">
+<!DOCTYPE html>
+<html
+  lang="en"
+  x-data="{
+    darkMode: localStorage.getItem('dark') ? localStorage.getItem('dark') === 'true' : true
+  }"
+  x-init="$watch('darkMode', val => localStorage.setItem('dark', val))"
+  x-bind:class="{ 'dark': darkMode }">
+<head>
+  <meta charset="UTF-8"/>
+  <title>{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="{{ description or site.description }}"/>
+  <meta name="keywords" content="{{ keywords or site.keywords }}"/>
+  <link rel="stylesheet" type="text/css" href="/styles.css?build={% now %}"/>
+  <link rel="icon" type="image/x-icon" href="{{ site.url }}/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ site.url }}/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ site.url }}/favicon-16x16.png">
+  <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="{{ site.url }}/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="{{ site.url }}/favicon.svg">
+  <meta property="og:type" content="{{ type or 'website' }}"/>
+  <meta property="og:title" content="{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}"/>
+  <meta property="og:description" content="{{ description or site.description }}"/>
+  <meta property="og:url" content="{{ site.url + page.url }}"/>
+  <meta property="og:image" content="{{ site.url }}/cover@2x.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:url" content="{{ site.url + page.url }}"/>
+  <meta name="twitter:title" content="{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}"/>
+  <meta name="twitter:description" content="{{ description or site.description }}"/>
+  <meta name="twitter:image" content="{{ site.url }}/cover@2x.png"/>
+  <script src="/js/alpine.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background antialiased font-inter flex flex-col min-h-screen">
+  {% include "partials/header.njk" %}
+
+  <main class="flex-1">
+    {{ content | safe }}
+  </main>
+
+  {% include "partials/footer.njk" %}
+</body>
+
+</html>
+</file>
+
+<file path="src/_includes/partials/header.njk">
+<header class="border-b flex items-center gap-x-4 py-2 px-4 lg:py-3 lg:px-6 mx-auto sticky top-0 w-full bg-background z-50">
+  <a class="inline-flex items-center" href="/">
+    <img src="/media/svg/commandbridge.svg" alt="CommandBridge Logo" class="max-sm:h-4 max-sm:w-4 h-5 w-5" />
+    <span class="hidden sm:inline-block ml-2 text-sm font-semibold">CommandBridge</span>
+  </a>
+  <a class="ml-auto text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary font-medium' if page.url == '/' }}" href="/">
+    About
+  </a>
+  <a class="text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary' if '/docs' in page.url }}" href="/docs">
+    Docs
+  </a>
+
+
+
+<div class="h-4 w-px bg-border mx-2"></div>
+
+  <a class="flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://github.com/objz/CommandBridge" target="_blank">
+    GitHub
+    {% lucide "arrow-up-right", { "class" : "h-3 w-3" } %}
+  </a>
+  <a class="flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://discord.gg/QPqBYb44ce" target="_blank">
+    Discord
+    {% lucide "arrow-up-right", { "class" : "h-3 w-3" } %}
+  </a>
+
+<a class="button-outline !h-8 inline-flex items-center" href="https://modrinth.com/plugin/commandbridge#download">
+  <span>Download</span>
+  <span class="ml-1">{% lucide "download", { "class" : "h-3 w-3" } %}</span>
+</a>
+
+</header>
+</file>
+
+<file path="src/index.njk">
+---
+layout: layouts/base.njk
+title: About
+permalink: /
+promotion:
+  text: Try CommandBridge now — unleash server automation
+  url: https://modrinth.com/plugin/commandbridge
+description: A modern Minecraft plugin that enables robust server-side automation via structured commands and scriptings.
+---
+
+<style>
+  @keyframes glint-right {
+    0%,100% { transform: translateX(0);   opacity: .6; }
+    50%      { transform: translateX(6px); opacity: 1;  }
+  }
+  @keyframes glint-left {
+    0%,100% { transform: translateX(0);     opacity: .6; }
+    50%      { transform: translateX(-6px);  opacity: 1;  }
+  }
+
+  .arrow-svg {
+    width: 8rem;
+    height: 1.5rem;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    opacity: .6;
+    transform-origin: center;
+  }
+  .arrow-right { animation: glint-right 1.2s ease-in-out infinite; }
+  .arrow-left  { animation: glint-left  1.2s ease-in-out infinite; }
+
+  .arrow-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  .cb-bg {
+    filter: blur(1.5px);
+    -webkit-filter: blur(1.5px);
+  }
+</style>
+<canvas id="cb-background"
+        class="absolute inset-0 w-full h-full z-0 block cb-bg">
+</canvas>
+<div class="relative min-h-screen overflow-hidden">
+  <div class="relative z-10 px-4 lg:px-8">
+    <section class="max-w-6xl mx-auto py-32 grid lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-6 space-y-6">
+        <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">CommandBridge</h1>
+        <p class="text-muted-foreground text-lg">
+          CommandBridge connects Velocity and Paper servers to enable secure, real-time command execution and global scripting via YAML.
+        </p>
+        <div class="flex gap-4 flex-wrap">
+          <a class="button !text-base !h-12 !px-8" href="/docs">Documentation</a>
+          <a class="button-outline !text-base !h-12 !px-8"
+             href="https://modrinth.com/plugin/commandbridge"
+             target="_blank">Modrinth</a>
+          <a class="button-outline !text-base !h-12 !px-8"
+             href="https://github.com/objz/commandbridge"
+             target="_blank">GitHub</a>
+        </div>
+      </div>
+      <div class="lg:col-span-6">
+        <div class="relative w-full aspect-video rounded-xl shadow-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden">
+          <div class="relative z-10 w-full h-full flex items-center justify-between px-20">
+            <div class="w-38 h-38 flex items-center justify-center overflow-hidden">
+              <img src="https://assets.papermc.io/brand/velocity_logo_blue.min.svg"
+                   alt="Velocity"
+                   class="w-40 h-auto"
+                   width="160"
+                   height="160" />
+            </div>
+            <div class="arrow-stack">
+              <svg class="arrow-svg arrow-right"
+                   viewBox="0 0 40 24"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 12h40" />
+                <path d="M35 6l6 6-6 6" />
+              </svg>
+              <svg class="arrow-svg arrow-left"
+                   viewBox="0 0 40 24"
+                   xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 12H40" />
+                <path d="M7 6l-6 6 6 6" />
+              </svg>
+            </div>
+            <div class="w-28 h-28 flex items-center justify-center overflow-hidden">
+              <img src="https://assets.papermc.io/brand/papermc_logo.512.png"
+                   alt="Paper"
+                   class="w-32 h-auto"
+                   width="512"
+                   height="512" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="max-w-5xl mx-auto my-24 text-center">
+      <h2 class="text-4xl font-semibold tracking-tight mb-12">What Makes It Unique?</h2>
+      <div class="grid md:grid-cols-2 gap-8 text-left">
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "zap" %}</div>
+          <h3 class="text-xl font-medium mt-4">Run Commands Across Servers</h3>
+          <p class="text-muted-foreground">
+            Run a command on the proxy or backend and trigger actions on other servers instantly. Works in both directions.
+          </p>
+        </div>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "activity" %}</div>
+          <h3 class="text-xl font-medium mt-4">Realtime WebSocket Sync</h3>
+          <p class="text-muted-foreground">
+            Servers stay connected using secure WebSocket channels. Commands sync even when no players are online.
+          </p>
+        </div>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "code" %}</div>
+          <h3 class="text-xl font-medium mt-4">Simple YAML Scripts</h3>
+          <p class="text-muted-foreground">
+            Define scripts that react to commands and send new ones to other servers. Each script handles one command.
+          </p>
+        </div>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "lock" %}</div>
+          <h3 class="text-xl font-medium mt-4">Secure by Design</h3>
+          <p class="text-muted-foreground">
+            Connections are encrypted and require an authentication key. Only verified servers can join your network.
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="max-w-4xl mx-auto my-32 text-center">
+      <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Link Your Servers?</h2>
+      <p class="text-muted-foreground mb-8 text-lg">
+        CommandBridge makes it easy to share commands between Velocity and Paper. Add the plugin, write a few scripts, and build powerful cross-server setups.
+      </p>
+      <a href="/docs" class="button !text-base !h-12 !px-8">Get Started</a>
+    </section>
+  </div>
+</div>
+<script type="module">
+  import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
+
+  const bgCanvas = document.getElementById('cb-background');
+  const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
+  const bgScene = new THREE.Scene();
+  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  bgCamera.position.z = 2.5;
+
+  const geometry = new THREE.IcosahedronGeometry(1.2, 2);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000, wireframe: true });
+  const voidMesh = new THREE.Mesh(geometry, material);
+  bgScene.add(voidMesh);
+
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 5, 5);
+  bgScene.add(pointLight);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    voidMesh.rotation.x += 0.002;
+    voidMesh.rotation.y += 0.004;
+    bgRenderer.setSize(bgCanvas.clientWidth, bgCanvas.clientHeight, false);
+    bgRenderer.render(bgScene, bgCamera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    bgCamera.aspect = window.innerWidth / window.innerHeight;
+    bgCamera.updateProjectionMatrix();
+    bgRenderer.setSize(bgCanvas.clientWidth, bgCanvas.clientHeight, false);
+  });
+</script>
+</file>
+
+</files>

@@ -1,0 +1,477 @@
+---
+layout: layouts/base.njk
+title: Dump
+permalink: /dump/
+---
+
+<div x-data="decoder()" x-init="init()" class="h-screen bg-background overflow-hidden flex flex-col">
+  <!-- Main Content Area -->
+  <div class="flex h-full overflow-hidden min-h-0">
+    <!-- Left Sidebar: Servers & Scripts -->
+    <div class="flex flex-col w-80 bg-card border-r shadow-sm overflow-hidden">
+      <!-- Servers Section -->
+      <div class="flex-none px-4 py-3 border-b bg-muted/50">
+        <h2 class="text-sm font-semibold text-foreground">Servers</h2>
+      </div>
+      <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+        <template x-for="(entry, i) in entries" :key="entry.id">
+          <button
+            @click="selectServer(i)"
+            :class="i===activeServer ? 'button w-full text-left justify-start' : 'button-outline w-full text-left justify-start hover:bg-accent'"
+            class="text-sm truncate transition-colors"
+          >
+            <span x-text="entry.label" class="truncate"></span>
+          </button>
+        </template>
+        <template x-if="entries.length === 0">
+          <div class="text-muted-foreground text-sm p-4 text-center">
+            <p>No servers loaded</p>
+            <p class="text-xs mt-1">Add an ID parameter to the URL</p>
+          </div>
+        </template>
+      </div>
+      
+      <!-- Scripts Section -->
+      <div class="flex-none px-4 py-3 border-t bg-muted/50">
+        <h2 class="text-sm font-semibold text-foreground">Scripts</h2>
+      </div>
+      <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+        <template x-for="(script, j) in activeEntry.scripts" :key="j">
+          <button
+            @click="selectScript(j)"
+            :class="j===activeScript ? 'button w-full text-left justify-start' : 'button-outline w-full text-left justify-start hover:bg-accent'"
+            class="text-sm truncate transition-colors"
+          >
+            <div class="flex items-center gap-2 w-full">
+              <div :class="script.enabled ? 'bg-gray-400' : 'bg-gray-600'" class="w-2 h-2 rounded-full flex-shrink-0"></div>
+              <span x-text="script.name || 'Unnamed Script'" class="truncate"></span>
+            </div>
+          </button>
+        </template>
+        <template x-if="activeEntry.scripts && activeEntry.scripts.length === 0">
+          <div class="text-muted-foreground text-sm p-4 text-center">
+            <p>No scripts available</p>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Main Content: Selected Script -->
+    <div class="flex-1 bg-card border-r shadow-sm overflow-hidden min-w-0 flex flex-col">
+      <div class="flex-none px-4 py-3 border-b bg-muted/50">
+        <h2 class="text-sm font-semibold text-foreground">Script Details</h2>
+      </div>
+      <div class="flex-1 p-4 overflow-hidden min-h-0">
+        <template x-if="activeScriptObject">
+          <div class="h-full border rounded-lg overflow-auto">
+            <pre class="text-sm leading-relaxed m-0 p-4 h-full overflow-auto"><code x-html="highlightedYaml(activeScriptObject)" class="language-yaml block"></code></pre>
+          </div>
+        </template>
+        <template x-if="!activeScriptObject">
+          <div class="flex items-center justify-center h-full text-muted-foreground">
+            <div class="text-center">
+              <div class="w-12 h-12 mx-auto mb-4 rounded-lg bg-muted flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <p class="text-sm">Select a script to view its configuration</p>
+              <p class="text-xs mt-1">Choose from the scripts list on the left</p>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Right Panels: Meta & Config -->
+    <div class="flex flex-col w-80 bg-card shadow-sm overflow-hidden">
+      <!-- Meta Information -->
+      <div class="flex-1 overflow-hidden border-b flex flex-col min-h-0">
+        <div class="flex-none px-4 py-3 border-b bg-muted/50">
+          <h3 class="text-sm font-semibold text-foreground">Meta Information</h3>
+        </div>
+        <div class="flex-1 p-4 pt-6 overflow-y-auto min-h-0">
+          <template x-if="Object.keys(activeEntry.header || {}).length > 0">
+            <div class="space-y-4">
+              <template x-for="[key, value] in Object.entries(activeEntry.header || {})" :key="key">
+                <div class="flex flex-col space-y-2">
+                  <div class="text-xs font-medium text-muted-foreground uppercase tracking-wide" x-text="key.replace(/([A-Z])/g, ' $1').trim()"></div>
+                  <div class="text-sm text-foreground font-mono bg-muted rounded px-2 py-1.5" x-text="value || 'N/A'"></div>
+                </div>
+              </template>
+            </div>
+          </template>
+          <template x-if="Object.keys(activeEntry.header || {}).length === 0">
+            <div class="flex items-center justify-center h-full">
+              <div class="text-center">
+                <p class="text-sm text-muted-foreground">No meta information available</p>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Configuration -->
+      <div class="flex-1 overflow-hidden flex flex-col min-h-0">
+        <div class="flex-none px-4 py-3 border-b bg-muted/50">
+          <h3 class="text-sm font-semibold text-foreground">Configuration</h3>
+        </div>
+        <div class="flex-1 p-4 overflow-hidden min-h-0">
+          <template x-if="Object.keys(activeEntry.config || {}).length > 0">
+            <div class="border rounded-lg h-full overflow-auto">
+              <pre class="text-sm leading-relaxed m-0 p-4 h-full overflow-auto"><code x-html="highlightedYaml(activeEntry.config)" class="language-yaml block"></code></pre>
+            </div>
+          </template>
+          <template x-if="Object.keys(activeEntry.config || {}).length === 0">
+            <div class="flex items-center justify-center h-full">
+              <div class="text-center">
+                <div class="w-10 h-10 mx-auto mb-3 rounded-lg bg-muted flex items-center justify-center">
+                  <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+                <p class="text-sm text-muted-foreground">No configuration available</p>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div x-data="{ loading: true }" x-init="setTimeout(() => loading = false, 1000)" x-show="loading" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center" x-transition:opacity>
+  <div class="bg-card border rounded-lg p-6 shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
+      <p class="text-sm text-foreground">Loading...</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+<script>
+function decoder() {
+  return {
+    entries: [], 
+    activeServer: 0, 
+    activeScript: 0,
+    
+    async init() {
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) return;
+      
+      try {
+        const res = await fetch(`https://cb.objz.dev/api/fetch?id=${encodeURIComponent(id)}`);
+        const raw = await res.text();
+        const parts = this.splitPayload(raw);
+        this.entries = parts.map(p => {
+          const d = this.parseDecoded(p.text);
+          return { 
+            id: p.id, 
+            label: p.label, 
+            header: d.header, 
+            config: d.config, 
+            scripts: d.scripts 
+          };
+        });
+      } catch (e) {
+        console.error('Failed to load decoder data:', e);
+      }
+    },
+    
+    selectServer(i) { 
+      this.activeServer = i; 
+      this.activeScript = 0;
+    },
+    
+    selectScript(j) { 
+      this.activeScript = j;
+    },
+    
+    get activeEntry() { 
+      return this.entries[this.activeServer] || { scripts: [], header: {}, config: {} }; 
+    },
+    
+    get activeScriptObject() { 
+      return (this.activeEntry.scripts || [])[this.activeScript] || null; 
+    },
+
+    highlightedYaml(obj) {
+      const yamlText = this.formatAsYaml(obj);
+      return this.customYamlHighlight(yamlText);
+    },
+
+    customYamlHighlight(yamlText) {
+      const lines = yamlText.split('\n');
+      const highlightedLines = [];
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        if (/^\s*-\s+[a-zA-Z0-9_-]+\s*:\s*/.test(line)) {
+          const highlighted = line.replace(/^(\s*)(- )([a-zA-Z0-9_-]+)(\s*:\s*)(.*)$/, (match, indent, dash, key, colon, value) => {
+            return `${indent}<span class="syntax-dash">${dash}</span><span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span><span class="syntax-value">${value}</span>`;
+          });
+          highlightedLines.push(highlighted);
+          continue;
+        }
+        
+        if (/^\s*- /.test(line)) {
+          const highlighted = line.replace(/^(\s*)(- )(.*)$/, (match, indent, dash, value) => {
+            return `${indent}<span class="syntax-dash">${dash}</span><span class="syntax-value">${value}</span>`;
+          });
+          highlightedLines.push(highlighted);
+          continue;
+        }
+        
+        if (/^\s*[a-zA-Z0-9_-]+\s*:\s*/.test(line)) {
+          const highlighted = line.replace(/^(\s*)([a-zA-Z0-9_-]+)(\s*:\s*)(.*)$/, (match, indent, key, colon, value) => {
+            const isParentKey = !value.trim();
+            if (isParentKey) {
+              return `${indent}<span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span>`;
+            } else {
+              return `${indent}<span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span><span class="syntax-value">${value}</span>`;
+            }
+          });
+          highlightedLines.push(highlighted);
+          continue;
+        }
+        
+        highlightedLines.push(line);
+      }
+      
+      return highlightedLines.join('\n');
+    },
+
+    formatAsYaml(obj, indent = 0) {
+      if (obj === null || obj === undefined) {
+        return 'null';
+      }
+      
+      if (typeof obj === 'string') {
+        if (obj === '' || obj.includes(':') || obj.includes('#') || obj.includes('\n') || obj.match(/^\d+$/) || obj === 'true' || obj === 'false') {
+          return `"${obj.replace(/"/g, '\\"')}"`;
+        }
+        return obj;
+      }
+      
+      if (typeof obj === 'number' || typeof obj === 'boolean') {
+        return String(obj);
+      }
+      
+      if (Array.isArray(obj)) {
+        if (obj.length === 0) {
+          return '[]';
+        }
+        const spaces = ' '.repeat(indent);
+        return obj.map(item => `${spaces}- ${this.formatAsYaml(item, indent + 2).replace(/^\s+/, '')}`).join('\n');
+      }
+      
+      if (typeof obj === 'object') {
+        const entries = Object.entries(obj);
+        if (entries.length === 0) {
+          return '{}';
+        }
+        
+        const spaces = ' '.repeat(indent);
+        return entries.map(([key, value]) => {
+          const formattedValue = this.formatAsYaml(value, indent + 2);
+          if (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length > 0) {
+            return `${spaces}${key}:\n${formattedValue}`;
+          } else if (Array.isArray(value) && value.length > 0) {
+            return `${spaces}${key}:\n${formattedValue}`;
+          } else {
+            return `${spaces}${key}: ${formattedValue}`;
+          }
+        }).join('\n');
+      }
+      
+      return String(obj);
+    },
+
+    decodePayload(b64) { 
+      let s = b64.replace(/-/g,'+').replace(/_/g,'/'); 
+      while(s.length % 4) s += '='; 
+      const bin = atob(s), a = new Uint8Array(bin.length); 
+      for(let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); 
+      return pako.ungzip(a, {to: 'string'}); 
+    },
+    
+    splitPayload(payload) { 
+      const ps = payload.split('#'), main = ps.shift(); 
+      const out = [{id: 'main', label: 'Main', text: this.decodePayload(main)}]; 
+      for(const p of ps) {
+        const [val, b] = p.split(','); 
+        if(val && b) out.push({id: val, label: val, text: this.decodePayload(b)});
+      } 
+      return out; 
+    },
+    
+    parseDecoded(text) { 
+      const r = {header: {}, config: {}, scripts: []}; 
+      const [h, rest = ''] = text.split('&', 2), hdr = h.split('/'); 
+      
+      if(hdr[0] === 'V') {
+        r.header = {
+          type: 'Velocity',
+          javaVersion: hdr[1] || '',
+          serverVersion: hdr[2] || '',
+          pluginVersion: hdr[3] || ''
+        };
+      } else if(hdr[0] === 'Paper') {
+        r.header = {
+          type: 'Paper',
+          javaVersion: hdr[1] || '',
+          serverVersion: hdr[2] || '',
+          pluginVersion: hdr[3] || ''
+        };
+      } else {
+        r.header = {
+          type: hdr[0] || 'Client',
+          javaVersion: hdr[1] || '',
+          serverVersion: hdr[2] || '',
+          pluginVersion: hdr[3] || ''
+        };
+      }
+      
+      const [cfg, ...sr] = rest.split('@'), vals = cfg.split(','); 
+      
+      if(r.header.type === 'Velocity') { 
+        const [s, d, hst, san, prt, to] = vals; 
+        r.config = {
+          'server-id': this.decFld(s),
+          debug: this.decFld(d) === 'true',
+          host: this.decFld(hst),
+          san: this.decFld(san),
+          port: +this.decFld(prt) || 8080,
+          timeout: +this.decFld(to) || 8
+        }; 
+      } else { 
+        const [c, d, rm, prt, to] = vals; 
+        r.config = {
+          'client-id': this.decFld(c),
+          debug: this.decFld(d) === 'true',
+          remote: this.decFld(rm),
+          port: +this.decFld(prt) || 8080,
+          timeout: +this.decFld(to) || 120
+        }; 
+      } 
+      
+      for(const raw of sr.filter(x => x.trim())) {
+        try { 
+          r.scripts.push(this.parseScript(raw, r.header.type === 'Velocity')); 
+        } catch(e) {
+          console.warn('Failed to parse script:', e);
+        }
+      }
+      
+      return r; 
+    },
+    
+    parseScript(raw, isV) { 
+      const [info, ...cs] = raw.split(';'), [nm, al, f36] = info.split(','); 
+      const flags = parseInt(f36 || '0', 36);
+      const s = {
+        name: this.decFld(nm),
+        aliases: this.decList(al),
+        enabled: !!(flags & 4),
+        'ignore-permission-check': !!(flags & 2),
+        'hide-permission-warning': !!(flags & 1),
+        commands: []
+      }; 
+      
+      for(const c of cs) { 
+        const p = c.split(','); 
+        if(p.length < (isV ? 4 : 3)) continue; 
+        
+        const cmd = {
+          command: this.decFld(p[0]),
+          delay: +p[1] || 0
+        }; 
+        
+        if(isV) { 
+          cmd['target-client-ids'] = this.decList(p[2]); 
+          cmd['target-executor'] = p[3] === 'p' ? 'player' : 'console'; 
+          if(p[4]) { 
+            const cf = parseInt(p[4], 36); 
+            cmd['wait-until-player-is-online'] = !!(cf & 4); 
+            cmd['check-if-executor-is-player'] = !!(cf & 2); 
+            cmd['check-if-executor-is-on-server'] = !!(cf & 1);
+          } 
+        } else { 
+          cmd['target-executor'] = p[2] === 'p' ? 'player' : 'console'; 
+          if(p[3]) cmd['check-if-executor-is-player'] = !!(parseInt(p[3], 36) & 1);
+        } 
+        
+        s.commands.push(cmd);
+      } 
+      
+      return s; 
+    },
+    
+    decFld(v) { 
+      return v === '.' ? '' : v.replace(/\\,/g, ',').replace(/\\;/g, ';'); 
+    },
+    
+    decList(v) { 
+      return v === '.' ? [] : v.split('|').map(x => this.decFld(x)); 
+    }
+  };
+}
+</script>
+
+<style>
+.syntax-key {
+  color: #3665c9;
+  font-weight: normal;
+}
+
+.syntax-value {
+  color: #d17224;
+  font-weight: normal;
+}
+
+.syntax-dash,
+.syntax-colon {
+  color: #abb2bf;
+}
+
+@media (prefers-color-scheme: dark) {
+  .syntax-key {
+    color: #3665c9;
+    font-weight: normal;
+  }
+
+  .syntax-value {
+    color: #d17224;
+    font-weight: normal;
+  }
+
+  .syntax-dash,
+  .syntax-colon {
+    color: #5c6370;
+  }
+}
+
+.dark .syntax-key {
+  color: #61afef;
+  font-weight: normal;
+}
+
+.dark .syntax-value {
+  color: #ffa459;
+  font-weight: normal;
+}
+
+.dark .syntax-dash,
+.dark .syntax-colon {
+  color: #abb2bf;
+}
+
+.hljs {
+  background: transparent !important;
+}
+</style>
