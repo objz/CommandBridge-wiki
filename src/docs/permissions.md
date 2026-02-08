@@ -63,6 +63,8 @@ permissions:
 - `PLAYER` uses the player's own permissions on the target server.
 - `OPERATOR` temporarily grants elevated permissions for the command.
 
+<div></div>
+
 {% hint "warning" %}
 `OPERATOR` grants broad permissions temporarily. Only use it when the target command requires permissions the player doesn't normally have.
 {% endhint %}

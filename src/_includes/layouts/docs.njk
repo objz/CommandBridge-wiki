@@ -1,7 +1,7 @@
 ---
 layout: layouts/base.njk
 ---
-<div x-data="{ wideLayout: localStorage.getItem('wideLayout') === 'true' }" x-init="$watch('wideLayout', val => localStorage.setItem('wideLayout', val))" :class="wideLayout ? 'max-w-none' : 'max-w-7xl'" class="flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8">
+<div x-data="{ wideLayout: localStorage.getItem('wideLayout') === 'true' }" x-init="$watch('wideLayout', val => localStorage.setItem('wideLayout', val))" :class="wideLayout ? 'max-w-none' : 'max-w-7xl'" class="flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8 transition-[max-width] duration-300 ease-in-out">
   <div class="md:w-80 shrink-0 max-md:mb-4">
     <div class="navigation md:pr-8 md:border-r" x-data="{ showNav: false }">
       <button @click="showNav = !showNav" class="button-outline flex items-center gap-x-2 w-full md:hidden mb-2">
@@ -27,12 +27,19 @@ layout: layouts/base.njk
   
   <div class="w-64 shrink-0 max-lg:hidden">
     <div class="sticky top-16 text-sm">
-      <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center gap-4 mb-3">
         <h2 class="font-semibold tracking-tight">Content:</h2>
-        <button @click="wideLayout = !wideLayout" class="p-1 rounded text-muted-foreground hover:text-primary transition-colors" :title="wideLayout ? 'Compact layout' : 'Wide layout'">
-          <template x-if="!wideLayout">{% lucide "maximize-2", { "class" : "h-4 w-4" } %}</template>
-          <template x-if="wideLayout">{% lucide "minimize-2", { "class" : "h-4 w-4" } %}</template>
-        </button>
+        <div class="flex items-center gap-1 border rounded-md px-1 py-0.5">
+          <button @click="darkMode = !darkMode" class="p-1 rounded text-muted-foreground hover:text-primary transition-colors" :title="darkMode ? 'Light mode' : 'Dark mode'">
+            <template x-if="darkMode">{% lucide "sun", { "class" : "h-3.5 w-3.5" } %}</template>
+            <template x-if="!darkMode">{% lucide "moon", { "class" : "h-3.5 w-3.5" } %}</template>
+          </button>
+          <div class="w-px h-3.5 bg-border"></div>
+          <button @click="wideLayout = !wideLayout" class="p-1 rounded text-muted-foreground hover:text-primary transition-colors" :title="wideLayout ? 'Compact layout' : 'Wide layout'">
+            <template x-if="!wideLayout">{% lucide "maximize-2", { "class" : "h-3.5 w-3.5" } %}</template>
+            <template x-if="wideLayout">{% lucide "minimize-2", { "class" : "h-3.5 w-3.5" } %}</template>
+          </button>
+        </div>
       </div>
       {{ content | toc | safe }}
     </div>
