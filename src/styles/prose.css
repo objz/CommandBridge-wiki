@@ -46,8 +46,12 @@
   @apply text-[90%] bg-muted rounded-sm py-1 px-1.5;
 }
 
+.prose pre {
+  @apply my-6;
+}
+
 .prose pre code {
-  @apply p-2 block break-words whitespace-pre-wrap;
+  @apply p-4 block break-words whitespace-pre-wrap;
 }
 
 .prose ul,
@@ -100,7 +104,7 @@
 }
 
 .prose table {
-  @apply table text-sm;
+  @apply table text-sm my-6 w-full;
 }
 
 .prose table tr {
@@ -121,4 +125,9 @@
 
 html.dark .prose table td strong code {
   @apply font-medium text-[#79c0ff];
+}
+
+/* Hint boxes */
+.prose .hint-box {
+  @apply my-6;
 }

@@ -1,31 +1,61 @@
 ---
-title: "Example: lobby"
-order: 4
+title: "Example: Lobby"
+order: 6
 ---
 
-**Goal:** Forward a proxy `/server lobby` command from a Paper server.
+Send a player to the lobby server using a command registered on a backend.
+
+### Script
+
+Place this script on **Velocity** (`plugins/commandbridge/scripts/lobby.yml`). The `register` block tells CommandBridge to register the command on the backend remotely:
 
 ```yaml
+version: 2
 name: lobby
+description: Send the player to the lobby
 enabled: true
-ignore-permission-check: false
-hide-permission-warning: false
+aliases: [hub]
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "survival-1"
+    location: BACKEND
+
+defaults:
+  run-as: PLAYER
+  execute:
+    - id: "proxy-1"
+      location: VELOCITY
+  server:
+    target-required: false
+    schedule-online: false
+    timeout: 5s
+  delay: 0s
+  cooldown: 0s
+
+args: []
+
 commands:
   - command: "server lobby"
-    delay: 0
-    target-executor: "player"
-    check-if-executor-is-player: true
-    check-if-executor-is-on-server: true
 ```
 
-#### What happens?
+### What happens
 
-* Registers `/lobby` command.
-* Runs `server lobby` on the player.
-* Player is moved to the `lobby` server via proxy.
+- Registers `/lobby` (and alias `/hub`) on the backend server `survival-1`
+- When a player runs it, the command `server lobby` is forwarded to Velocity and executed as the player
+- The player is transferred to the `lobby` server
 
-> This command is triggered from the **Paper server** and automatically forwarded to **Velocity**.
+### Permissions
 
-{% hint "warning" %}
-Set the permission `commandbridge.command.lobby` on **Paper**, not Velocity.
+Set `commandbridge.command.lobby` on the **backend** (where the command is registered).
+
+```bash
+lp user playerName permission set commandbridge.command.lobby true
+```
+
+{% hint "info" %}
+`run-as: PLAYER` is required here because `server lobby` needs to run in the player's context on Velocity.
 {% endhint %}

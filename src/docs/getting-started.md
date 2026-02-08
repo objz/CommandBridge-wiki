@@ -3,133 +3,146 @@ title: Getting Started
 order: 4
 ---
 
-In this documentation:
+Walks you through connecting Velocity and your backend servers with CommandBridge.
 
-- **Server** → the **Velocity proxy**
-- **Clients** → all connected **Paper servers**
+**Terminology:**
 
-***
+- **Server** = your Velocity proxy
+- **Clients** = your backend servers (Paper, Folia, etc.)
 
-### **File Structure Overview**
+---
 
-After installing and restarting your servers, CommandBridge will generate the following files:
+### Step 1: Install the plugin
 
-#### On **each Paper server**:
+1. Download the JAR from [Modrinth](https://modrinth.com/plugin/commandbridge/versions)
+2. Place it in `plugins/` on Velocity and each backend
+3. Install [CommandAPI](https://commandapi.jorel.dev/) on Velocity and each backend
+4. Start Velocity, then start backends
+5. Stop everything
+
+This generates default configs on both sides.
+
+---
+
+### Step 2: Configure the Velocity proxy
+
+Open `plugins/commandbridge/config.yml` on Velocity:
+
+```yaml
+bind-host: "0.0.0.0"
+bind-port: 8765
+server-id: "proxy-1"
 ```
 
-plugins/CommandBridge/
-├── config.yml             # Client configuration
-└── scripts/
-    └── example.yml        # Example script
+- `bind-host` → use `0.0.0.0` to listen on all interfaces, or `127.0.0.1` if everything runs on the same machine
+- `bind-port` → any free port. Must be open in your firewall if backends are on other machines.
+- `server-id` → a unique name for this proxy
 
+---
+
+### Step 3: Configure each backend
+
+Open `plugins/commandbridge/config.yml` on each backend:
+
+```yaml
+host: "127.0.0.1"
+port: 8765
+client-id: "survival-1"
 ```
 
-#### On the **Velocity proxy**:
+- `host` → the IP or domain of your Velocity server
+- `port` → must match Velocity's `bind-port`
+- `client-id` → a unique name for this backend (e.g. `lobby`, `survival-1`, `minigames`)
+
+---
+
+### Step 4: Set up authentication
+
+On first startup, Velocity generates a `secret.key` file. Copy the contents of this file into each backend's `config.yml`:
+
+```yaml
+security:
+  secret: "paste-your-secret-here"
 ```
-
-plugins/CommandBridge/
-├── config.yml             # Server configuration
-├── secret.key             # Shared authentication key (server only)
-└── scripts/
-    └── example.yml        # Example script
-
-```
-
-<div class="h-4"></div>
 
 {% hint "danger" %}
-The `secret.key` file is only created on the Velocity proxy. **Keep it private** — anyone with this key can issue commands across your network.
+Keep `secret.key` private. Anyone with this key can issue commands across your network.
 {% endhint %}
 
-<div class="h-4"></div>
+---
 
-***
+### Step 5: Start your network
 
-### **Step 1: Configure Authentication**
+1. Start Velocity first
+2. Then start each backend
 
-1. Open the `secret.key` file from the **Velocity server**.
-2. Copy the key and paste it into each **Paper server’s** `config.yml`:
-
-```yaml
-secret: "PASTE_KEY_HERE"
-```
-<div class="h-4"></div>
+Order matters. The proxy must be listening before clients try to connect.
 
 ---
 
-### **Step 2: Set Server and Client IDs**
+### Step 6: Verify the connection
 
-* On **each backend server**:
-  Set a unique `client-id` in `config.yml`:
+On the Velocity console you should see:
 
-```yaml
-client-id: "lobby"
+```
+[CommandBridge] Client authenticated successfully: /127.0.0.1:42918
+[CommandBridge] Added connected client: survival-1
 ```
 
-* On the **Velocity proxy**:
-  Set a `server-id` in `config.yml` (default is `"main"`):
+You can also run:
 
-```yaml
-server-id: "main"
-```
-<div class="h-4"></div>
+- `/cb list` → shows connected clients
+- `/cb ping survival-1` → pings a specific client
+
+If clients don't connect, check the [Troubleshooting](/docs/troubleshooting/) page.
 
 ---
 
-### **Step 3: Configure Velocity Network**
+### Step 7: Create your first script
 
-In the Velocity `config.yml`:
-
-```yaml
-host: "0.0.0.0"      # Use 127.0.0.1 if running locally
-port: 3000           # Choose any free port
-san: "your.server.ip"  # Must match client-side remote host
-```
-<div class="h-4"></div>
-
-{% hint "warning" %}
-Do not include a port in the `san` value — use `"152.248.198.124"`, **not** `"152.248.198.124:3000"`.
-{% endhint %}
-
-Ensure the port is open and reachable from each Paper server.
-
----
-
-### **Step 4: Configure Paper Servers**
-
-In each Paper server’s `config.yml`, configure connection to Velocity:
+Create a file at `plugins/commandbridge/scripts/hello.yml` on Velocity:
 
 ```yaml
-remote: "152.248.198.124"  # Must match Velocity’s SAN
-port: 3000                 # Same port used on Velocity
+version: 2
+name: hello
+description: Say hello on a backend server
+enabled: true
+aliases: []
+
+permissions:
+  enabled: false
+  silent: false
+
+register:
+  - id: "proxy-1"
+    location: VELOCITY
+
+defaults:
+  run-as: CONSOLE
+  execute:
+    - id: "survival-1"
+      location: BACKEND
+  server:
+    target-required: false
+    schedule-online: false
+    timeout: 5s
+  delay: 0s
+  cooldown: 0s
+
+args: []
+
+commands:
+  - command: "say Hello from the proxy!"
 ```
-<div class="h-4"></div>
+
+Run `/cb reload` to load the script, then type `/hello` on the proxy.
+
+The backend server `survival-1` will execute `say Hello from the proxy!` in its console.
 
 ---
 
-### **Step 5: Start Your Network**
+### Next steps
 
-1. **Start the Velocity proxy first**
-2. Then restart all Paper servers
-
-This ensures the proxy is listening before clients attempt to connect.
-
----
-
-### **Connection Verification**
-
-On startup, the Velocity console should show:
-
-```
-[INFO] [CommandBridge]: Client authenticated successfully: /127.0.0.1:42918
-[INFO] [CommandBridge]: Added connected client: lobby
-```
-
-If all Paper clients show up as connected, your setup is complete!
-
-If not, check for:
-
-* Typos in config files
-* Incorrect or closed ports
-* Mismatched `secret`, `client-id`, or `san` values
-
+- [Scripting](/docs/scripting/) → full guide to YAML scripts, arguments, and placeholders
+- [Configuration](/docs/configuration/velocity/) → all config options for both sides
+- [Security](/docs/security/) → TLS modes and authentication details

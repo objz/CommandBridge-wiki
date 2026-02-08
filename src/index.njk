@@ -5,7 +5,7 @@ permalink: /
 promotion:
   text: Try CommandBridge now — unleash server automation
   url: https://modrinth.com/plugin/commandbridge
-description: A modern Minecraft plugin that enables robust server-side automation via structured commands and scriptings.
+description: A Minecraft plugin that bridges commands between Velocity and backend servers over WebSocket using YAML scripts.
 ---
 
 <style>
@@ -51,7 +51,7 @@ description: A modern Minecraft plugin that enables robust server-side automatio
       <div class="lg:col-span-6 space-y-6">
         <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">CommandBridge</h1>
         <p class="text-muted-foreground text-lg">
-          CommandBridge connects Velocity and Paper servers to enable secure, real-time command execution and global scripting via YAML.
+          CommandBridge connects Velocity and backend servers to enable secure, real-time command execution across your network via YAML scripts.
         </p>
         <div class="flex gap-4 flex-wrap">
           <a class="button !text-base !h-12 !px-8" href="/docs">Documentation</a>
@@ -117,16 +117,16 @@ description: A modern Minecraft plugin that enables robust server-side automatio
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "code" %}</div>
-          <h3 class="text-xl font-medium mt-4">Simple YAML Scripts</h3>
+          <h3 class="text-xl font-medium mt-4">Typed YAML Scripts</h3>
           <p class="text-muted-foreground">
-            Define scripts that react to commands and send new ones to other servers. Each script handles one command.
+            Define scripts with typed arguments, named placeholders, and per-command overrides. Each script handles one command across the network.
           </p>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "lock" %}</div>
           <h3 class="text-xl font-medium mt-4">Secure by Design</h3>
           <p class="text-muted-foreground">
-            Connections are encrypted and require an authentication key. Only verified servers can join your network.
+            Connections use TLS encryption and shared-secret authentication. Choose from TOFU, STRICT, or PLAIN modes.
           </p>
         </div>
       </div>
@@ -134,7 +134,7 @@ description: A modern Minecraft plugin that enables robust server-side automatio
     <section class="max-w-4xl mx-auto my-32 text-center">
       <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Link Your Servers?</h2>
       <p class="text-muted-foreground mb-8 text-lg">
-        CommandBridge makes it easy to share commands between Velocity and Paper. Add the plugin, write a few scripts, and build powerful cross-server setups.
+        CommandBridge makes it easy to share commands between Velocity and your backend servers. Add the plugin, write a few scripts, and build powerful cross-server setups.
       </p>
       <a href="/docs" class="button !text-base !h-12 !px-8">Get Started</a>
     </section>

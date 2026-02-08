@@ -3,29 +3,36 @@ title: Requirements
 order: 3
 ---
 
-{% hint "info" %}
-Looking for the legacy version of CommandBridge? Visit the [old documentation](https://objz.github.io/CommandBridge/getting-started.html).
-{% endhint %}
+### Java and Minecraft
 
-### **Requirements**
+- Java 21 or newer
+- Minecraft 1.20.x to 1.21.x
 
-CommandBridge v2.0.0+ requires **Java 21** and is compatible with **Minecraft 1.20.x – 1.21.x**.
+---
 
-A **permissions plugin** is also required on both the **Velocity proxy** and **Paper backend**.  
-I recommend using [LuckPerms](https://luckperms.net/) for its reliability and flexibility.
+### Platforms
 
-***
+| Platform | Supported |
+|----------|-----------|
+| Velocity | Yes (proxy side) |
+| Paper | Yes (primary backend) |
+| Folia | Yes (regionized multithreading) |
+| Bukkit / Spigot | Yes (unless scripts use Paper-specific features) |
+| Purpur / other Paper forks | Yes (not extensively tested) |
+| Forge | No |
+| Fabric | No |
+| NeoForge | No |
 
-### **Platform Compatibility**
 
-CommandBridge runs a unified JAR across both proxy and backend servers.
+### Required
 
-| Server Platform                         | Support Level        | Notes                                                                 |
-| -------------------------------------- | -------------------- | --------------------------------------------------------------------- |
-| **Velocity**                           | ✅ Fully Supported   | Native support for proxy-side command routing.                        |
-| **Paper**                              | ✅ Fully Supported   | Officially supported backend platform.                                |
-| **Spigot / Bukkit**                    | ✅ Compatible        | Works as long as Paper-specific APIs aren't required by your scripts. |
-| **Folia (Paper fork)**                 | ✅ Supported         | Officially supported. Compatible with regionized multithreading.     |
-| **Purpur / Tuinity / Other Paper Forks** | ⚠️ Should Work      | Based on Paper. Not extensively tested, but expected to work.         |
-| **Waterfall / Other Proxies**          | ⚠️ Should Work      | Likely compatible if Velocity is used as the backend bridge.         |
-| **Forge / Fabric / Other Modloaders**  | ❌ Not Supported     | Only works on plugin-based platforms (not modloaders).                |
+- [CommandAPI](https://commandapi.jorel.dev/) on **Velocity and all backends**
+- A permissions plugin on **both sides** ([LuckPerms](https://luckperms.net/) recommended)
+
+---
+
+### Optional
+
+- [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) on backends for PAPI placeholders
+- [PapiProxyBridge](https://modrinth.com/plugin/papiproxybridge) on Velocity to resolve PAPI placeholders proxy-side
+- [PacketEvents](https://modrinth.com/plugin/packetevents) on Velocity to enable the `TIME` argument type

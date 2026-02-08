@@ -1,6 +1,6 @@
 {
   "title": "CommandBridge",
-  "description": "A modern Minecraft plugin that enables robust server-side automation via structured commands and scriptings.",
+  "description": "A Minecraft plugin that bridges commands between Velocity and backend servers over WebSocket using YAML scripts.",
   "url": "https://cb.objz.dev",
   "cover": "/assets/cover.png"
 }

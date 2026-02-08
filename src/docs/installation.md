@@ -3,28 +3,48 @@ title: Installation
 order: 2
 ---
 
-### Setup **the Plugin**
+### Download
 
-1. Download the latest **`CommandBridge-xxx-all.jar`** from the [releases page](https://modrinth.com/plugin/commandbridge/versions).
-2. Place the JAR file into the `plugins` folder on **both your Velocity and Paper servers**.
-3. Restart **both** the **Velocity and Paper** server and let the plugin generate its configs.
+Get the latest **CommandBridge JAR** from [Modrinth](https://modrinth.com/plugin/commandbridge/versions).
 
-{% hint "success" %}
-No need for separate JARs – CommandBridge will automatically detect whether it’s running on Velocity or Paper.
+CommandBridge ships as a single JAR. It detects whether it's running on Velocity or a backend server automatically.
+
+### Install
+
+1. Place the JAR in the `plugins/` folder on your **Velocity proxy**
+2. Place the same JAR in the `plugins/` folder on each **backend server**
+3. Install [CommandAPI](https://commandapi.jorel.dev/) on **Velocity and each backend**
+4. Start Velocity, then start your backends
+5. Stop both sides
+
+On first startup, CommandBridge generates its config files and a shared secret on the Velocity side. You'll configure these in the [Getting Started](/docs/getting-started/) guide.
+
+{% hint "info" %}
+CommandBridge requires a permissions plugin on both sides. [LuckPerms](https://luckperms.net/) is recommended.
 {% endhint %}
 
-<div class="h-4"></div>
+### File structure after first startup
 
-***
+**Velocity proxy:**
 
-### **Upgrading to Version 2.0.0**
+```
+plugins/commandbridge/
+├── config.yml
+├── secret.key
+├── keystore.p12
+├── keystore.pass
+└── scripts/
+```
 
-If you’re upgrading from an older version of CommandBridge to version **2.0.0 or above**, follow these additional steps:
+**Backend server:**
 
-1. **Convert Scripts Manually**:
-   * The script format has changed. You’ll need to manually convert your old scripts to the new format. You can see how to write the scripts [here](../scripts/overview.md).
-2. **Regenerate `config.yml`**:
-   * Delete your old `config.yml`.
-   * Start the server to let the plugin generate a new configuration file.
-   * Follow the [plugin setup guide](plugin-setup.md) on how to configure the plugin.
+```
+plugins/commandbridge/
+├── config.yml
+└── secret.key
+```
 
+### Next steps
+
+- Check the [requirements](/docs/requirements/) page for version compatibility
+- Follow the [Getting Started](/docs/getting-started/) guide to connect your servers

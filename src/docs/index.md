@@ -3,18 +3,30 @@ title: Welcome
 order: 1
 ---
 
-{% hint "warning" %}  
-This documentation applies **only to CommandBridge plugin versions 2.0.0 and above**.
-If you are using an earlier version, please refer to the [legacy documentation](https://objz.github.io/CommandBridge/getting-started.html).  
+{% hint "warning" %}
+These docs are for **CommandBridge v3**. If you're running v2, see the [legacy documentation](https://objz.github.io/CommandBridge/getting-started.html) and the [migration guide](/docs/migration/).
 {% endhint %}
-### What This Documentation Covers
 
-* [x] Quick Installation  
-* [x] Configuration Guide  
-* [x] Troubleshooting  
-* [ ] How to escape vim
+### What is CommandBridge?
 
-### Why use CommandBridge?
+CommandBridge connects your Velocity proxy and backend servers over WebSocket, letting you run commands across your entire network from a single YAML script.
 
-CommandBridge is the easiest way to enable **real-time, cross-server communication** between Velocity and Paper servers.  
-Seamlessly manage commands, automate tasks, and create a unified server experience.
+- Define a command once, register it anywhere
+- Execute commands on the proxy from a backend, or on backends from the proxy
+- Secure connections with TLS and shared-secret authentication
+- Works with Paper, Folia, Bukkit, and Velocity
+
+### What these docs cover
+
+- [Installation](/docs/installation/) and [requirements](/docs/requirements/)
+- [Step-by-step setup](/docs/getting-started/)
+- [Configuration reference](/docs/configuration/velocity/) for both sides
+- [YAML scripting](/docs/scripting/) with argument types, placeholders, and examples
+- [Security](/docs/security/), [commands](/docs/commands/), and [permissions](/docs/permissions/)
+- [Troubleshooting](/docs/troubleshooting/) and [migration from v2](/docs/migration/)
+
+### Links
+
+- [GitHub](https://github.com/objz/CommandBridge)
+- [Modrinth](https://modrinth.com/plugin/commandbridge)
+- [Discord](https://discord.gg/QPqBYb44ce)

@@ -1,8 +1,8 @@
 ---
 layout: layouts/base.njk
 ---
-<div class="flex max-md:flex-col max-w-7xl mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8">
-  <div class="md:w-80 max-md:mb-4">
+<div x-data="{ wideLayout: localStorage.getItem('wideLayout') === 'true' }" x-init="$watch('wideLayout', val => localStorage.setItem('wideLayout', val))" :class="wideLayout ? 'max-w-none' : 'max-w-7xl'" class="flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8 transition-[max-width] duration-300 ease-in-out">
+  <div class="md:w-80 shrink-0 max-md:mb-4">
     <div class="navigation md:pr-8 md:border-r" x-data="{ showNav: false }">
       <button @click="showNav = !showNav" class="button-outline flex items-center gap-x-2 w-full md:hidden mb-2">
         <span x-text="showNav ? 'Hide navigation' : 'Show navigation'"></span>
@@ -17,7 +17,7 @@ layout: layouts/base.njk
     </div>
   </div>
   
-  <div class="w-full">
+  <div class="flex-1 min-w-0">
     <div class="prose">
       <h1 class="!mb-8">{{ title }}</h1>
       {{ content | safe }}
@@ -25,9 +25,22 @@ layout: layouts/base.njk
     {% include "partials/docs/footer.njk" %}
   </div>
   
-  <div class="w-64 max-lg:hidden">
+  <div class="w-64 shrink-0 max-lg:hidden">
     <div class="sticky top-16 text-sm">
-      <h2 class="font-semibold track-tight">Content:</h2>
+      <div class="flex items-center gap-4 mb-3">
+        <h2 class="font-semibold tracking-tight">Content:</h2>
+        <div class="flex items-center gap-1 border rounded-md px-1 py-0.5">
+          <button @click="darkMode = !darkMode" class="p-1 rounded text-muted-foreground hover:text-primary transition-colors" :title="darkMode ? 'Light mode' : 'Dark mode'">
+            <template x-if="darkMode">{% lucide "sun", { "class" : "h-3.5 w-3.5" } %}</template>
+            <template x-if="!darkMode">{% lucide "moon", { "class" : "h-3.5 w-3.5" } %}</template>
+          </button>
+          <div class="w-px h-3.5 bg-border"></div>
+          <button @click="wideLayout = !wideLayout" class="p-1 rounded text-muted-foreground hover:text-primary transition-colors" :title="wideLayout ? 'Compact layout' : 'Wide layout'">
+            <template x-if="!wideLayout">{% lucide "maximize-2", { "class" : "h-3.5 w-3.5" } %}</template>
+            <template x-if="wideLayout">{% lucide "minimize-2", { "class" : "h-3.5 w-3.5" } %}</template>
+          </button>
+        </div>
+      </div>
       {{ content | toc | safe }}
     </div>
   </div>
@@ -37,3 +50,36 @@ layout: layouts/base.njk
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/languages/yaml.min.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function() { hljs.highlightAll(); });</script>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  const dark = document.documentElement.classList.contains('dark');
+  mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'default' });
+  // Convert <pre><code class="language-mermaid"> to <pre class="mermaid"> for mermaid.js
+  document.querySelectorAll('code.language-mermaid').forEach(code => {
+    const pre = code.parentElement;
+    pre.classList.add('mermaid');
+    pre.textContent = code.textContent;
+  });
+  await mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre').forEach(function (pre) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Copy';
+    btn.className = 'copy-btn absolute top-2 right-2 px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity';
+    btn.addEventListener('click', function () {
+      const code = pre.querySelector('code');
+      navigator.clipboard.writeText(code ? code.textContent : pre.textContent).then(function () {
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    pre.style.position = 'relative';
+    pre.classList.add('group');
+    pre.appendChild(btn);
+  });
+});
+</script>
