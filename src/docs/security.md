@@ -29,7 +29,7 @@ You can disable authentication by setting `require-auth: false` on both sides, b
 
 ## TLS
 
-TLS encrypts all traffic between the proxy and backends. CommandBridge supports three TLS modes.
+TLS encrypts all traffic between the proxy and backends. Three modes available.
 
 ### PLAIN
 
@@ -60,16 +60,16 @@ security:
 After the first successful connection, the backend saves the certificate fingerprint in `tls-pin`. Future connections verify the proxy's certificate against this pin.
 
 {% hint "info" %}
-TOFU is the recommended mode for most setups. It provides encryption with zero manual certificate management.
+TOFU is the recommended mode for most setups. Encryption with zero manual certificate management.
 {% endhint %}
 
 #### Re-pinning
 
-If you regenerate the proxy's TLS certificate (e.g. by deleting the `tls/` folder), you need to clear the `tls-pin` on each backend and let them re-pin:
+If you regenerate the proxy's TLS certificate (e.g. by deleting `keystore.p12` and `keystore.pass` from the plugin directory), you need to clear the `tls-pin` on each backend and let them re-pin:
 
-1. Delete the `tls/` folder on Velocity and restart to generate a new cert
+1. Delete `keystore.p12` and `keystore.pass` from `plugins/commandbridge/` on Velocity and restart to generate a new cert
 2. Set `tls-pin: ""` on each backend
-3. Restart backends -- they'll pin the new certificate automatically
+3. Restart backends. They'll pin the new certificate automatically.
 
 ### STRICT
 
@@ -90,12 +90,10 @@ Use `STRICT` when you need a specific certificate (e.g. issued by a CA) or when 
 
 ## Which mode to use
 
-| Scenario | Recommended mode |
-|----------|-----------------|
-| Local dev / same machine | `PLAIN` or `TOFU` |
-| Production / different machines | `TOFU` |
-| Corporate / compliance requirements | `STRICT` |
-| Don't care about encryption | `PLAIN` |
+- **Local dev / same machine** → `PLAIN` or `TOFU`
+- **Production / different machines** → `TOFU`
+- **Corporate / compliance requirements** → `STRICT`
+- **Don't care about encryption** → `PLAIN`
 
 ---
 
@@ -118,9 +116,7 @@ sequenceDiagram
 
 ## Common issues
 
-| Problem | Fix |
-|---------|-----|
-| `SSL handshake failed` | TLS mode mismatch between proxy and backend. Make sure both use the same mode. |
-| `Certificate pin mismatch` | Proxy cert was regenerated. Clear `tls-pin` on the backend and restart. |
-| `Auth timeout` | Secret mismatch, or `require-auth` is enabled on one side but not the other. |
-| Backend can't connect at all | Check firewall, port, and `host` settings. See [Troubleshooting](/docs/troubleshooting/). |
+- **`SSL handshake failed`** → TLS mode mismatch between proxy and backend. Make sure both use the same mode.
+- **`Certificate pin mismatch`** → Proxy cert was regenerated. Clear `tls-pin` on the backend and restart.
+- **`Auth timeout`** → Secret mismatch, or `require-auth` is enabled on one side but not the other.
+- **Backend can't connect at all** → Check firewall, port, and `host` settings. See [Troubleshooting](/docs/troubleshooting/).

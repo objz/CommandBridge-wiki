@@ -3,26 +3,24 @@ title: Commands
 order: 8
 ---
 
-CommandBridge provides admin commands on both sides of the network.
+Admin commands for both sides of the network.
 
 ---
 
-## Velocity commands
+## Velocity
 
-Base command: `/commandbridge` (alias: `/cb`)
+Base command: `/commandbridge` (alias `/cb`)
 
-Permission: `commandbridge.admin`
+Requires `commandbridge.admin`.
 
-| Command | Description |
-|---------|-------------|
-| `/cb help` | Show available commands. |
-| `/cb info` | Show plugin version, uptime, and connection info. |
-| `/cb list` | List all connected clients and their status. |
-| `/cb ping [clientId]` | Ping a specific client or all clients. Shows round-trip latency. |
-| `/cb scripts [page]` | List loaded scripts with pagination. |
-| `/cb reload` | Reload all scripts from disk. Does not reload `config.yml` (restart required for config changes). |
-| `/cb debug` | Toggle debug logging on/off. |
-| `/cb dump` | Generate a diagnostic dump for bug reports. |
+- `/cb help` shows available commands
+- `/cb info` shows plugin version, uptime, and connection info
+- `/cb list` lists connected clients and their status
+- `/cb ping [clientId]` pings a specific client or all clients
+- `/cb scripts [page]` lists loaded scripts
+- `/cb reload` reloads config and scripts from disk
+- `/cb debug` toggles debug logging
+- `/cb dump` generates a diagnostic dump for bug reports
 
 ### Example output
 
@@ -40,20 +38,16 @@ Pong from survival-1: 12ms
 
 ---
 
-## Backend commands
+## Backends
 
-Base command: `/commandbridgeclient` (alias: `/cbc`)
+Base command: `/commandbridgeclient` (alias `/cbc`)
 
-Permission: `commandbridge.admin`
+Requires `commandbridge.admin`.
 
-| Command | Description |
-|---------|-------------|
-| `/cbc reconnect` | Disconnect from the proxy and reconnect. Useful after config changes or connection issues. |
+- `/cbc reconnect` disconnects and reconnects to the proxy
 
 ---
 
 ## Notes
 
-- All admin commands require `commandbridge.admin` permission
-- Admin commands output in two formats: styled chat (MiniMessage with clickable elements) for players, and ANSI box-drawing for the console
-- `/cb reload` only reloads scripts, not the main config. For config changes, restart the server.
+- Admin commands use styled chat (MiniMessage) for players and ANSI box-drawing for console

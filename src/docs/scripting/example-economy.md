@@ -3,9 +3,11 @@ title: "Example: Economy"
 order: 7
 ---
 
-Give money to a player on a backend server from the proxy. Demonstrates typed arguments and targeting a specific backend.
+Give money to a player on a backend server. Demonstrates typed arguments with backend-only argument types.
 
 ### Script
+
+Place this in `plugins/commandbridge/scripts/eco-give.yml` on Velocity:
 
 ```yaml
 version: 2
@@ -19,8 +21,8 @@ permissions:
   silent: false
 
 register:
-  - id: "proxy-1"
-    location: VELOCITY
+  - id: "survival-1"
+    location: BACKEND
 
 defaults:
   run-as: CONSOLE
@@ -41,7 +43,7 @@ args:
 
   - name: amount
     required: true
-    type: RANGE
+    type: INTEGER
 
 commands:
   - command: "eco give ${player} ${amount}"
@@ -49,10 +51,10 @@ commands:
 
 ### What happens
 
-- Registers `/eco-give` (alias `/eco`) on Velocity
-- `player` uses the `PLAYERS` type -- tab-completes online players and supports selectors like `@a`
-- `amount` uses `RANGE` -- accepts values like `100`, `1..1000`
-- The resolved command is sent to `survival-1`'s console
+- Registers `/eco-give` (alias `/eco`) on the backend `survival-1`
+- `player` uses the `PLAYERS` type. Tab-completes online players and supports selectors like `@a`.
+- `amount` uses `INTEGER`. Accepts whole numbers.
+- The resolved command runs on `survival-1`'s console
 
 ### Test it
 
@@ -64,10 +66,12 @@ Runs `eco give Steve 500` on the `survival-1` server console.
 
 ### Permissions
 
+Set the permission on the **backend** where the command is registered:
+
 ```bash
-lpv user playerName permission set commandbridge.command.eco-give true
+lp user playerName permission set commandbridge.command.eco-give true
 ```
 
-{% hint "info" %}
-This script is registered on Velocity but the `PLAYERS` and `RANGE` argument types are backend-only. CommandBridge handles this by registering the tab-completion on the backend specified in `register`, then routing execution through the proxy.
+{% hint "warning" %}
+`PLAYERS` is a backend-only argument type. It can only be used in scripts that register on a `BACKEND`. See [Argument Types](/docs/scripting/argument-types/) for platform availability.
 {% endhint %}

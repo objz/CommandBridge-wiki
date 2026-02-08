@@ -5,15 +5,10 @@ order: 6
 
 ### Overview
 
-CommandBridge scripts are YAML files that define custom commands and what happens when they're run. Scripts live in the `plugins/commandbridge/scripts/` folder on your server.
-
-| Context | What it does |
-|---------|-------------|
-| **Scripts on Velocity** | Register commands on the proxy or backends, execute commands anywhere in the network. |
-| **Scripts on backends** | Register commands on the backend, forward execution to the proxy or other backends. |
+CommandBridge scripts are YAML files that define custom commands and what happens when they're run. All scripts live on the **Velocity proxy** in `plugins/commandbridge/scripts/`. From there, you can register and execute commands anywhere in the network.
 
 {% hint "info" %}
-Scripts define custom commands your players or console can run across your network.
+Scripts are managed entirely from Velocity. Backends don't have their own scripts folder. Velocity registers commands on backends remotely over WebSocket.
 {% endhint %}
 
 ### How scripts work
@@ -34,7 +29,7 @@ flowchart LR
 
 ### Script location
 
-Place `.yml` files in:
+Place `.yml` files in the Velocity proxy's plugin directory:
 
 ```
 plugins/commandbridge/scripts/
@@ -44,8 +39,8 @@ Files are loaded on startup. Use `/cb reload` to reload without restarting.
 
 ### Next steps
 
-- [Syntax](/docs/scripting/syntax/) -- full YAML reference for all script fields
-- [Argument Types](/docs/scripting/argument-types/) -- all 21 supported types
-- [Placeholders](/docs/scripting/placeholders/) -- built-in `${arg}` placeholders
-- [PlaceholderAPI](/docs/scripting/placeholderapi/) -- PAPI integration
+- [Syntax](/docs/scripting/syntax/) → full YAML reference for all script fields
+- [Argument Types](/docs/scripting/argument-types/) → all 21 supported types
+- [Placeholders](/docs/scripting/placeholders/) → built-in `${arg}` placeholders
+- [PlaceholderAPI](/docs/scripting/placeholderapi/) → PAPI integration
 - Examples: [Alert](/docs/scripting/example-alert/), [Lobby](/docs/scripting/example-lobby/), [Economy](/docs/scripting/example-economy/), [Punishment](/docs/scripting/example-punishment/)

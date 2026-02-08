@@ -3,7 +3,7 @@ title: "Example: Punishment"
 order: 8
 ---
 
-Ban a player across the entire network. Demonstrates multiple commands in one script, console execution, and PAPI placeholders.
+Ban a player across the entire network. Demonstrates multiple commands in one script, console execution, and per-command overrides.
 
 ### Script
 
@@ -65,9 +65,9 @@ The ban is applied on each backend through their ban plugin, and the player is k
 
 ### Key concepts
 
-- **Multiple commands**: Each entry in `commands` runs independently
-- **Per-command overrides**: The second command overrides `execute` to target Velocity instead of the backends
-- **Optional argument**: `reason` is optional -- if not provided, `${reason}` resolves to an empty string
+- **Multiple commands** → each entry in `commands` runs independently
+- **Per-command overrides** → the second command overrides `execute` to target Velocity instead of the backends
+- **Optional argument** → `reason` is optional. If not provided, `${reason}` resolves to an empty string.
 
 ### Permissions
 

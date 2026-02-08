@@ -58,18 +58,17 @@ commands:
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `version` | int | yes | -- | Schema version. Use `2`. |
-| `name` | string | yes | -- | Command name (becomes `/name`). Lowercase, 3-33 chars, pattern: `^[a-z][a-z0-9-]{2,32}$`. |
-| `description` | string | no | -- | Short description shown in `/help`. |
+| `version` | int | yes | | Schema version. Use `2`. |
+| `name` | string | yes | | Command name (becomes `/name`). Lowercase, 3-33 chars, pattern: `^[a-z][a-z0-9-]{2,32}$`. |
+| `description` | string | no | | Short description shown in `/help`. |
 | `enabled` | boolean | no | `true` | Set `false` to disable without deleting the file. |
 | `aliases` | list | no | `[]` | Alternative command names. |
-| `permissions` | object | yes | -- | Permission settings. See below. |
-| `register` | list | yes | -- | Where to register the command. See below. |
-| `defaults` | object | yes | -- | Default execution settings inherited by all commands. See below. |
-| `args` | list | yes | -- | Argument definitions. Can be empty (`[]`). See below. |
-| `commands` | list | yes | -- | Commands to execute. See below. |
+| `permissions` | object | yes | | Permission settings. See below. |
+| `register` | list | yes | | Where to register the command. See below. |
+| `defaults` | object | yes | | Default execution settings inherited by all commands. See below. |
+| `args` | list | yes | | Argument definitions. Can be empty (`[]`). See below. |
+| `commands` | list | yes | | Commands to execute. See below. |
 
----
 
 ## permissions
 
@@ -78,7 +77,6 @@ commands:
 | `enabled` | boolean | `true` | Check `commandbridge.command.<name>` before executing. |
 | `silent` | boolean | `false` | When `true`, permission failures are silent (no error message to the player). |
 
----
 
 ## register
 
@@ -108,18 +106,16 @@ Default execution settings. Every field here is inherited by each entry in `comm
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `run-as` | string | `CONSOLE` | Execution context: `CONSOLE`, `PLAYER`, or `OPERATOR`. |
-| `execute` | list | -- | Where to send the command. Same format as `register`. |
-| `server` | object | -- | Player-related scheduling settings. See below. |
+| `execute` | list | | Where to send the command. Same format as `register`. |
+| `server` | object | | Player-related scheduling settings. See below. |
 | `delay` | duration | `0s` | Delay before executing. Supports `s`, `m`, `h`, `d` suffixes. |
 | `cooldown` | duration | `0s` | Per-player cooldown between uses. Same suffix support. |
 
 ### run-as modes
 
-| Mode | Description |
-|------|-------------|
-| `CONSOLE` | Command runs as the server console. |
-| `PLAYER` | Command runs as the triggering player. |
-| `OPERATOR` | Command runs as the player with temporary operator-level permissions. |
+- **`CONSOLE`** → command runs as the server console.
+- **`PLAYER`** → command runs as the triggering player.
+- **`OPERATOR`** → command runs as the player with temporary operator-level permissions.
 
 ### server (scheduling)
 
@@ -129,7 +125,6 @@ Default execution settings. Every field here is inherited by each entry in `comm
 | `schedule-online` | boolean | `false` | If `true`, queue the command until the target player comes online. |
 | `timeout` | duration | `5s` | How long to wait for a scheduled command before giving up. |
 
----
 
 ## args
 
@@ -137,10 +132,10 @@ Argument definitions. Each entry:
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `name` | string | yes | -- | Name used as `${name}` placeholder in commands. |
+| `name` | string | yes | | Name used as `${name}` placeholder in commands. |
 | `required` | boolean | no | `false` | Whether the player must provide this argument. |
 | `type` | string | no | `STRING` | Argument type. See [Argument Types](/docs/scripting/argument-types/). |
-| `suggestions` | list | no | -- | Static suggestions for tab completion. Each must match `^[a-z0-9._+\-]+$`. |
+| `suggestions` | list | no | | Static suggestions for tab completion. Each must match `^[a-z0-9._+\-]+$`. |
 
 Arguments are processed in order. Required arguments must come before optional ones.
 
@@ -159,7 +154,7 @@ A list of commands to execute. Each entry:
 | `delay` | duration | no | Override `defaults.delay` for this command. |
 | `cooldown` | duration | no | Override `defaults.cooldown` for this command. |
 
-Fields marked with "Override" inherit from `defaults` when not set. This lets you define common settings once and only override where needed.
+Fields marked with "Override" inherit from `defaults` when not set. Define common settings once and only override where needed.
 
 {% hint "info" %}
 You can have multiple commands in one script. They are processed in order.
@@ -171,8 +166,8 @@ You can have multiple commands in one script. They are processed in order.
 
 Duration fields (`delay`, `cooldown`, `timeout`) accept:
 
-- `0s`, `5s`, `30s` -- seconds
-- `1m`, `5m` -- minutes
-- `1h` -- hours
-- `1d` -- days
+- `0s`, `5s`, `30s` → seconds
+- `1m`, `5m` → minutes
+- `1h` → hours
+- `1d` → days
 - Bare numbers are treated as seconds

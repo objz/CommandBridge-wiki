@@ -7,10 +7,8 @@ CommandBridge integrates with [PlaceholderAPI](https://www.spigotmc.org/resource
 
 ### Requirements
 
-| Plugin | Where | Purpose |
-|--------|-------|---------|
-| [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) | Backend servers | Provides placeholder resolution on backends. |
-| [PapiProxyBridge](https://modrinth.com/plugin/papiproxybridge) | Velocity proxy | Bridges PAPI resolution to the proxy side. |
+- **[PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)** (backend servers) → provides placeholder resolution on backends.
+- **[PapiProxyBridge](https://modrinth.com/plugin/papiproxybridge)** (Velocity proxy) → bridges PAPI resolution to the proxy side.
 
 Both are optional. Without them, PAPI placeholders in your scripts will not be resolved.
 
@@ -20,7 +18,7 @@ Both are optional. Without them, PAPI placeholders in your scripts will not be r
 2. If PAPI is available and the executor is a player, the resolved command string is passed through PlaceholderAPI
 3. Any `%placeholder%` tokens in the string are replaced with their PAPI values
 
-This means you can mix both systems in the same command:
+You can mix both systems in the same command:
 
 ```yaml
 commands:
@@ -37,7 +35,7 @@ If the triggering player has the `[Admin]` prefix and the `player` argument is `
 2. Install any PAPI expansion packs you need (e.g. `Player`, `LuckPerms`, `Vault`)
 3. If you need PAPI on the Velocity side, install PapiProxyBridge on Velocity
 
-No CommandBridge configuration is needed -- PAPI support is auto-detected.
+No CommandBridge configuration needed. PAPI support is auto-detected.
 
 ### Example
 
@@ -73,7 +71,7 @@ defaults:
 args:
   - name: target
     required: true
-    type: PLAYERS
+    type: STRING
 
 commands:
   - command: "say Welcome %luckperms_prefix% ${target}! Balance: %vault_eco_balance%"

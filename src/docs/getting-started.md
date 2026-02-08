@@ -3,7 +3,7 @@ title: Getting Started
 order: 4
 ---
 
-This guide walks you through connecting Velocity and your backend servers with CommandBridge.
+Walks you through connecting Velocity and your backend servers with CommandBridge.
 
 **Terminology:**
 
@@ -16,7 +16,7 @@ This guide walks you through connecting Velocity and your backend servers with C
 
 1. Download the JAR from [Modrinth](https://modrinth.com/plugin/commandbridge/versions)
 2. Place it in `plugins/` on Velocity and each backend
-3. Install [CommandAPI](https://commandapi.jorel.dev/) on each backend
+3. Install [CommandAPI](https://commandapi.jorel.dev/) on Velocity and each backend
 4. Start Velocity, then start backends
 5. Stop everything
 
@@ -34,9 +34,9 @@ bind-port: 8765
 server-id: "proxy-1"
 ```
 
-- `bind-host` -- use `0.0.0.0` to listen on all interfaces, or `127.0.0.1` if everything runs on the same machine
-- `bind-port` -- any free port. Must be open in your firewall if backends are on other machines.
-- `server-id` -- a unique name for this proxy
+- `bind-host` → use `0.0.0.0` to listen on all interfaces, or `127.0.0.1` if everything runs on the same machine
+- `bind-port` → any free port. Must be open in your firewall if backends are on other machines.
+- `server-id` → a unique name for this proxy
 
 ---
 
@@ -50,9 +50,9 @@ port: 8765
 client-id: "survival-1"
 ```
 
-- `host` -- the IP or domain of your Velocity server
-- `port` -- must match Velocity's `bind-port`
-- `client-id` -- a unique name for this backend (e.g. `lobby`, `survival-1`, `minigames`)
+- `host` → the IP or domain of your Velocity server
+- `port` → must match Velocity's `bind-port`
+- `client-id` → a unique name for this backend (e.g. `lobby`, `survival-1`, `minigames`)
 
 ---
 
@@ -76,7 +76,7 @@ Keep `secret.key` private. Anyone with this key can issue commands across your n
 1. Start Velocity first
 2. Then start each backend
 
-Order matters -- the proxy must be listening before clients try to connect.
+Order matters. The proxy must be listening before clients try to connect.
 
 ---
 
@@ -91,8 +91,8 @@ On the Velocity console you should see:
 
 You can also run:
 
-- `/cb list` -- shows connected clients
-- `/cb ping survival-1` -- pings a specific client
+- `/cb list` → shows connected clients
+- `/cb ping survival-1` → pings a specific client
 
 If clients don't connect, check the [Troubleshooting](/docs/troubleshooting/) page.
 
@@ -143,6 +143,6 @@ The backend server `survival-1` will execute `say Hello from the proxy!` in its 
 
 ### Next steps
 
-- [Scripting](/docs/scripting/) -- full guide to YAML scripts, arguments, and placeholders
-- [Configuration](/docs/configuration/velocity/) -- all config options for both sides
-- [Security](/docs/security/) -- TLS modes and authentication details
+- [Scripting](/docs/scripting/) → full guide to YAML scripts, arguments, and placeholders
+- [Configuration](/docs/configuration/velocity/) → all config options for both sides
+- [Security](/docs/security/) → TLS modes and authentication details

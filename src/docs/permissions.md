@@ -3,16 +3,14 @@ title: Permissions
 order: 9
 ---
 
-CommandBridge uses two permission nodes. A permissions plugin is required on both Velocity and backends. [LuckPerms](https://luckperms.net/) is recommended.
+Two permission nodes. Requires a permissions plugin on both Velocity and backends. [LuckPerms](https://luckperms.net/) recommended.
 
 ---
 
 ### Permission nodes
 
-| Permission | Description |
-|------------|-------------|
-| `commandbridge.admin` | Access to all admin commands (`/cb`, `/cbc`). |
-| `commandbridge.command.<name>` | Permission to run a specific script command. Replace `<name>` with the script name. |
+- `commandbridge.admin` grants access to all admin commands (`/cb`, `/cbc`).
+- `commandbridge.command.<name>` grants access to run a specific script command.
 
 ---
 
@@ -20,20 +18,20 @@ CommandBridge uses two permission nodes. A permissions plugin is required on bot
 
 Set the permission where the command is **registered**.
 
-- **Command registered on Velocity** -- set the permission on Velocity
-- **Command registered on a backend** -- set the permission on that backend
-- **Admin commands** -- always set on the side you want to use them
+- Command registered on Velocity → set on Velocity
+- Command registered on a backend → set on that backend
+- Admin commands → set on the side you want to use them
 
 #### LuckPerms examples
 
 ```bash
-# Grant admin access on Velocity
+# Admin access on Velocity
 lpv user playerName permission set commandbridge.admin true
 
-# Grant /alert permission on Velocity
+# /alert permission on Velocity
 lpv user playerName permission set commandbridge.command.alert true
 
-# Grant /lobby permission on a backend
+# /lobby permission on a backend
 lp user playerName permission set commandbridge.command.lobby true
 ```
 
@@ -41,7 +39,7 @@ lp user playerName permission set commandbridge.command.lobby true
 
 ### Disabling permission checks
 
-In any script, set `permissions.enabled` to `false` to skip the permission check entirely:
+Skip the permission check entirely:
 
 ```yaml
 permissions:
@@ -49,7 +47,7 @@ permissions:
   silent: false
 ```
 
-To keep the check but suppress the error message when a player lacks permission:
+Keep the check but suppress the error message:
 
 ```yaml
 permissions:
@@ -59,14 +57,12 @@ permissions:
 
 ---
 
-### Run-as modes and permissions
+### Run-as modes
 
-| Mode | Permission behavior |
-|------|-------------------|
-| `CONSOLE` | No permission check on the executing side -- console has full access. |
-| `PLAYER` | The player's own permissions apply on the target server. |
-| `OPERATOR` | The player is temporarily granted elevated permissions for the command, including `commandbridge.command.<name>`, the base command permission, and `<base>.*`. |
+- `CONSOLE` has full access, no permission check on the executing side.
+- `PLAYER` uses the player's own permissions on the target server.
+- `OPERATOR` temporarily grants elevated permissions for the command.
 
 {% hint "warning" %}
-`OPERATOR` mode grants broad permissions temporarily. Use it only when the target command requires permissions the player doesn't normally have.
+`OPERATOR` grants broad permissions temporarily. Only use it when the target command requires permissions the player doesn't normally have.
 {% endhint %}

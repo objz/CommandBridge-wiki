@@ -7,7 +7,7 @@ Send a player to the lobby server using a command registered on a backend.
 
 ### Script
 
-Place this script on a **backend server** (e.g. `survival-1`):
+Place this script on **Velocity** (`plugins/commandbridge/scripts/lobby.yml`). The `register` block tells CommandBridge to register the command on the backend remotely:
 
 ```yaml
 version: 2

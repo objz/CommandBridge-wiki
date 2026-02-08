@@ -3,7 +3,7 @@ title: Migration from v2
 order: 11
 ---
 
-This guide covers upgrading from CommandBridge v2 to v3. The script format, config structure, and connection system have all changed.
+Covers upgrading from CommandBridge v2 to v3. The script format, config structure, and connection system have all changed.
 
 {% hint "danger" %}
 Back up your configs and scripts before upgrading. v3 is not backwards-compatible with v2.
@@ -22,7 +22,7 @@ Back up your configs and scripts before upgrading. v3 is not backwards-compatibl
 | Config | `host`, `port`, `san`, `secret` flat | Nested sections: `security`, `timeouts`, `limits`, `heartbeat` |
 | TLS | Not available | PLAIN, TOFU, STRICT modes |
 | bStats | Included | Removed |
-| Dependencies | None | CommandAPI required on backends |
+| Dependencies | None | CommandAPI required on both Velocity and backends |
 
 ---
 
@@ -36,7 +36,7 @@ Copy your entire `plugins/CommandBridge/` folder on both Velocity and all backen
 
 1. Delete the old CommandBridge JAR from `plugins/` on both sides
 2. Install the v3 JAR
-3. Install [CommandAPI](https://commandapi.jorel.dev/) on each backend
+3. Install [CommandAPI](https://commandapi.jorel.dev/) on Velocity and each backend
 4. Delete old config files (they'll be regenerated)
 5. Start and stop both sides to generate v3 configs
 
@@ -162,12 +162,12 @@ v3 arguments give you tab-completion, validation, and type safety.
 
 ### 5. Permission changes
 
-| v2 | v3 |
-|----|-----|
-| `commandbridge.admin` | `commandbridge.admin` (unchanged) |
-| `commandbridge.command.<name>` | `commandbridge.command.<name>` (unchanged) |
+Permission nodes are unchanged in v3:
 
-Permissions work the same way. No changes needed.
+- `commandbridge.admin` → same as v2
+- `commandbridge.command.<name>` → same as v2
+
+No changes needed.
 
 ### 6. Verify
 
@@ -180,10 +180,10 @@ Permissions work the same way. No changes needed.
 
 ## Breaking changes
 
-- **CommandAPI is now required** on all backends
-- **bStats removed** -- delete `plugins/bStats/` if no other plugins use it
-- **`san` config key removed** -- TLS handles certificate validation now
-- **Script format completely changed** -- old scripts will not load
-- **`%args%` / `%arg[n]%` removed** -- use named `${arg}` placeholders
-- **`%cb_player%` / `%cb_server%` removed** -- use PAPI or named arguments instead
-- **WebSocket on a dedicated port** -- v3 uses its own port (default `8765`), not plugin messaging channels
+- **CommandAPI is now required** on both Velocity and all backends
+- **bStats removed** → delete `plugins/bStats/` if no other plugins use it
+- **`san` config key removed** → TLS handles certificate validation now
+- **Script format completely changed** → old scripts will not load
+- **`%args%` / `%arg[n]%` removed** → use named `${arg}` placeholders
+- **`%cb_player%` / `%cb_server%` removed** → use PAPI or named arguments instead
+- **WebSocket on a dedicated port** → v3 uses its own port (default `8765`), not plugin messaging channels

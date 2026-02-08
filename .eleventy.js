@@ -158,7 +158,7 @@ const stripped = rendered.match(/^<p>(.*?)<\/p>$/s)
 
 
 return `
-  <div class="flex items-start gap-4 rounded-md p-4 ${s.bg} ${s.text}">
+  <div class="flex items-start gap-4 rounded-md p-4 my-6 ${s.bg} ${s.text}">
     <div class="flex-shrink-0 mt-[2px]">
       ${iconSvg}
     </div>

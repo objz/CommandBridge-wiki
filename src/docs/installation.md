@@ -13,7 +13,7 @@ CommandBridge ships as a single JAR. It detects whether it's running on Velocity
 
 1. Place the JAR in the `plugins/` folder on your **Velocity proxy**
 2. Place the same JAR in the `plugins/` folder on each **backend server**
-3. Install [CommandAPI](https://commandapi.jorel.dev/) on each backend server
+3. Install [CommandAPI](https://commandapi.jorel.dev/) on **Velocity and each backend**
 4. Start Velocity, then start your backends
 5. Stop both sides
 
@@ -31,9 +31,9 @@ CommandBridge requires a permissions plugin on both sides. [LuckPerms](https://l
 plugins/commandbridge/
 ├── config.yml
 ├── secret.key
-├── tls/
+├── keystore.p12
+├── keystore.pass
 └── scripts/
-    └── testcmd.yml
 ```
 
 **Backend server:**
@@ -41,7 +41,7 @@ plugins/commandbridge/
 ```
 plugins/commandbridge/
 ├── config.yml
-└── scripts/
+└── secret.key
 ```
 
 ### Next steps

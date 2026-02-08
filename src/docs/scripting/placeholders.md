@@ -61,6 +61,6 @@ Running `/cmd Steve` resolves to `msg Steve ` (with trailing space). Running `/c
 ### Tips
 
 - Placeholder names must match the argument `name` exactly (case-sensitive)
-- Use descriptive names: `${player}`, `${amount}`, `${reason}` -- not `${a}`, `${b}`
+- Use descriptive names: `${player}`, `${amount}`, `${reason}`. Not `${a}`, `${b}`.
 - Only arguments referenced in at least one command string are registered with the command system
-- Placeholders are validated at script load time -- a `${name}` that doesn't match any argument will produce a warning
+- Placeholders are validated at script load time. A `${name}` that doesn't match any argument will produce a warning.

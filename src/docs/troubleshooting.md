@@ -13,11 +13,11 @@ Common issues and how to fix them. Enable `debug: true` in `config.yml` for deta
 
 **Checklist:**
 
-- **Secret mismatch** -- the `secret` in each backend's config must match Velocity's `secret.key` file contents
-- **Wrong host** -- if both run on the same machine, use `127.0.0.1`. If on different machines, the backend's `host` must point to Velocity's external IP or domain
-- **Port closed** -- make sure `bind-port` on Velocity is open in your firewall and matches the backend's `port`
-- **TLS mode mismatch** -- both sides must use the same `tls-mode` (`PLAIN`, `TOFU`, or `STRICT`)
-- **Start order** -- start Velocity first, then backends. The proxy must be listening before clients connect.
+- **Secret mismatch** → the `secret` in each backend's config must match Velocity's `secret.key` file contents
+- **Wrong host** → if both run on the same machine, use `127.0.0.1`. If on different machines, the backend's `host` must point to Velocity's external IP or domain
+- **Port closed** → make sure `bind-port` on Velocity is open in your firewall and matches the backend's `port`
+- **TLS mode mismatch** → both sides must use the same `tls-mode` (`PLAIN`, `TOFU`, or `STRICT`)
+- **Start order** → start Velocity first, then backends. The proxy must be listening before clients connect.
 
 ---
 
@@ -35,11 +35,11 @@ Another process is using the configured port.
 
 **Checklist:**
 
-- **Script not loaded** -- check `/cb scripts` to verify the script appears. If not, check for YAML syntax errors in the server log.
-- **Wrong side** -- the script must exist on the side that runs the dispatch. If the command is registered on Velocity, the script file must be on Velocity.
-- **Missing permissions** -- the player needs `commandbridge.command.<name>` unless `permissions.enabled` is `false` in the script
-- **Target client ID mismatch** -- the `id` in `execute` must match the backend's `client-id` exactly
-- **Client disconnected** -- if the target backend disconnected after `/cb list` was run, the command will fail silently
+- **Script not loaded** → check `/cb scripts` to verify the script appears. If not, check for YAML syntax errors in the server log.
+- **Scripts are Velocity-only** → all scripts must be in `plugins/commandbridge/scripts/` on the Velocity proxy, even if they register commands on backends.
+- **Missing permissions** → the player needs `commandbridge.command.<name>` unless `permissions.enabled` is `false` in the script
+- **Target client ID mismatch** → the `id` in `execute` must match the backend's `client-id` exactly
+- **Client disconnected** → if the target backend disconnected after `/cb list` was run, the command will fail silently
 
 ---
 
@@ -72,7 +72,7 @@ See the [Security](/docs/security/) page for detailed TLS setup.
 - `${arg}` placeholders require matching argument names in the `args` list
 - PlaceholderAPI (`%placeholder%`) requires PAPI on the backend and PapiProxyBridge on Velocity
 - PAPI placeholders only resolve when the executor is a player (not console)
-- Check spelling and case -- placeholder names are case-sensitive
+- Check spelling and case. Placeholder names are case-sensitive.
 
 ---
 
@@ -80,12 +80,10 @@ See the [Security](/docs/security/) page for detailed TLS setup.
 
 CommandBridge validates scripts at load time. Common errors:
 
-| Error | Fix |
-|-------|-----|
-| `name does not match pattern` | Script name must be lowercase, 3-33 chars, start with a letter, only `a-z0-9-` |
-| `required field missing` | Add the missing field. All of `version`, `name`, `permissions`, `register`, `defaults`, `args`, `commands` are required. |
-| `platform mismatch` | You used a backend-only argument type (like `PLAYERS`) in a command registered on Velocity without a backend in `register` |
-| `unknown argument type` | Check spelling against the [Argument Types](/docs/scripting/argument-types/) list |
+- **`name does not match pattern`** → script name must be lowercase, 3-33 chars, start with a letter, only `a-z0-9-`.
+- **`required field missing`** → add the missing field. All of `version`, `name`, `permissions`, `register`, `defaults`, `args`, `commands` are required.
+- **`platform mismatch`** → you used a backend-only argument type (like `PLAYERS`) in a command registered on Velocity. Either register on a backend or use a universal type.
+- **`unknown argument type`** → check spelling against the [Argument Types](/docs/scripting/argument-types/) list.
 
 ---
 

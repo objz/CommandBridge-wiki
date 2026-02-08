@@ -24,7 +24,6 @@ Available on both Velocity and backends.
 | `TEXT` | A single quoted or unquoted token. | `"hello world"` |
 | `GREEDY_STRING` | Everything after this argument, including spaces. Must be the last argument. | `this is a long message` |
 
----
 
 ## Minecraft types (backend only)
 
@@ -97,7 +96,6 @@ When a command is executed, argument values are serialized to strings for the `$
 | `null` / missing optional | Empty string |
 | Everything else | `.toString()` |
 
----
 
 ## Example usage
 
