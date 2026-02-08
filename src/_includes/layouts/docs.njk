@@ -37,3 +37,29 @@ layout: layouts/base.njk
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/languages/yaml.min.js"></script>
 <script>document.addEventListener('DOMContentLoaded', function() { hljs.highlightAll(); });</script>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  const dark = document.documentElement.classList.contains('dark');
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default' });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre').forEach(function (pre) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Copy';
+    btn.className = 'copy-btn absolute top-2 right-2 px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity';
+    btn.addEventListener('click', function () {
+      const code = pre.querySelector('code');
+      navigator.clipboard.writeText(code ? code.textContent : pre.textContent).then(function () {
+        btn.textContent = 'Copied!';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    pre.style.position = 'relative';
+    pre.classList.add('group');
+    pre.appendChild(btn);
+  });
+});
+</script>

@@ -3,29 +3,33 @@ title: Requirements
 order: 3
 ---
 
-{% hint "info" %}
-Looking for the legacy version of CommandBridge? Visit the [old documentation](https://objz.github.io/CommandBridge/getting-started.html).
-{% endhint %}
+### Java and Minecraft
 
-### **Requirements**
+- **Java 21** or newer
+- **Minecraft 1.20.x -- 1.21.x**
 
-CommandBridge v2.0.0+ requires **Java 21** and is compatible with **Minecraft 1.20.x – 1.21.x**.
+### Platform compatibility
 
-A **permissions plugin** is also required on both the **Velocity proxy** and **Paper backend**.  
-I recommend using [LuckPerms](https://luckperms.net/) for its reliability and flexibility.
+| Platform | Support | Notes |
+|----------|---------|-------|
+| **Velocity** | Fully supported | Proxy side. Native command routing. |
+| **Paper** | Fully supported | Primary backend platform. |
+| **Folia** | Fully supported | Regionized multithreading compatible. |
+| **Bukkit / Spigot** | Compatible | Works unless scripts use Paper-specific features. |
+| **Purpur / other Paper forks** | Should work | Not extensively tested. |
+| **Forge / Fabric / NeoForge** | Not supported | Plugin-based platforms only. |
 
-***
+### Required dependencies
 
-### **Platform Compatibility**
+| Dependency | Where | Purpose |
+|------------|-------|---------|
+| [CommandAPI](https://commandapi.jorel.dev/) | Backends | Command registration and argument parsing on backend servers. |
+| A permissions plugin | Both sides | Permission checks for admin and script commands. [LuckPerms](https://luckperms.net/) recommended. |
 
-CommandBridge runs a unified JAR across both proxy and backend servers.
+### Optional dependencies
 
-| Server Platform                         | Support Level        | Notes                                                                 |
-| -------------------------------------- | -------------------- | --------------------------------------------------------------------- |
-| **Velocity**                           | ✅ Fully Supported   | Native support for proxy-side command routing.                        |
-| **Paper**                              | ✅ Fully Supported   | Officially supported backend platform.                                |
-| **Spigot / Bukkit**                    | ✅ Compatible        | Works as long as Paper-specific APIs aren't required by your scripts. |
-| **Folia (Paper fork)**                 | ✅ Supported         | Officially supported. Compatible with regionized multithreading.     |
-| **Purpur / Tuinity / Other Paper Forks** | ⚠️ Should Work      | Based on Paper. Not extensively tested, but expected to work.         |
-| **Waterfall / Other Proxies**          | ⚠️ Should Work      | Likely compatible if Velocity is used as the backend bridge.         |
-| **Forge / Fabric / Other Modloaders**  | ❌ Not Supported     | Only works on plugin-based platforms (not modloaders).                |
+| Dependency | Where | Purpose |
+|------------|-------|---------|
+| [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) | Backends | Use PAPI placeholders in scripts. |
+| [PapiProxyBridge](https://modrinth.com/plugin/papiproxybridge) | Velocity | Resolve PAPI placeholders on the proxy side. |
+| [PacketEvents](https://modrinth.com/plugin/packetevents) | Velocity | Enables the `TIME` argument type on Velocity-registered commands. |

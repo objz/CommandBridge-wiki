@@ -1,5 +1,6 @@
 const markdownIt = require("markdown-it");
 const markdownItAnchor = require("markdown-it-anchor");
+const markdownItTaskLists = require("markdown-it-task-lists");
 const pluginTOC = require("eleventy-plugin-toc")
 const lucideIcons = require("@grimlink/eleventy-plugin-lucide-icons");
 const nunjucks = require("nunjucks");
@@ -21,7 +22,10 @@ module.exports = function(eleventyConfig) {
 
   eleventyConfig.addPlugin(lucideIcons);
 
-  eleventyConfig.setLibrary("md", markdownIt({ html: true }).use(markdownItAnchor, { tabIndex: false }));
+  eleventyConfig.setLibrary("md", markdownIt({ html: true })
+    .use(markdownItAnchor, { tabIndex: false })
+    .use(markdownItTaskLists)
+  );
 
   eleventyConfig.addFilter("markdown", (content) => {
     return md.render(content);
@@ -165,6 +169,35 @@ return `
 
 });
 
+
+  // Tabs shortcode: {% tabs %}{% tab "Label" %}content{% endtab %}{% endtabs %}
+  eleventyConfig.addPairedShortcode("tabs", function (content) {
+    // Extract tab blocks from the rendered content
+    const tabRegex = /<!--tab:(.+?)-->([\s\S]*?)<!--\/tab-->/g;
+    let tabs = [];
+    let match;
+    while ((match = tabRegex.exec(content)) !== null) {
+      tabs.push({ label: match[1], content: match[2].trim() });
+    }
+    if (tabs.length === 0) return content;
+
+    const id = "tabs-" + Math.random().toString(36).slice(2, 8);
+    const buttons = tabs.map((t, i) =>
+      `<button @click="active = ${i}" :class="active === ${i} ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-4 py-2 text-sm font-medium border-b-2 transition-colors">${t.label}</button>`
+    ).join("\n");
+    const panels = tabs.map((t, i) =>
+      `<div x-show="active === ${i}" x-cloak>${md.render(t.content)}</div>`
+    ).join("\n");
+
+    return `<div x-data="{ active: 0 }" class="my-4">
+  <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">${buttons}</div>
+  <div class="prose dark:prose-invert">${panels}</div>
+</div>`;
+  });
+
+  eleventyConfig.addPairedShortcode("tab", function (content, label) {
+    return `<!--tab:${label}-->${content}<!--/tab-->`;
+  });
 
   return {
     dir: {

@@ -1,55 +1,72 @@
 ---
 title: Permissions
-order: 6
+order: 9
 ---
 
-CommandBridge requires a **permissions plugin** on both Velocity and Paper servers. I recommend [LuckPerms](https://luckperms.net/).
+CommandBridge uses two permission nodes. A permissions plugin is required on both Velocity and backends. [LuckPerms](https://luckperms.net/) is recommended.
 
-***
+---
 
-### **Permission Nodes**
+### Permission nodes
 
 | Permission | Description |
 |------------|-------------|
-| `commandbridge.admin` | Access to all admin commands like `/cb reload` |
-| `commandbridge.command.<name>` | Permission to use a specific command |
+| `commandbridge.admin` | Access to all admin commands (`/cb`, `/cbc`). |
+| `commandbridge.command.<name>` | Permission to run a specific script command. Replace `<name>` with the script name. |
 
-Replace `<name>` with your script's name (e.g. `lobby`, `alert`, `test`).
+---
 
-***
+### Where to set permissions
 
-### **Where to Set**
+Set the permission where the command is **registered**.
 
-**Simple rule:** Set permissions where the command runs.
+- **Command registered on Velocity** -- set the permission on Velocity
+- **Command registered on a backend** -- set the permission on that backend
+- **Admin commands** -- always set on the side you want to use them
 
-- **Admin permissions** → Set on Velocity only
-- **Velocity commands** → Set on Velocity with `lpv`
-- **Paper commands** → Set on Paper with `lp`
-
-#### Examples
+#### LuckPerms examples
 
 ```bash
-# Admin access (Velocity only)
+# Grant admin access on Velocity
 lpv user playerName permission set commandbridge.admin true
 
-# Velocity: Grant /alert permission
+# Grant /alert permission on Velocity
 lpv user playerName permission set commandbridge.command.alert true
 
-# Paper: Grant /lobby permission  
+# Grant /lobby permission on a backend
 lp user playerName permission set commandbridge.command.lobby true
 ```
 
-***
+---
 
-### **Bypass Permissions**
+### Disabling permission checks
 
-Add this to any script to skip permission checks:
+In any script, set `permissions.enabled` to `false` to skip the permission check entirely:
 
 ```yaml
-ignore-permission-check: true
+permissions:
+  enabled: false
+  silent: false
 ```
-<div class="h-4"></div>
+
+To keep the check but suppress the error message when a player lacks permission:
+
+```yaml
+permissions:
+  enabled: true
+  silent: true
+```
+
+---
+
+### Run-as modes and permissions
+
+| Mode | Permission behavior |
+|------|-------------------|
+| `CONSOLE` | No permission check on the executing side -- console has full access. |
+| `PLAYER` | The player's own permissions apply on the target server. |
+| `OPERATOR` | The player is temporarily granted elevated permissions for the command, including `commandbridge.command.<name>`, the base command permission, and `<base>.*`. |
 
 {% hint "warning" %}
-If you see "You do not have permission to use this command", check that the permission is set on the correct server (Velocity vs Paper) and that your permissions plugin is installed.
+`OPERATOR` mode grants broad permissions temporarily. Use it only when the target command requires permissions the player doesn't normally have.
 {% endhint %}

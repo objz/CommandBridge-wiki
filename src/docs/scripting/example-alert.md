@@ -1,36 +1,70 @@
 ---
-title: "Example: alert"
-order: 3
+title: "Example: Alert"
+order: 5
 ---
 
-**Goal:** Broadcast a message on multiple servers with `/alert`.
+Broadcast a maintenance warning to multiple backend servers from the proxy.
+
+### Script
 
 ```yaml
+version: 2
 name: alert
+description: Broadcast an alert to all servers
 enabled: true
-ignore-permission-check: false
-hide-permission-warning: false
+aliases: []
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "proxy-1"
+    location: VELOCITY
+
+defaults:
+  run-as: CONSOLE
+  execute:
+    - id: "lobby"
+      location: BACKEND
+    - id: "survival"
+      location: BACKEND
+    - id: "minigames"
+      location: BACKEND
+  server:
+    target-required: false
+    schedule-online: false
+    timeout: 5s
+  delay: 0s
+  cooldown: 0s
+
+args:
+  - name: message
+    required: true
+    type: GREEDY_STRING
+
 commands:
-  - command: "say Attention: Maintenance in 5 minutes!"
-    delay: 0
-    target-client-ids:
-      - "lobby"
-      - "survival"
-      - "minigame"
-    target-executor: "console"
-    wait-until-player-is-online: false
-    check-if-executor-is-player: false
-    check-if-executor-is-on-server: false
+  - command: "say [Alert] ${message}"
 ```
 
-#### What happens?
+### What happens
 
-* Registers `/alert` command.
-* Runs `say ...` on 3 Paper servers.
-* Executed immediately by each server console.
+- Registers `/alert` on the Velocity proxy
+- When run, sends `say [Alert] <message>` to the console on `lobby`, `survival`, and `minigames`
+- Uses `GREEDY_STRING` so the message can include spaces
 
-> This command is triggered from the **Velocity proxy** and forwarded to the **Paper servers**.
+### Test it
 
-{% hint "warning" %}
-Set the permission `commandbridge.command.alert` on **Velocity**, not Paper.
-{% endhint %}
+```
+/alert Maintenance in 5 minutes!
+```
+
+Each backend server broadcasts: `[Alert] Maintenance in 5 minutes!`
+
+### Permissions
+
+Set `commandbridge.command.alert` on **Velocity** (where the command is registered).
+
+```bash
+lpv user playerName permission set commandbridge.command.alert true
+```

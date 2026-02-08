@@ -1,100 +1,66 @@
 ---
 title: Placeholders
-order: 2
+order: 3
 ---
 
-### Built-in Placeholders
+CommandBridge uses `${name}` placeholders in command strings to insert argument values at runtime.
 
-These placeholders are always available — no plugins required.
+### Argument placeholders
 
-| Placeholder                  | Paper | Velocity | Description                                  |
-|-----------------------------|:-----:|:--------:|----------------------------------------------|
-| `%cb_player%`               | ✅    | ✅       | The triggering player’s name.                |
-| `%cb_uuid%`                 | ✅    | ✅       | The player’s UUID.                           |
-| `%cb_world%`                | ✅    | ❌       | The player’s current world.                  |
-| `%cb_server%`               | ❌    | ✅       | The player’s current Velocity server.        |
-| `%args%`                    | ✅    | ✅       | The full raw argument string.                |
-| `%arg[0]%`, `%arg[1]%`, …   | ✅    | ✅       | Individual arguments by index.               |
-
-<div class="h-4"></div>
-
-
-{% hint "info" %}
-Platform-specific placeholders (like `%cb_world%` or `%cb_server%`) are automatically ignored when unsupported.
-{% endhint %}
-
-<div class="h-4"></div>
-
-{% hint "warning" %}
-Only `%args%` and `%arg[n]%` work for console executors; all other placeholders require a player executor.
-{% endhint %}
-
-
-<div class="h-4"></div>
-
-***
-
-### Argument Placeholders
-
-Use `%args%` or `%arg[n]%` to insert player-provided input:
-
-- `%args%` → everything after the command name  
-- `%arg[0]%` → the first argument  
-- `%arg[1]%` → the second argument  
-- etc.
-
-Helpful for passing dynamic values into commands across servers.
-
-***
-
-### Example: Cross-Server Announcements
-
-Broadcast a custom message using `/announce <message>`:
+Every argument defined in the `args` list becomes a placeholder you can use in `commands`:
 
 ```yaml
-name: announce
-enabled: true
-ignore-permission-check: false
-hide-permission-warning: false
+args:
+  - name: player
+    required: true
+    type: PLAYERS
+
+  - name: amount
+    required: true
+    type: INTEGER
+
 commands:
-  - command: "say [Notice] %args%"
-    delay: 0
-    target-client-ids:
-      - "lobby"
-      - "survival"
-    target-executor: "console"
-    wait-until-player-is-online: false
-    check-if-executor-is-player: true
-    check-if-executor-is-on-server: true
+  - command: "eco give ${player} ${amount}"
 ```
 
-If a player runs:
-
-```
-/announce Hello world
-```
-
-The result on each target server will be:
-
-> `[Notice] Hello world`
+When a player runs `/eco-give Steve 100`, the command resolves to `eco give Steve 100`.
 
 ---
 
-### PlaceholderAPI Integration
+### How resolution works
 
-CommandBridge supports full **PlaceholderAPI (PAPI)** support:
+1. Player runs the command with arguments
+2. Each `${name}` in the command string is looked up from the arguments map
+3. Values are serialized based on their type (see [Argument Types](/docs/scripting/argument-types/) for serialization rules)
+4. If PlaceholderAPI is available and the executor is a player, PAPI placeholders are resolved after argument placeholders
 
-* **On Paper:** install [`PlaceholderAPI`](https://www.spigotmc.org/resources/placeholderapi.6245/)
-* **On Velocity:** install [`PapiProxyBridge`](https://modrinth.com/plugin/papiproxybridge)
+---
 
-Example usage:
+### Optional arguments
+
+If an optional argument isn't provided, its placeholder resolves to an empty string:
 
 ```yaml
-- command: "say Welcome %luckperms_prefix% %cb_player%!"
+args:
+  - name: target
+    required: true
+    type: PLAYERS
+
+  - name: message
+    required: false
+    type: GREEDY_STRING
+
+commands:
+  - command: "msg ${target} ${message}"
 ```
 
-> Output: `Welcome [Admin] Alex!`
+Running `/cmd Steve` resolves to `msg Steve ` (with trailing space). Running `/cmd Steve hello` resolves to `msg Steve hello`.
 
-{% hint "info" %}
-PAPI is optional, but recommended for dynamic metadata like prefixes, stats, or permissions.
-{% endhint %}
+---
+
+### Tips
+
+- Placeholder names must match the argument `name` exactly (case-sensitive)
+- Use descriptive names: `${player}`, `${amount}`, `${reason}` -- not `${a}`, `${b}`
+- Only arguments referenced in at least one command string are registered with the command system
+- Placeholders are validated at script load time -- a `${name}` that doesn't match any argument will produce a warning
