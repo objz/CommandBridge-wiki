@@ -284,7 +284,7 @@ description: Bridge commands between your Velocity proxy and backend servers. De
         <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
           <div class="text-3xl font-bold stat-number">21</div>
           <div class="text-sm text-muted-foreground mt-1">Argument Types</div>
-          <div class="text-xs text-muted-foreground/70 mt-0.5">Tab completion & PlaceholderAPI support</div>
+          <div class="text-xs text-muted-foreground/70 mt-0.5">Tab completion + optional PlaceholderAPI support</div>
         </div>
         <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
           <div class="text-3xl font-bold stat-number">1.20–1.21</div>
@@ -325,10 +325,10 @@ description: Bridge commands between your Velocity proxy and backend servers. De
             {% lucide "radio", { "class" : "h-5 w-5 text-sky-400" } %} WebSocket
           </h3>
           <ul class="space-y-2 text-sm text-muted-foreground">
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Direct peer-to-peer connections</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Direct proxy-to-backend connections</li>
             <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} TLS encryption support</li>
             <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} No external dependencies</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Auto-reconnect & heartbeat</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Built-in reconnect handling</li>
           </ul>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
@@ -361,14 +361,14 @@ description: Bridge commands between your Velocity proxy and backend servers. De
           <div class="flex items-center gap-2">{% lucide "code" %}</div>
           <h3 class="text-xl font-medium mt-4">YAML Script Engine</h3>
           <p class="text-muted-foreground">
-            21 argument types with full tab completion via CommandAPI. Named placeholders, player/server variables, and PlaceholderAPI support built in.
+            21 argument types with full tab completion via CommandAPI. Named placeholders, player/server variables, and optional PlaceholderAPI support via PapiProxyBridge.
           </p>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "lock" %}</div>
           <h3 class="text-xl font-medium mt-4">Secure by Default</h3>
           <p class="text-muted-foreground">
-            HMAC-SHA256 message signing on every payload. Optional TLS encryption. Three trust modes: TOFU, STRICT, or PLAIN.
+            HMAC-SHA256 mutual authentication during connection setup, plus optional TLS encryption. Three trust modes: TOFU, STRICT, or PLAIN.
           </p>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
