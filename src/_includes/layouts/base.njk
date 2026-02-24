@@ -2,9 +2,9 @@
 <html
   lang="en"
   x-data="{
-    darkMode: localStorage.getItem('dark') ? localStorage.getItem('dark') === 'true' : true
+    darkMode: document.documentElement.classList.contains('dark')
   }"
-  x-init="$watch('darkMode', val => localStorage.setItem('dark', val))"
+  x-init="$watch('darkMode', val => { document.documentElement.classList.add('theme-transition'); try { localStorage.setItem('dark', val); } catch (e) {} setTimeout(() => document.documentElement.classList.remove('theme-transition'), 420); })"
   x-bind:class="{ 'dark': darkMode }">
 <head>
   <meta charset="UTF-8"/>
@@ -12,6 +12,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta name="description" content="{{ description or site.description }}"/>
   <meta name="keywords" content="{{ keywords or site.keywords }}"/>
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("dark");
+        var isDark = stored ? stored === "true" : true;
+        document.documentElement.classList.toggle("dark", isDark);
+
+        var onDocsPage = window.location.pathname.startsWith("/docs");
+        if (onDocsPage) {
+          var wide = localStorage.getItem("wideLayout") === "true";
+          document.documentElement.classList.toggle("docs-wide", wide);
+        }
+      } catch (e) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+  <style>
+    html { background: #ffffff; color: #0a0a0a; }
+    html.dark { background: #0a0a0a; color: #f4f4f5; }
+    html.theme-transition *,
+    html.theme-transition *::before,
+    html.theme-transition *::after {
+      transition: background-color 360ms ease, color 300ms ease, border-color 360ms ease, box-shadow 360ms ease, fill 300ms ease, stroke 300ms ease !important;
+    }
+    html.docs-wide .docs-shell { max-width: calc(100vw - 2rem) !important; }
+    @media (min-width: 1024px) {
+      html.docs-wide .docs-shell { max-width: calc(100vw - 4rem) !important; }
+    }
+  </style>
   <link rel="stylesheet" type="text/css" href="/styles.css?build={% now %}"/>
   <link rel="icon" type="image/x-icon" href="{{ site.url }}/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ site.url }}/favicon-32x32.png">

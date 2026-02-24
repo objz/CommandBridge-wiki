@@ -4,7 +4,7 @@ order: 1
 ---
 
 {% hint "warning" %}
-These docs are for **CommandBridge 3.1.0**. Use the version switcher in the sidebar if you need **3.0.0** or the [legacy v2 docs](https://objz.github.io/CommandBridge/getting-started.html).
+These docs are for **CommandBridge v3**. If you're running v2, see the [legacy documentation](https://objz.github.io/CommandBridge/getting-started.html) and the [migration guide](/docs/migration/).
 {% endhint %}
 
 ### What is CommandBridge?
@@ -24,11 +24,6 @@ CommandBridge connects your Velocity proxy and backend servers over WebSocket, l
 - [YAML scripting](/docs/scripting/) with argument types, placeholders, and examples
 - [Security](/docs/security/), [commands](/docs/commands/), and [permissions](/docs/permissions/)
 - [Troubleshooting](/docs/troubleshooting/) and [migration from v2](/docs/migration/)
-
-### What's new in 3.1.0
-
-- Added Modrinth update checks so admins get notified when a newer release is available
-- Fixed `example.yml` defaults and command unregistration issues on shutdown
 
 ### Links
 

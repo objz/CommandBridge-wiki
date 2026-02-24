@@ -5,7 +5,7 @@ permalink: /
 promotion:
   text: Try CommandBridge now — unleash server automation
   url: https://modrinth.com/plugin/commandbridge
-description: A Minecraft plugin that bridges commands between Velocity and backend servers over WebSocket using YAML scripts.
+description: Bridge commands between your Velocity proxy and backend servers. Define commands once in YAML, execute them anywhere across your Minecraft network.
 ---
 
 <style>
@@ -16,6 +16,10 @@ description: A Minecraft plugin that bridges commands between Velocity and backe
   @keyframes glint-left {
     0%,100% { transform: translateX(0);     opacity: .6; }
     50%      { transform: translateX(-6px);  opacity: 1;  }
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: .3; }
+    50%     { opacity: 1;  }
   }
 
   .arrow-svg {
@@ -37,9 +41,117 @@ description: A Minecraft plugin that bridges commands between Velocity and backe
     justify-content: center;
     gap: 1.5rem;
   }
+
   .cb-bg {
     filter: blur(1.5px);
     -webkit-filter: blur(1.5px);
+  }
+
+  .stat-number {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Graph nodes ── */
+  .net-node {
+    padding: 0.5rem 0.6rem;
+    border-radius: 0.75rem;
+    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+    text-align: center;
+  }
+
+  .net-node-hub {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.06);
+  }
+
+  .net-node h4 {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .net-node .net-sub {
+    margin: 0.05rem 0 0;
+    font-size: 0.62rem;
+    line-height: 1.3;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .net-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+    margin: 0 auto 0.15rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .net-icon-blue   { background: rgba(59,130,246,0.14); color: #60a5fa; }
+  .net-icon-indigo { background: rgba(99,102,241,0.17); color: #a5b4fc; }
+  .net-icon-green  { background: rgba(16,185,129,0.14); color: #6ee7b7; }
+
+  /* ── Connection lines ── */
+  .net-h-line {
+    height: 2px;
+    background: hsl(var(--border));
+    position: relative;
+    flex: 1;
+    min-width: 1.5rem;
+  }
+
+  .net-h-line::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #7dd3fc;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+
+  .net-v-line {
+    width: 2px;
+    height: 0.6rem;
+    background: hsl(var(--border));
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .net-v-line::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #7dd3fc;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+
+  .net-pd1::after { animation-delay: .25s; }
+  .net-pd2::after { animation-delay: .5s;  }
+  .net-pd3::after { animation-delay: .75s; }
+  .net-pd4::after { animation-delay: 1s;   }
+  .net-pd5::after { animation-delay: 1.25s;}
+
+  @media (max-width: 640px) {
+    .hero-graph-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+    .hero-graph-inner {
+      min-width: 480px;
+    }
   }
 </style>
 <canvas id="cb-background"
@@ -47,14 +159,17 @@ description: A Minecraft plugin that bridges commands between Velocity and backe
 </canvas>
 <div class="relative min-h-screen overflow-hidden">
   <div class="relative z-10 px-4 lg:px-8">
+
+    {# ── Hero ── #}
     <section class="max-w-6xl mx-auto py-32 grid lg:grid-cols-12 gap-12 items-center">
-      <div class="lg:col-span-6 space-y-6">
-        <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">CommandBridge</h1>
-        <p class="text-muted-foreground text-lg">
-          CommandBridge connects Velocity and backend servers to enable secure, real-time command execution across your network via YAML scripts.
+      <div class="lg:col-span-5 space-y-6">
+        <span class="inline-block text-xs font-semibold tracking-widest uppercase text-indigo-400">Open Source Minecraft Plugin</span>
+        <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">Command<wbr>Bridge</h1>
+        <p class="text-muted-foreground text-lg leading-relaxed">
+          Bridge commands between your <strong>Velocity</strong> proxy and backend servers. Define commands once in YAML, execute them anywhere across your network over <strong>WebSocket</strong> or <strong>Redis</strong>.
         </p>
         <div class="flex gap-4 flex-wrap">
-          <a class="button !text-base !h-12 !px-8" href="/docs">Documentation</a>
+          <a class="button !text-base !h-12 !px-8" href="/docs">Get Started</a>
           <a class="button-outline !text-base !h-12 !px-8"
              href="https://modrinth.com/plugin/commandbridge"
              target="_blank">Modrinth</a>
@@ -63,80 +178,219 @@ description: A Minecraft plugin that bridges commands between Velocity and backe
              target="_blank">GitHub</a>
         </div>
       </div>
-      <div class="lg:col-span-6">
-        <div class="relative w-full aspect-video rounded-xl shadow-xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-center overflow-hidden">
-          <div class="relative z-10 w-full h-full flex items-center justify-between px-20">
-            <div class="w-38 h-38 flex items-center justify-center overflow-hidden">
-              <img src="https://assets.papermc.io/brand/velocity_logo_blue.min.svg"
-                   alt="Velocity"
-                   class="w-40 h-auto"
-                   width="160"
-                   height="160" />
+
+      {# ── Network Graph ── #}
+      <div class="lg:col-span-7">
+        <div class="rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md overflow-hidden p-5 lg:p-6">
+          <div class="hero-graph-wrap">
+            <div class="hero-graph-inner">
+
+              {# Top row: Velocity ── CommandBridge #}
+              <div class="flex items-center gap-0 mb-4">
+                <div class="shrink-0">
+                  <div class="net-node">
+                    <div class="net-icon net-icon-blue">{% lucide "send", { "class" : "h-3 w-3" } %}</div>
+                    <h4>Velocity</h4>
+                    <div class="net-sub">Proxy</div>
+                  </div>
+                </div>
+
+                <div class="flex items-center flex-1 px-1">
+                  <div class="arrow-stack flex-1">
+                    <svg class="arrow-svg arrow-right" viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 12h40" /><path d="M35 6l6 6-6 6" />
+                    </svg>
+                    <svg class="arrow-svg arrow-left" viewBox="0 0 40 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M1 12H40" /><path d="M7 6l-6 6 6 6" />
+                    </svg>
+                  </div>
+                </div>
+
+                <div class="shrink-0">
+                  <div class="net-node net-node-hub px-4">
+                    <div class="net-icon net-icon-indigo">{% lucide "workflow", { "class" : "h-3 w-3" } %}</div>
+                    <h4>CommandBridge</h4>
+                    <div class="net-sub">Route & execute scripts</div>
+                    <div class="flex justify-center gap-3 mt-1.5 pt-1.5 border-t" style="border-color: hsl(var(--border))">
+                      <span class="flex items-center gap-1 text-[0.6rem] text-muted-foreground">{% lucide "radio", { "class" : "h-2.5 w-2.5" } %} WebSocket</span>
+                      <span class="flex items-center gap-1 text-[0.6rem] text-muted-foreground">{% lucide "database", { "class" : "h-2.5 w-2.5" } %} Redis</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {# Vertical connector lines from hub down to backends #}
+              <div class="grid grid-cols-6 gap-2 px-4">
+                <div class="net-v-line net-pd1"></div>
+                <div class="net-v-line net-pd2"></div>
+                <div class="net-v-line net-pd3"></div>
+                <div class="net-v-line net-pd4"></div>
+                <div class="net-v-line net-pd5"></div>
+                <div class="net-v-line"></div>
+              </div>
+
+              {# Backend server row #}
+              <div class="grid grid-cols-6 gap-2 mt-2 px-4">
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Paper</h4>
+                  <div class="net-sub">Survival</div>
+                </div>
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Paper</h4>
+                  <div class="net-sub">SkyBlock</div>
+                </div>
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Folia</h4>
+                  <div class="net-sub">Creative</div>
+                </div>
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Purpur</h4>
+                  <div class="net-sub">Hub</div>
+                </div>
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Spigot</h4>
+                  <div class="net-sub">Minigames</div>
+                </div>
+                <div class="net-node">
+                  <div class="net-icon net-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
+                  <h4>Bukkit</h4>
+                  <div class="net-sub">Legacy</div>
+                </div>
+              </div>
+
             </div>
-            <div class="arrow-stack">
-              <svg class="arrow-svg arrow-right"
-                   viewBox="0 0 40 24"
-                   xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 12h40" />
-                <path d="M35 6l6 6-6 6" />
-              </svg>
-              <svg class="arrow-svg arrow-left"
-                   viewBox="0 0 40 24"
-                   xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 12H40" />
-                <path d="M7 6l-6 6 6 6" />
-              </svg>
-            </div>
-            <div class="w-28 h-28 flex items-center justify-center overflow-hidden">
-              <img src="https://assets.papermc.io/brand/papermc_logo.512.png"
-                   alt="Paper"
-                   class="w-32 h-auto"
-                   width="512"
-                   height="512" />
-            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t text-center">
+            <p class="text-xs text-muted-foreground">A player runs <code class="text-xs">/lobby</code> on a backend — the proxy picks it up. An admin runs <code class="text-xs">/alert</code> on Velocity — every backend executes it.</p>
           </div>
         </div>
       </div>
     </section>
+
+    {# ── Stats bar ── #}
+    <section class="max-w-4xl mx-auto mb-24">
+      <div class="grid grid-cols-3 gap-6 text-center items-stretch">
+        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
+          <div class="text-3xl font-bold stat-number">6</div>
+          <div class="text-sm text-muted-foreground mt-1">Platforms</div>
+          <div class="text-xs text-muted-foreground/70 mt-0.5">Paper, Folia, Purpur, Spigot, Bukkit, Velocity</div>
+        </div>
+        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
+          <div class="text-3xl font-bold stat-number">21</div>
+          <div class="text-sm text-muted-foreground mt-1">Argument Types</div>
+          <div class="text-xs text-muted-foreground/70 mt-0.5">Tab completion & PlaceholderAPI support</div>
+        </div>
+        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
+          <div class="text-3xl font-bold stat-number">1.20–1.21</div>
+          <div class="text-sm text-muted-foreground mt-1">MC Versions</div>
+          <div class="text-xs text-muted-foreground/70 mt-0.5">Java 21+ required</div>
+        </div>
+      </div>
+    </section>
+
+    {# ── How it works ── #}
+    <section class="max-w-4xl mx-auto my-28">
+      <h2 class="text-3xl lg:text-4xl font-semibold tracking-tight mb-12 text-center">Up and Running in Minutes</h2>
+      <div class="grid md:grid-cols-3 gap-8 text-center">
+        <div class="space-y-3">
+          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">1</div>
+          <h3 class="text-lg font-semibold">Install</h3>
+          <p class="text-sm text-muted-foreground">Drop the plugin JAR on Velocity and every backend server. Java 21+ required.</p>
+        </div>
+        <div class="space-y-3">
+          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">2</div>
+          <h3 class="text-lg font-semibold">Configure</h3>
+          <p class="text-sm text-muted-foreground">Set the shared secret and connection settings in <code>config.yml</code>.</p>
+        </div>
+        <div class="space-y-3">
+          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">3</div>
+          <h3 class="text-lg font-semibold">Script</h3>
+          <p class="text-sm text-muted-foreground">Write YAML scripts that define commands, arguments, and what happens where. One file per command.</p>
+        </div>
+      </div>
+    </section>
+
+    {# ── Transport comparison ── #}
+    <section class="max-w-5xl mx-auto my-24">
+      <h2 class="text-3xl lg:text-4xl font-semibold tracking-tight mb-10 text-center">Choose Your Transport</h2>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <h3 class="text-xl font-semibold flex items-center gap-2 mb-3">
+            {% lucide "radio", { "class" : "h-5 w-5 text-sky-400" } %} WebSocket
+          </h3>
+          <ul class="space-y-2 text-sm text-muted-foreground">
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Direct peer-to-peer connections</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} TLS encryption support</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} No external dependencies</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Auto-reconnect & heartbeat</li>
+          </ul>
+        </div>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <h3 class="text-xl font-semibold flex items-center gap-2 mb-3">
+            {% lucide "database", { "class" : "h-5 w-5 text-red-400" } %} Redis
+          </h3>
+          <ul class="space-y-2 text-sm text-muted-foreground">
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Centralized message broker</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Works behind NATs & firewalls</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Leverage existing Redis infra</li>
+            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Pub/sub channel isolation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    {# ── Features ── #}
     <section class="max-w-5xl mx-auto my-24 text-center">
-      <h2 class="text-4xl font-semibold tracking-tight mb-12">What Makes It Unique?</h2>
+      <h2 class="text-4xl font-semibold tracking-tight mb-4">What Makes It Unique?</h2>
+      <p class="text-muted-foreground mb-12 max-w-2xl mx-auto">No plugin messaging channels, no player-online requirements. Commands go through instantly.</p>
       <div class="grid md:grid-cols-2 gap-8 text-left">
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "zap" %}</div>
-          <h3 class="text-xl font-medium mt-4">Run Commands Across Servers</h3>
+          <h3 class="text-xl font-medium mt-4">Cross-Server Execution</h3>
           <p class="text-muted-foreground">
-            Run a command on the proxy or backend and trigger actions on other servers instantly. Works in both directions.
-          </p>
-        </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <div class="flex items-center gap-2">{% lucide "activity" %}</div>
-          <h3 class="text-xl font-medium mt-4">Realtime WebSocket Sync</h3>
-          <p class="text-muted-foreground">
-            Servers stay connected using secure WebSocket channels. Commands sync even when no players are online.
+            Run a command on the proxy and trigger actions on any backend instantly. Run it on a backend and the proxy picks it up. Full bidirectional flow.
           </p>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "code" %}</div>
-          <h3 class="text-xl font-medium mt-4">Typed YAML Scripts</h3>
+          <h3 class="text-xl font-medium mt-4">YAML Script Engine</h3>
           <p class="text-muted-foreground">
-            Define scripts with typed arguments, named placeholders, and per-command overrides. Each script handles one command across the network.
+            21 argument types with full tab completion via CommandAPI. Named placeholders, player/server variables, and PlaceholderAPI support built in.
           </p>
         </div>
         <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
           <div class="flex items-center gap-2">{% lucide "lock" %}</div>
-          <h3 class="text-xl font-medium mt-4">Secure by Design</h3>
+          <h3 class="text-xl font-medium mt-4">Secure by Default</h3>
           <p class="text-muted-foreground">
-            Connections use TLS encryption and shared-secret authentication. Choose from TOFU, STRICT, or PLAIN modes.
+            HMAC-SHA256 message signing on every payload. Optional TLS encryption. Three trust modes: TOFU, STRICT, or PLAIN.
+          </p>
+        </div>
+        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
+          <div class="flex items-center gap-2">{% lucide "user-cog" %}</div>
+          <h3 class="text-xl font-medium mt-4">Flexible Execution</h3>
+          <p class="text-muted-foreground">
+            Run commands as console, as the player, or with temporary operator permissions. Cooldowns, per-target overrides, and conditional logic included.
           </p>
         </div>
       </div>
     </section>
+
+    {# ── CTA ── #}
     <section class="max-w-4xl mx-auto my-32 text-center">
       <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Link Your Servers?</h2>
       <p class="text-muted-foreground mb-8 text-lg">
-        CommandBridge makes it easy to share commands between Velocity and your backend servers. Add the plugin, write a few scripts, and build powerful cross-server setups.
+        Drop in the plugin, write a few YAML scripts, and your entire network shares commands. It's that simple.
       </p>
-      <a href="/docs" class="button !text-base !h-12 !px-8">Get Started</a>
+      <div class="flex gap-4 flex-wrap justify-center">
+        <a href="/docs" class="button !text-base !h-12 !px-8">Read the Docs</a>
+        <a href="https://modrinth.com/plugin/commandbridge" target="_blank" class="button-outline !text-base !h-12 !px-8">Download on Modrinth</a>
+      </div>
     </section>
   </div>
 </div>

@@ -1,9 +1,41 @@
 ---
 layout: layouts/base.njk
 ---
-<div x-data="{ wideLayout: localStorage.getItem('wideLayout') === 'true' }" x-init="$watch('wideLayout', val => localStorage.setItem('wideLayout', val))" :class="wideLayout ? 'max-w-none' : 'max-w-7xl'" class="flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8 transition-[max-width] duration-300 ease-in-out">
+{% set currentDocVersion = docVersion or (page.url | docsVersionFromUrl) %}
+{% set docsMenu = collections.docs | docsMenuForVersion(currentDocVersion) %}
+<style>
+  .docs-shell {
+    max-width: min(80rem, calc(100vw - 2rem));
+    transition: max-width 420ms cubic-bezier(0.22, 1, 0.36, 1), padding 320ms ease;
+  }
+
+  html.docs-wide .docs-shell {
+    max-width: calc(100vw - 2rem) !important;
+  }
+
+  @media (min-width: 1024px) {
+    .docs-shell {
+      max-width: min(80rem, calc(100vw - 4rem));
+    }
+
+    html.docs-wide .docs-shell {
+      max-width: calc(100vw - 4rem) !important;
+    }
+  }
+</style>
+
+<div x-data="{ wideLayout: document.documentElement.classList.contains('docs-wide') }" x-init="$watch('wideLayout', val => { try { localStorage.setItem('wideLayout', val); } catch (e) {} document.documentElement.classList.toggle('docs-wide', val); })" class="docs-shell flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8 motion-reduce:transition-none">
   <div class="md:w-80 shrink-0 max-md:mb-4">
     <div class="navigation md:pr-8 md:border-r" x-data="{ showNav: false }">
+      <label for="docs-version" class="mb-2 block text-xs font-semibold tracking-wide uppercase text-muted-foreground">Version</label>
+      <select id="docs-version" class="mb-3 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors" onchange="window.location.href = this.value">
+        {% for version in docVersions.versions %}
+          {% set targetUrl = page.url | docsUrlForVersion(version.id) %}
+          <option value="{{ targetUrl }}" {{ 'selected' if version.id == currentDocVersion }}>
+            {{ version.label }}{{ ' (latest)' if version.id == docVersions.latest else '' }}
+          </option>
+        {% endfor %}
+      </select>
       <button @click="showNav = !showNav" class="button-outline flex items-center gap-x-2 w-full md:hidden mb-2">
         <span x-text="showNav ? 'Hide navigation' : 'Show navigation'"></span>
         <template x-if="!showNav">{% lucide "chevrons-up-down", { "class" : "ml-auto h-4 w-4" } %}</template>
@@ -20,7 +52,7 @@ layout: layouts/base.njk
   <div class="flex-1 min-w-0">
     <div class="prose">
       <h1 class="!mb-8">{{ title }}</h1>
-      {{ content | safe }}
+      {{ content | rewriteDocsLinks(currentDocVersion) | safe }}
     </div>
     {% include "partials/docs/footer.njk" %}
   </div>

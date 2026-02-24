@@ -6,8 +6,105 @@ const lucideIcons = require("@grimlink/eleventy-plugin-lucide-icons");
 const nunjucks = require("nunjucks");
 const fs = require("fs");
 const path = require("path");
+const docVersions = require("./src/_data/docVersions.js");
 
 const md = new markdownIt({ html: true });
+
+const INTERNAL_DOC_VERSIONS = docVersions.versions.filter((version) => !version.externalUrl);
+
+function sortDocsByOrderAndTitle(a, b) {
+  const aOrder = typeof a.data.order === "number" ? a.data.order : 0;
+  const bOrder = typeof b.data.order === "number" ? b.data.order : 0;
+  const orderDiff = aOrder - bOrder;
+  if (orderDiff !== 0) return orderDiff;
+  return a.data.title.localeCompare(b.data.title);
+}
+
+function detectDocsVersionFromUrl(url) {
+  if (typeof url !== "string" || !url.startsWith("/docs")) {
+    return docVersions.latest;
+  }
+
+  const sortedVersions = [...INTERNAL_DOC_VERSIONS].sort(
+    (a, b) => b.pathPrefix.length - a.pathPrefix.length
+  );
+
+  const normalizedUrl = url.endsWith("/") ? url : `${url}/`;
+  const matched = sortedVersions.find((version) => {
+    const normalizedPrefix = version.pathPrefix.endsWith("/")
+      ? version.pathPrefix
+      : `${version.pathPrefix}/`;
+    return normalizedUrl.startsWith(normalizedPrefix);
+  });
+
+  return matched ? matched.id : docVersions.latest;
+}
+
+function extractDocsPath(url) {
+  if (typeof url !== "string") return "/";
+
+  const sortedVersions = [...INTERNAL_DOC_VERSIONS].sort(
+    (a, b) => b.pathPrefix.length - a.pathPrefix.length
+  );
+
+  for (const version of sortedVersions) {
+    if (url === version.pathPrefix || url === `${version.pathPrefix}/`) {
+      return "/";
+    }
+
+    const prefixWithSlash = `${version.pathPrefix}/`;
+    if (url.startsWith(prefixWithSlash)) {
+      const remaining = url.slice(version.pathPrefix.length);
+      return remaining.startsWith("/") ? remaining : `/${remaining}`;
+    }
+  }
+
+  return "/";
+}
+
+function buildDocsUrl(versionId, docsPath = "/") {
+  const version = INTERNAL_DOC_VERSIONS.find((item) => item.id === versionId);
+  if (!version) return "/docs/";
+
+  const normalizedPath = docsPath.startsWith("/") ? docsPath : `/${docsPath}`;
+  if (normalizedPath === "/") {
+    return `${version.pathPrefix}/`;
+  }
+
+  return `${version.pathPrefix}${normalizedPath}`;
+}
+
+function buildDocsMenuForVersion(docs, versionId) {
+  const docsForVersion = docs
+    .filter((doc) => (doc.data.docVersion || docVersions.latest) === versionId)
+    .sort(sortDocsByOrderAndTitle);
+
+  return docsForVersion
+    .filter((doc) => extractDocsPath(doc.url).split("/").filter(Boolean).length <= 1)
+    .map((doc) => {
+      const relativeSegments = extractDocsPath(doc.url).split("/").filter(Boolean);
+
+      const children =
+        relativeSegments.length === 1
+          ? docsForVersion
+              .filter((childDoc) => {
+                const childSegments = extractDocsPath(childDoc.url).split("/").filter(Boolean);
+                return childSegments.length === 2 && childSegments[0] === relativeSegments[0];
+              })
+              .sort(sortDocsByOrderAndTitle)
+              .map((childDoc) => ({
+                title: childDoc.data.title,
+                url: childDoc.url,
+              }))
+          : [];
+
+      return {
+        title: doc.data.title,
+        url: doc.url,
+        children,
+      };
+    });
+}
 
 module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({
@@ -37,16 +134,7 @@ module.exports = function(eleventyConfig) {
 
   eleventyConfig.addFilter("sortByOrderAndTitle", (values) => {
     let vals = [...values];
-    return vals.sort((a, b) => {
-      // Sort by order first
-      const aOrder = typeof a.data.order === 'number' ? a.data.order : 0;
-      const bOrder = typeof b.data.order === 'number' ? b.data.order : 0;
-      const orderDiff = aOrder - bOrder;
-      if (orderDiff !== 0) return orderDiff;
-    
-      // If order is the same, sort by title
-      return a.data.title.localeCompare(b.data.title);
-    })
+    return vals.sort(sortDocsByOrderAndTitle)
   });
 
   eleventyConfig.addFilter("sortByUrl", (values) => {
@@ -71,51 +159,39 @@ module.exports = function(eleventyConfig) {
   
     return { previous: previousItem, next: nextItem };
   });
-  
-  eleventyConfig.addCollection("menu", function(collectionApi) {
-    const docs = collectionApi.getFilteredByGlob("src/docs/**/*.md");
-    let menu = [];
 
-    docs.sort((a, b) => {
-      // Sort by order first
-      const aOrder = typeof a.data.order === 'number' ? a.data.order : 0;
-      const bOrder = typeof b.data.order === 'number' ? b.data.order : 0;
-      const orderDiff = aOrder - bOrder;
-      if (orderDiff !== 0) return orderDiff;
-    
-      // If order is the same, sort by title
-      return a.data.title.localeCompare(b.data.title);
-    })
-    .forEach(doc => {
-      const urlSegments = doc.url.split('/').filter(Boolean);
-    
-      // Add top-level items
-      if (urlSegments.length === 1 || urlSegments.length === 2) {
-        let menuItem = {
-          title: doc.data.title,
-          url: doc.url,
-          children: []
-        };
-    
-        // Add children
-        docs.forEach(subDoc => {
-          const subUrlSegments = subDoc.url.split('/').filter(Boolean);
-          if (subUrlSegments.length === 3 && subUrlSegments[1] === urlSegments[1]) {
-            menuItem.children.push({
-              title: subDoc.data.title,
-              url: subDoc.url
-            });
-          }
-        });
-    
-        menu.push(menuItem);
-      }
-    });
-
-    return menu;
+  eleventyConfig.addFilter("docsVersionFromUrl", function (url) {
+    return detectDocsVersionFromUrl(url);
   });
 
+  eleventyConfig.addFilter("docsUrlForVersion", function (url, versionId) {
+    const selectedVersion = docVersions.versions.find((version) => version.id === versionId);
+    if (!selectedVersion) return "/docs/";
+    if (selectedVersion.externalUrl) return selectedVersion.externalUrl;
 
+    const docsPath = extractDocsPath(url);
+    return buildDocsUrl(versionId, docsPath);
+  });
+
+  eleventyConfig.addFilter("docsMenuForVersion", function (docs, versionId) {
+    if (!Array.isArray(docs)) return [];
+    return buildDocsMenuForVersion(docs, versionId || docVersions.latest);
+  });
+
+  eleventyConfig.addFilter("rewriteDocsLinks", function (content, versionId) {
+    if (typeof content !== "string" || !versionId || versionId === docVersions.latest) {
+      return content;
+    }
+
+    const targetPrefix = buildDocsUrl(versionId, "/").replace(/\/$/, "");
+    return content.replace(
+      /href=(['"])\/docs(?!\/\d+\.\d+\.\d+)(\/[^'"#?]*)?([?#][^'"]*)?\1/g,
+      (match, quote, pathPart = "", queryOrHash = "") => {
+        return `href=${quote}${targetPrefix}${pathPart}${queryOrHash}${quote}`;
+      }
+    );
+  });
+  
 eleventyConfig.addPairedShortcode("hint", function (content, style = "info") {
   const styles = {
     info: {

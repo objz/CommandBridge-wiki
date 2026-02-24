@@ -1,5 +1,5 @@
-{% if collections.docs %}
-  {% set nextPrevItems = collections.menu | getNextPrevMenu(page.url) %}
+{% if docsMenu %}
+  {% set nextPrevItems = docsMenu | getNextPrevMenu(page.url) %}
   {% set previousDoc = nextPrevItems.previous %}
   {% set nextDoc = nextPrevItems.next %}
   {% if nextDoc or previousDoc %}
