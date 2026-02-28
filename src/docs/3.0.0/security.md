@@ -100,16 +100,36 @@ Use `STRICT` when you need a specific certificate (e.g. issued by a CA) or when 
 ## Connection flow
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '18px'}, 'sequence': {'noteMargin': 15, 'actorMargin': 80}} }%%
 sequenceDiagram
     participant B as Backend
     participant V as Velocity
 
-    B->>V: WebSocket connect
-    V->>B: TLS handshake (if not PLAIN)
-    B->>V: Auth (shared secret)
-    V->>B: Auth accepted
-    B->>V: Ready
-    V->>B: Register commands
+    rect rgba(59, 130, 246, 0.15)
+        Note over B,V: 1 — Connection
+        B->>V: WebSocket + TLS connect
+        Note right of V: TLS only in TOFU / STRICT mode
+    end
+
+    rect rgba(168, 85, 247, 0.15)
+        Note over B,V: 2 — Mutual Authentication
+        B->>V: AUTH_REQUEST { clientId, nonce, hmac }
+        V->>B: AUTH_OK { serverNonce, serverHmac }
+    end
+
+    rect rgba(34, 197, 94, 0.15)
+        Note over B,V: 3 — Command Registration
+        V->>B: REGISTER_COMMANDS
+        B->>V: REGISTER_COMMANDS_RESULT
+    end
+
+    rect rgba(251, 191, 36, 0.15)
+        Note over B,V: 4 — Normal Operation
+        V->>B: EXECUTE_COMMAND
+        B->>V: EXECUTE_COMMAND_RESULT
+        V->>B: PING
+        B->>V: PONG
+    end
 ```
 
 ---
