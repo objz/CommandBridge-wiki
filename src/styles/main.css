@@ -57,11 +57,50 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Docs page: app-shell layout where only the content column scrolls */
+@media (min-width: 768px) {
+  body.docs-body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  body.docs-body > header {
+    flex-shrink: 0;
+  }
+  body.docs-body > footer {
+    flex-shrink: 0;
+  }
+  .docs-main {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .docs-main .docs-shell {
+    height: 100%;
+  }
+  #docs-content {
+    scroll-behavior: smooth;
+    /* Padding so the scrollbar doesn't overlay content */
+    padding-right: 1rem;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #docs-content {
+      scroll-behavior: auto;
+    }
   }
 }
 
@@ -77,14 +116,221 @@
   @apply pl-4 pt-4;
 }
 
+/* Hide scrollbar on sidebar but keep it scrollable */
+@media (min-width: 768px) {
+  .navigation {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .navigation:hover {
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .navigation::-webkit-scrollbar {
+    width: 4px;
+  }
+  .navigation::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .navigation::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+  }
+  .navigation:hover::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
+}
+
 .toc li {
   @apply mt-2;
 }
 
 .toc a {
-  @apply text-primary underline hover:decoration-muted-foreground	 underline-offset-2;
+  @apply text-muted-foreground no-underline transition-colors duration-200;
+}
+
+.toc a:hover {
+  @apply text-foreground;
+}
+
+.toc a.toc-active {
+  @apply text-primary font-medium;
 }
 
 .toc ol ol {
   @apply pl-4;
+}
+
+/* Active TOC indicator line */
+.toc > ol {
+  @apply relative border-l border-border;
+}
+
+.toc > ol > li {
+  @apply pl-4 -ml-px;
+}
+
+.toc > ol > li > ol > li {
+  @apply pl-4;
+}
+
+.toc li.toc-active-item {
+  @apply border-l-2 border-primary -ml-px;
+}
+
+/* Nested active items inherit from parent border */
+.toc > ol > li > ol > li.toc-active-item {
+  @apply border-l-0 ml-0;
+}
+
+.toc > ol > li:has(> ol > li.toc-active-item) {
+  @apply border-l-2 border-primary;
+}
+
+/* Share highlight button animation */
+#share-highlight-btn {
+  animation: share-btn-in 150ms ease-out;
+}
+
+#share-highlight-toast .share-toast-inner {
+  animation: toast-in 200ms ease-out;
+}
+
+@keyframes share-btn-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shared text fragment highlighting */
+.shared-text-highlight {
+  background-color: rgba(250, 204, 21, 0.4);
+  border-radius: 2px;
+  padding: 1px 0;
+  transition: background-color 0.6s ease;
+}
+.dark .shared-text-highlight {
+  background-color: rgba(250, 204, 21, 0.25);
+}
+.shared-text-highlight.highlight-fade-out {
+  background-color: transparent;
+}
+
+/* Overlay highlight for code blocks (no DOM mutation) */
+.shared-text-highlight-overlay {
+  background-color: rgba(250, 204, 21, 0.35);
+  border-radius: 2px;
+  z-index: 1;
+  transition: opacity 0.6s ease;
+}
+.dark .shared-text-highlight-overlay {
+  background-color: rgba(250, 204, 21, 0.2);
+}
+.shared-text-highlight-overlay.highlight-fade-out {
+  opacity: 0;
+}
+
+/* CSS Highlight API support */
+::highlight(shared-text) {
+  background-color: rgba(250, 204, 21, 0.4);
+}
+.dark ::highlight(shared-text) {
+  background-color: rgba(250, 204, 21, 0.25);
+}
+
+/* ── Enhanced YAML / code syntax highlighting ── */
+/* Scoped to .prose to override hljs CDN theme styles */
+
+/* Keys (attributes) - softer blue */
+.prose .hljs-attr {
+  color: #5c6bc0;
+}
+.dark .prose .hljs-attr {
+  color: #8eaadc;
+}
+
+/* Booleans (true/false/null) - orange/amber */
+.prose .hljs-literal {
+  color: #d97706;
+  font-weight: 500;
+}
+.dark .prose .hljs-literal {
+  color: #f59e0b;
+}
+
+/* Numbers - teal */
+.prose .hljs-number {
+  color: #0d9488;
+}
+.dark .prose .hljs-number {
+  color: #5eead4;
+}
+
+/* Strings (quoted and unquoted values) - green */
+.prose .hljs-string {
+  color: #16a34a;
+}
+.dark .prose .hljs-string {
+  color: #86efac;
+}
+
+/* Comments */
+.prose .hljs-comment {
+  color: #94a3b8;
+  font-style: italic;
+}
+.dark .prose .hljs-comment {
+  color: #64748b;
+}
+
+/* UPPERCASE enum values (custom class added via JS post-processing) */
+.prose .hljs-enum {
+  color: #9333ea;
+  font-weight: 500;
+}
+.dark .prose .hljs-enum {
+  color: #c084fc;
+}
+
+/* Empty strings '' / "" */
+.prose .hljs-string-empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+.dark .prose .hljs-string-empty {
+  color: #64748b;
+}
+
+/* File paths (custom class added via JS post-processing) */
+.prose .hljs-path {
+  color: #0284c7;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+.dark .prose .hljs-path {
+  color: #7dd3fc;
+}
+
+/* IP addresses and hostnames in strings */
+.prose .hljs-ip {
+  color: #0891b2;
+}
+.dark .prose .hljs-ip {
+  color: #67e8f9;
 }

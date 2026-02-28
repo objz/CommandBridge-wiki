@@ -24,9 +24,11 @@ layout: layouts/base.njk
   }
 </style>
 
-<div x-data="{ wideLayout: document.documentElement.classList.contains('docs-wide') }" x-init="$watch('wideLayout', val => { try { localStorage.setItem('wideLayout', val); } catch (e) {} document.documentElement.classList.toggle('docs-wide', val); })" class="docs-shell flex max-md:flex-col mx-auto px-4 my-8 lg:px-8 lg:my-12 gap-x-8 motion-reduce:transition-none">
-  <div class="md:w-80 shrink-0 max-md:mb-4">
-    <div class="navigation md:pr-8 md:border-r" x-data="{ showNav: false }">
+<div x-data="{ wideLayout: document.documentElement.classList.contains('docs-wide') }" x-init="$watch('wideLayout', val => { try { localStorage.setItem('wideLayout', val); } catch (e) {} document.documentElement.classList.toggle('docs-wide', val); })" class="docs-shell flex max-md:flex-col mx-auto px-4 lg:px-8 gap-x-8 h-full motion-reduce:transition-none">
+
+  {# Left sidebar: fixed, no scroll on desktop, its own internal scroll #}
+  <div class="md:w-80 shrink-0 max-md:mb-4 max-md:pt-6">
+    <div class="navigation md:pr-8 md:border-r md:h-full md:overflow-y-auto md:py-8" x-data="{ showNav: false }">
       <label for="docs-version" class="mb-2 block text-xs font-semibold tracking-wide uppercase text-muted-foreground">Version</label>
       <select id="docs-version" class="mb-3 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors" onchange="window.location.href = this.value">
         {% for version in docVersions.versions %}
@@ -48,17 +50,19 @@ layout: layouts/base.njk
       </div>
     </div>
   </div>
-  
-  <div class="flex-1 min-w-0">
+
+  {# Center content: the only thing that scrolls on desktop #}
+  <div id="docs-content" class="flex-1 min-w-0 md:overflow-y-auto md:py-8">
     <div class="prose">
       <h1 class="!mb-8">{{ title }}</h1>
       {{ content | rewriteDocsLinks(currentDocVersion) | safe }}
     </div>
     {% include "partials/docs/footer.njk" %}
   </div>
-  
+
+  {# Right TOC: fixed, never scrolls #}
   <div class="w-64 shrink-0 max-lg:hidden">
-    <div class="sticky top-16 text-sm">
+    <div class="text-sm md:h-full md:overflow-y-auto md:py-8">
       <div class="flex items-center gap-4 mb-3">
         <h2 class="font-semibold tracking-tight">Content:</h2>
         <div class="flex items-center gap-1 border rounded-md px-1 py-0.5">
@@ -81,7 +85,49 @@ layout: layouts/base.njk
 <link x-bind:href="darkMode ? 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github-dark.min.css' : 'https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/github.min.css'" rel="stylesheet">
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
 <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/languages/yaml.min.js"></script>
-<script>document.addEventListener('DOMContentLoaded', function() { hljs.highlightAll(); });</script>
+<script>document.addEventListener('DOMContentLoaded', function() {
+  hljs.highlightAll();
+
+  // Post-process hljs output: add custom classes for enums, empty strings, paths, IPs
+  document.querySelectorAll('pre code').forEach(function (codeEl) {
+    // Process .hljs-string spans for enums, empty strings, paths, IPs
+    codeEl.querySelectorAll('.hljs-string').forEach(function (span) {
+      var text = span.textContent;
+      var stripped = text.replace(/^['"]|['"]$/g, '');
+
+      // Empty strings: '' or ""
+      if (stripped === '') {
+        span.classList.remove('hljs-string');
+        span.classList.add('hljs-string-empty');
+        return;
+      }
+
+      // UPPERCASE enums: 2+ uppercase letters, may contain digits and underscores (e.g. WEBSOCKET, TOFU, PKCS12, REDIS)
+      if (/^[A-Z][A-Z0-9_]{1,}$/.test(stripped)) {
+        span.classList.remove('hljs-string');
+        span.classList.add('hljs-enum');
+        return;
+      }
+
+      // File/directory paths: contains / and looks like a path
+      if (/^[\/~]/.test(stripped) || /\/[a-zA-Z0-9._-]+/.test(stripped)) {
+        // Only if it has at least one slash and some path-like structure
+        if ((stripped.match(/\//g) || []).length >= 1 && stripped.length > 2) {
+          span.classList.remove('hljs-string');
+          span.classList.add('hljs-path');
+          return;
+        }
+      }
+
+      // IP addresses: digits and dots forming an IP pattern
+      if (/^\d{1,3}(\.\d{1,3}){2,3}$/.test(stripped)) {
+        span.classList.remove('hljs-string');
+        span.classList.add('hljs-ip');
+        return;
+      }
+    });
+  });
+});</script>
 
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -113,5 +159,583 @@ document.addEventListener('DOMContentLoaded', function () {
     pre.classList.add('group');
     pre.appendChild(btn);
   });
+});
+</script>
+
+<!-- Text highlight sharing -->
+<div id="share-highlight-btn" class="fixed z-50 hidden">
+  <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md shadow-lg border border-border bg-background text-foreground hover:bg-accent transition-colors">
+    {% lucide "share-2", { "class" : "h-3 w-3" } %}
+    <span>Share</span>
+  </button>
+</div>
+<div id="share-highlight-toast" class="fixed top-4 left-1/2 z-[60] hidden" style="transform: translateX(-50%);">
+  <div class="share-toast-inner flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md shadow-lg border border-border bg-background text-foreground">
+    {% lucide "check", { "class" : "h-3.5 w-3.5 text-green-500" } %}
+    <span>Link copied!</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  const shareBtn = document.getElementById('share-highlight-btn');
+  const shareToast = document.getElementById('share-highlight-toast');
+  const proseEl = document.querySelector('.prose');
+  if (!shareBtn || !proseEl) return;
+
+  let hideTimeout = null;
+  let lastSelectedText = null;
+  let lastSelectionOffset = -1; // Character offset within .prose text content
+
+  function getCleanSelectedText(selection) {
+    const text = selection.toString().trim();
+    if (!text || text.length < 3 || text.length > 300) return null;
+    if (!selection.rangeCount) return null;
+    const range = selection.getRangeAt(0);
+    if (!proseEl.contains(range.commonAncestorContainer)) return null;
+    return text;
+  }
+
+  // Compute the character offset of the selection start within .prose text content
+  function getSelectionOffsetInProse(selection) {
+    if (!selection.rangeCount) return -1;
+    var range = selection.getRangeAt(0);
+    // Create a range from start of prose to selection start
+    var preRange = document.createRange();
+    preRange.setStart(proseEl, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    return preRange.toString().length;
+  }
+
+  function encodeTextFragment(text) {
+    const words = text.split(/\s+/);
+    if (words.length <= 6) {
+      return encodeURIComponent(text);
+    }
+    const start = words.slice(0, 3).join(' ');
+    const end = words.slice(-3).join(' ');
+    return encodeURIComponent(start) + ',' + encodeURIComponent(end);
+  }
+
+  function buildShareUrl(text, offset) {
+    const url = new URL(window.location.href);
+    // Strip any existing highlight params
+    url.searchParams.delete('hl');
+    url.searchParams.delete('hlp');
+    url.hash = '';
+
+    // Add highlight info as query params (browsers never strip these)
+    url.searchParams.set('hl', text);
+    if (offset >= 0) {
+      url.searchParams.set('hlp', offset.toString());
+    }
+
+    // Also add :~:text= fragment for browsers with native Text Fragment support
+    var currentHash = window.location.hash.split(':~:')[0];
+    var textFrag = currentHash + ':~:text=' + encodeTextFragment(text);
+
+    return url.origin + url.pathname + '?' + url.searchParams.toString() + textFrag;
+  }
+
+  function positionButton(selection) {
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const btnRect = shareBtn.getBoundingClientRect();
+    let left = rect.left + (rect.width / 2) - (btnRect.width / 2);
+    let top = rect.top - btnRect.height - 8;
+
+    left = Math.max(8, Math.min(left, window.innerWidth - btnRect.width - 8));
+    if (top < 8) top = rect.bottom + 8;
+
+    shareBtn.style.left = left + 'px';
+    shareBtn.style.top = top + 'px';
+  }
+
+  function showButton() {
+    clearTimeout(hideTimeout);
+    const selection = window.getSelection();
+    const text = getCleanSelectedText(selection);
+    if (!text) {
+      hideButton();
+      return;
+    }
+    lastSelectedText = text;
+    lastSelectionOffset = getSelectionOffsetInProse(selection);
+    shareBtn.classList.remove('hidden');
+    requestAnimationFrame(function () {
+      positionButton(selection);
+    });
+  }
+
+  function hideButton() {
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(function () {
+      shareBtn.classList.add('hidden');
+      lastSelectedText = null;
+      lastSelectionOffset = -1;
+    }, 200);
+  }
+
+  function showToast() {
+    shareToast.classList.remove('hidden');
+    var inner = shareToast.querySelector('.share-toast-inner');
+    if (inner) {
+      inner.style.animation = 'none';
+      inner.offsetHeight;
+      inner.style.animation = '';
+    }
+    setTimeout(function () {
+      shareToast.classList.add('hidden');
+    }, 2000);
+  }
+
+  let selectionTimeout = null;
+  document.addEventListener('selectionchange', function () {
+    clearTimeout(selectionTimeout);
+    selectionTimeout = setTimeout(function () {
+      const selection = window.getSelection();
+      const text = getCleanSelectedText(selection);
+      if (text) {
+        showButton();
+      } else {
+        hideButton();
+      }
+    }, 300);
+  });
+
+  shareBtn.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  shareBtn.querySelector('button').addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const selection = window.getSelection();
+    var text = getCleanSelectedText(selection) || lastSelectedText;
+    if (!text) return;
+
+    // Use current selection offset, or fall back to stored one
+    var offset = getCleanSelectedText(selection) ? getSelectionOffsetInProse(selection) : lastSelectionOffset;
+
+    const url = buildShareUrl(text, offset);
+
+    navigator.clipboard.writeText(url).then(function () {
+      showToast();
+      shareBtn.classList.add('hidden');
+      clearTimeout(hideTimeout);
+      var hashPart = url.substring(url.indexOf('#'));
+      history.replaceState(null, '', window.location.pathname + window.location.search + hashPart);
+    }).catch(function () {
+      var input = document.createElement('textarea');
+      input.value = url;
+      input.style.position = 'fixed';
+      input.style.opacity = '0';
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      showToast();
+      shareBtn.classList.add('hidden');
+      clearTimeout(hideTimeout);
+    });
+  });
+
+  document.addEventListener('mousedown', function (e) {
+    if (shareBtn.contains(e.target)) return;
+    setTimeout(function () {
+      const selection = window.getSelection();
+      const text = getCleanSelectedText(selection);
+      if (!text) hideButton();
+    }, 50);
+  });
+})();
+</script>
+
+<!-- Scroll spy: active TOC highlighting + URL hash sync -->
+<script>
+(function () {
+  var tocNav = document.querySelector('.toc');
+  var proseEl = document.querySelector('.prose');
+  var scrollContainer = document.getElementById('docs-content');
+  if (!tocNav || !proseEl || !scrollContainer) return;
+
+  // Collect all headings in prose that have an id (these are the ones in the TOC)
+  var headings = Array.from(proseEl.querySelectorAll('h2[id], h3[id]'));
+  if (!headings.length) return;
+
+  // Build a map from heading id -> TOC link element
+  // Note: heading IDs may contain literal percent-encoded chars (e.g. %3A)
+  // so we use the raw href slug which matches the DOM id exactly.
+  var tocLinks = {};
+  tocNav.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    var id = a.getAttribute('href').slice(1);
+    tocLinks[id] = a;
+  });
+
+  var activeId = null;
+  var isClickScrolling = false;
+  var clickScrollTimer = null;
+
+  // Handle TOC link clicks: scroll within the content container
+  tocNav.addEventListener('click', function (e) {
+    var link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    e.preventDefault();
+    var targetId = link.getAttribute('href').slice(1);
+    var targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+
+    isClickScrolling = true;
+    clearTimeout(clickScrollTimer);
+
+    // Scroll within the content container
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Update URL hash
+    history.pushState(null, '', link.getAttribute('href'));
+
+    clickScrollTimer = setTimeout(function () {
+      isClickScrolling = false;
+    }, 1000);
+  });
+
+  // Handle heading anchor clicks too (headerLink permalinks)
+  proseEl.addEventListener('click', function (e) {
+    var link = e.target.closest('a.header-anchor');
+    if (!link) return;
+    e.preventDefault();
+    var targetId = link.getAttribute('href').slice(1);
+    var targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+
+    isClickScrolling = true;
+    clearTimeout(clickScrollTimer);
+
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.pushState(null, '', link.getAttribute('href'));
+
+    clickScrollTimer = setTimeout(function () {
+      isClickScrolling = false;
+    }, 1000);
+  });
+
+  function setActive(id) {
+    if (id === activeId) return;
+    // Remove previous active state
+    if (activeId && tocLinks[activeId]) {
+      tocLinks[activeId].classList.remove('toc-active');
+      var parentLi = tocLinks[activeId].closest('li');
+      if (parentLi) parentLi.classList.remove('toc-active-item');
+    }
+    // Set new active state
+    activeId = id;
+    if (id && tocLinks[id]) {
+      tocLinks[id].classList.add('toc-active');
+      var parentLi = tocLinks[id].closest('li');
+      if (parentLi) parentLi.classList.add('toc-active-item');
+    }
+  }
+
+  // Debounced hash update
+  var hashTimer = null;
+  function updateHash(id) {
+    if (isClickScrolling) return;
+    clearTimeout(hashTimer);
+    hashTimer = setTimeout(function () {
+      if (!id) {
+        if (window.location.hash) {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        return;
+      }
+      var newHash = '#' + id;
+      if (window.location.hash !== newHash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search + newHash);
+      }
+    }, 150);
+  }
+
+  // Use IntersectionObserver with the scroll container as root
+  var visibleHeadings = new Map();
+  var containerRect = scrollContainer.getBoundingClientRect();
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        visibleHeadings.set(entry.target, entry);
+      } else {
+        visibleHeadings.delete(entry.target);
+      }
+    });
+
+    // Among all currently visible headings, pick the one closest to the top of the container
+    if (visibleHeadings.size > 0) {
+      var closest = null;
+      var closestTop = Infinity;
+      visibleHeadings.forEach(function (entry, heading) {
+        var top = heading.getBoundingClientRect().top;
+        if (top < closestTop) {
+          closestTop = top;
+          closest = heading;
+        }
+      });
+      if (closest) {
+        setActive(closest.id);
+        updateHash(closest.id);
+      }
+    } else {
+      // No heading in the observed zone -- find the last one scrolled past
+      var cTop = scrollContainer.getBoundingClientRect().top;
+      var lastAbove = null;
+      for (var i = 0; i < headings.length; i++) {
+        if (headings[i].getBoundingClientRect().top < cTop + 40) {
+          lastAbove = headings[i];
+        }
+      }
+      if (lastAbove) {
+        setActive(lastAbove.id);
+        updateHash(lastAbove.id);
+      } else {
+        setActive(null);
+        updateHash(null);
+      }
+    }
+  }, {
+    root: scrollContainer,
+    rootMargin: '0px 0px -65% 0px',
+    threshold: 0
+  });
+
+  headings.forEach(function (h) { observer.observe(h); });
+
+  // Detect scroll-to-bottom: when the user scrolls to the very end,
+  // force-activate the last heading (IntersectionObserver may miss it
+  // because of the -65% rootMargin).
+  scrollContainer.addEventListener('scroll', function () {
+    var atBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 2;
+    if (atBottom && headings.length > 0) {
+      var lastHeading = headings[headings.length - 1];
+      setActive(lastHeading.id);
+      updateHash(lastHeading.id);
+    }
+  });
+
+  // Handle initial hash on page load: scroll to the target
+  if (window.location.hash) {
+    var initialId = window.location.hash.split(':~:')[0].slice(1);
+    if (initialId) {
+      setActive(initialId);
+      var targetEl = document.getElementById(initialId);
+      if (!targetEl) {
+        // Try decoded version as fallback
+        targetEl = document.getElementById(decodeURIComponent(initialId));
+      }
+      if (targetEl) {
+        // Delay to let layout settle
+        setTimeout(function () {
+          targetEl.scrollIntoView({ block: 'start' });
+        }, 100);
+      }
+    }
+  }
+})();
+</script>
+
+<!-- Text Fragment visual highlight: reads ?hl= and ?hlp= query params -->
+<!-- Must run AFTER highlight.js to avoid DOM conflicts with code blocks -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Small delay so hljs.highlightAll() finishes first
+  setTimeout(function () {
+    var params = new URLSearchParams(window.location.search);
+    var highlightText = params.get('hl');
+    if (!highlightText) return;
+
+    var posOffset = params.has('hlp') ? parseInt(params.get('hlp'), 10) : -1;
+
+    var proseEl = document.querySelector('.prose');
+    var scrollContainer = document.getElementById('docs-content');
+    if (!proseEl) return;
+
+    var searchText = highlightText;
+
+    // Collect text nodes only within .prose
+    function getTextNodesIn(el) {
+      var nodes = [];
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+      var node;
+      while ((node = walker.nextNode())) {
+        nodes.push(node);
+      }
+      return nodes;
+    }
+
+    var textNodes = getTextNodesIn(proseEl);
+    var fullText = textNodes.map(function (n) { return n.textContent; }).join('');
+
+    var matchStart = -1;
+    var matchEnd = -1;
+
+    // Strategy 1: Use pos offset to find exact location
+    if (posOffset >= 0) {
+      var searchWindow = 80;
+      var searchFrom = Math.max(0, posOffset - searchWindow);
+      var searchTo = Math.min(fullText.length, posOffset + searchWindow + searchText.length);
+      var region = fullText.substring(searchFrom, searchTo);
+
+      var idx = region.indexOf(searchText);
+      if (idx !== -1) {
+        matchStart = searchFrom + idx;
+        matchEnd = matchStart + searchText.length;
+      }
+    }
+
+    // Strategy 2: Find all occurrences, pick the one closest to posOffset
+    if (matchStart === -1) {
+      var allOccurrences = [];
+      var si = 0;
+      while (true) {
+        var found = fullText.indexOf(searchText, si);
+        if (found === -1) break;
+        allOccurrences.push(found);
+        si = found + 1;
+      }
+      if (allOccurrences.length === 1) {
+        matchStart = allOccurrences[0];
+        matchEnd = matchStart + searchText.length;
+      } else if (allOccurrences.length > 1 && posOffset >= 0) {
+        var best = allOccurrences[0];
+        var bestDist = Math.abs(best - posOffset);
+        for (var k = 1; k < allOccurrences.length; k++) {
+          var d = Math.abs(allOccurrences[k] - posOffset);
+          if (d < bestDist) {
+            best = allOccurrences[k];
+            bestDist = d;
+          }
+        }
+        matchStart = best;
+        matchEnd = matchStart + searchText.length;
+      } else if (allOccurrences.length > 0) {
+        matchStart = allOccurrences[0];
+        matchEnd = matchStart + searchText.length;
+      }
+    }
+
+    if (matchStart === -1 || matchEnd === -1) return;
+
+    // Map character offsets back to DOM text nodes
+    function findNodeAndOffset(textNodes, charOffset) {
+      var pos = 0;
+      for (var i = 0; i < textNodes.length; i++) {
+        var len = textNodes[i].textContent.length;
+        if (pos + len > charOffset) {
+          return { node: textNodes[i], offset: charOffset - pos };
+        }
+        pos += len;
+      }
+      var last = textNodes[textNodes.length - 1];
+      return { node: last, offset: last.textContent.length };
+    }
+
+    var startInfo = findNodeAndOffset(textNodes, matchStart);
+    var endInfo = findNodeAndOffset(textNodes, matchEnd);
+
+    // Check if the matched text is inside a <pre> code block
+    function isInsidePre(node) {
+      var el = node.nodeType === 3 ? node.parentElement : node;
+      return el && el.closest('pre') !== null;
+    }
+
+    var insideCode = isInsidePre(startInfo.node);
+
+    try {
+      var range = document.createRange();
+      range.setStart(startInfo.node, startInfo.offset);
+      range.setEnd(endInfo.node, endInfo.offset);
+
+      if (insideCode) {
+        // For code blocks: use an absolutely positioned overlay so we don't
+        // mutate the DOM (which would break hljs classes).
+        var pre = startInfo.node.parentElement.closest('pre');
+        if (pre) {
+          var rects = range.getClientRects();
+          var preRect = pre.getBoundingClientRect();
+
+          // Ensure pre is positioned
+          var prePos = window.getComputedStyle(pre).position;
+          if (prePos === 'static') pre.style.position = 'relative';
+
+          for (var r = 0; r < rects.length; r++) {
+            var rect = rects[r];
+            var overlay = document.createElement('div');
+            overlay.className = 'shared-text-highlight-overlay';
+            overlay.style.position = 'absolute';
+            overlay.style.left = (rect.left - preRect.left) + 'px';
+            overlay.style.top = (rect.top - preRect.top) + 'px';
+            overlay.style.width = rect.width + 'px';
+            overlay.style.height = rect.height + 'px';
+            overlay.style.pointerEvents = 'none';
+            pre.appendChild(overlay);
+          }
+        }
+      } else if (window.CSS && CSS.highlights) {
+        // Use CSS Highlight API if available (no DOM mutation)
+        var highlight = new Highlight(range);
+        CSS.highlights.set('shared-text', highlight);
+      } else {
+        // Fallback: wrap in <mark> (safe outside code blocks)
+        var fragment = range.extractContents();
+        var mark = document.createElement('mark');
+        mark.className = 'shared-text-highlight';
+        mark.appendChild(fragment);
+        range.insertNode(mark);
+      }
+
+      // Scroll to the highlighted text
+      setTimeout(function () {
+        var el = document.querySelector('.shared-text-highlight, .shared-text-highlight-overlay');
+        if (!el) el = startInfo.node.parentElement;
+        if (el && scrollContainer) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
+      // Clean up the URL: remove hl/hlp params without reloading
+      var cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('hl');
+      cleanUrl.searchParams.delete('hlp');
+      var cleanHref = cleanUrl.pathname + (cleanUrl.searchParams.toString() ? '?' + cleanUrl.searchParams.toString() : '') + cleanUrl.hash;
+      history.replaceState(null, '', cleanHref);
+
+      // Fade out and remove highlight after 4 seconds
+      setTimeout(function () {
+        // Remove overlays (code block highlights)
+        document.querySelectorAll('.shared-text-highlight-overlay').forEach(function (el) {
+          el.classList.add('highlight-fade-out');
+          setTimeout(function () { el.remove(); }, 600);
+        });
+        // Remove CSS Highlight API highlights
+        if (window.CSS && CSS.highlights) {
+          CSS.highlights.delete('shared-text');
+        }
+        // Remove <mark> highlights (non-code)
+        document.querySelectorAll('.shared-text-highlight').forEach(function (mark) {
+          mark.classList.add('highlight-fade-out');
+          setTimeout(function () {
+            var parent = mark.parentNode;
+            while (mark.firstChild) {
+              parent.insertBefore(mark.firstChild, mark);
+            }
+            parent.removeChild(mark);
+            parent.normalize();
+          }, 600);
+        });
+      }, 4000);
+    } catch (e) {
+      // Silently fail if text fragment can't be highlighted
+    }
+  }, 150); // delay to run after hljs
 });
 </script>

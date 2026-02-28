@@ -38,6 +38,9 @@
       transition: background-color 360ms ease, color 300ms ease, border-color 360ms ease, box-shadow 360ms ease, fill 300ms ease, stroke 300ms ease !important;
     }
     html.docs-wide .docs-shell { max-width: calc(100vw - 2rem) !important; }
+    @media (min-width: 768px) {
+      body.docs-body { height: 100vh; overflow: hidden; }
+    }
     @media (min-width: 1024px) {
       html.docs-wide .docs-shell { max-width: calc(100vw - 4rem) !important; }
     }
@@ -61,10 +64,10 @@
   <script src="/js/alpine.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-background antialiased font-inter flex flex-col min-h-screen">
+<body class="bg-background antialiased font-inter flex flex-col min-h-screen {{ 'docs-body' if '/docs' in page.url }}">
   {% include "partials/header.njk" %}
 
-  <main class="flex-1">
+  <main class="flex-1 {{ 'docs-main' if '/docs' in page.url }}">
     {{ content | safe }}
   </main>
 

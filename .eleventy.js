@@ -111,7 +111,6 @@ module.exports = function(eleventyConfig) {
      "src/media": "/media",
      "src/assets": "/",
      "node_modules/alpinejs/dist/cdn.min.js": "js/alpine.js",
-     "node_modules/htmx.org/dist/htmx.min.js": "js/htmx.js",
      "src/lib": "/lib",
   });
 
@@ -120,7 +119,12 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPlugin(lucideIcons);
 
   eleventyConfig.setLibrary("md", markdownIt({ html: true })
-    .use(markdownItAnchor, { tabIndex: false })
+    .use(markdownItAnchor, {
+      tabIndex: false,
+      permalink: markdownItAnchor.permalink.headerLink({
+        safariReaderFix: true,
+      }),
+    })
     .use(markdownItTaskLists)
   );
 
@@ -179,7 +183,7 @@ module.exports = function(eleventyConfig) {
   });
 
   eleventyConfig.addFilter("rewriteDocsLinks", function (content, versionId) {
-    if (typeof content !== "string" || !versionId || versionId === docVersions.latest) {
+    if (typeof content !== "string" || !versionId) {
       return content;
     }
 

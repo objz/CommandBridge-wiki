@@ -11,6 +11,25 @@
   @apply font-semibold tracking-tight scroll-m-16;
 }
 
+/* Heading anchor links (from markdown-it-anchor headerLink) */
+.prose h1 > a.header-anchor,
+.prose h2 > a.header-anchor,
+.prose h3 > a.header-anchor,
+.prose h4 > a.header-anchor,
+.prose h5 > a.header-anchor,
+.prose h6 > a.header-anchor {
+  @apply no-underline text-inherit;
+}
+
+.prose h1 > a.header-anchor:hover,
+.prose h2 > a.header-anchor:hover,
+.prose h3 > a.header-anchor:hover,
+.prose h4 > a.header-anchor:hover,
+.prose h5 > a.header-anchor:hover,
+.prose h6 > a.header-anchor:hover {
+  @apply text-inherit;
+}
+
 .prose h1,
 .prose h2,
 .prose h3 {
@@ -104,19 +123,32 @@
 }
 
 .prose table {
-  @apply table text-sm my-6 w-full;
+  @apply my-6 w-full text-sm border-separate border-spacing-0 rounded-lg border border-border/70;
 }
 
-.prose table tr {
-  @apply border-b;
+.prose table thead tr {
+  @apply bg-muted/30;
 }
 
 .prose table th {
-  @apply text-muted-foreground text-xs font-medium text-left align-middle px-3 first:pl-0 last:pr-0 h-12;
+  @apply text-muted-foreground text-xs font-medium text-left align-middle px-4 py-3 border-b border-border/60;
 }
 
 .prose table td {
-  @apply align-middle px-3 py-3 first:pl-0 last:pr-0;
+  @apply align-middle px-4 py-3 border-b border-border/45;
+}
+
+.prose table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.prose table th + th,
+.prose table td + td {
+  @apply border-l border-border/40;
+}
+
+.prose table tbody tr:hover td {
+  @apply bg-muted/20;
 }
 
 .prose table td strong code {

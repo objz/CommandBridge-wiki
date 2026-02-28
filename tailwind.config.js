@@ -17,7 +17,9 @@ safelist: [
   // Success
   "bg-green-200", "dark:bg-green-500/30", "text-green-900", "dark:text-green-200",
   // Typography
-  "prose", "prose-sm", "dark:prose-invert"
+  "prose", "prose-sm", "dark:prose-invert",
+  // Share highlight
+  "text-green-500"
 ],
 
   theme: {

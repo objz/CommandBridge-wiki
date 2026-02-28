@@ -6,7 +6,7 @@
   <a class="ml-auto text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary font-medium' if page.url == '/' }}" href="/">
     About
   </a>
-  <a class="text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary' if '/docs' in page.url }}" href="/docs">
+  <a class="text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary' if '/docs' in page.url }}" href="/docs/{{ docVersions.latest }}/">
     Docs
   </a>
 

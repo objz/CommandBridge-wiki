@@ -4,7 +4,7 @@ module.exports = {
     {
       id: "3.1.0",
       label: "3.1.0",
-      pathPrefix: "/docs",
+      pathPrefix: "/docs/3.1.0",
     },
     {
       id: "3.0.0",
