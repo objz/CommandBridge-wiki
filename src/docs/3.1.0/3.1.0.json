@@ -1,6 +1,0 @@
-{
-  "layout": "layouts/docs.njk",
-  "type": "article",
-  "tags": [ "docs" ],
-  "docVersion": "3.1.0"
-}
