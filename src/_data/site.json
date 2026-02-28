@@ -1,6 +1,6 @@
 {
   "title": "CommandBridge",
-  "description": "A Minecraft plugin that bridges commands between Velocity and backend servers over WebSocket using YAML scripts.",
+  "description": "Bridge commands between Velocity and all kinds of servers using scripts. This helps to execute commands global across all your network",
   "url": "https://cb.objz.dev",
   "cover": "/assets/cover.png"
 }
