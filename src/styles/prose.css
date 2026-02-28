@@ -163,3 +163,129 @@ html.dark .prose table td strong code {
 .prose .hint-box {
   @apply my-6;
 }
+
+/* ── Config entry cards ── */
+.cfg-entry {
+  @apply my-4 rounded-lg border border-border/70 overflow-hidden;
+}
+
+.cfg-entry-header {
+  @apply flex flex-wrap items-center gap-3 px-4 py-3 bg-muted/30 border-b border-border/50;
+}
+
+.cfg-entry-name {
+  @apply text-sm font-semibold bg-transparent p-0 rounded-none;
+  color: hsl(var(--foreground));
+}
+
+.cfg-entry-meta {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.cfg-entry-badge {
+  @apply inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full;
+}
+
+.cfg-entry-badge code {
+  @apply text-[11px] bg-transparent p-0 rounded-none font-semibold;
+}
+
+/* ── Per-type badge colors ── */
+
+/* string - blue */
+.cfg-type-string {
+  @apply bg-blue-100 text-blue-700;
+}
+.dark .cfg-type-string {
+  @apply bg-blue-500/20 text-blue-300;
+}
+
+/* boolean - amber */
+.cfg-type-boolean {
+  @apply bg-amber-100 text-amber-700;
+}
+.dark .cfg-type-boolean {
+  @apply bg-amber-500/20 text-amber-300;
+}
+
+/* integer - teal */
+.cfg-type-integer {
+  @apply bg-teal-100 text-teal-700;
+}
+.dark .cfg-type-integer {
+  @apply bg-teal-500/20 text-teal-300;
+}
+
+/* enum - purple */
+.cfg-type-enum {
+  @apply bg-purple-100 text-purple-700;
+}
+.dark .cfg-type-enum {
+  @apply bg-purple-500/20 text-purple-300;
+}
+
+/* duration - rose */
+.cfg-type-duration {
+  @apply bg-rose-100 text-rose-700;
+}
+.dark .cfg-type-duration {
+  @apply bg-rose-500/20 text-rose-300;
+}
+
+/* list - indigo */
+.cfg-type-list {
+  @apply bg-indigo-100 text-indigo-700;
+}
+.dark .cfg-type-list {
+  @apply bg-indigo-500/20 text-indigo-300;
+}
+
+/* object - slate */
+.cfg-type-object {
+  @apply bg-slate-200 text-slate-700;
+}
+.dark .cfg-type-object {
+  @apply bg-slate-500/20 text-slate-300;
+}
+
+/* fallback */
+.cfg-type-default {
+  @apply bg-gray-100 text-gray-600;
+}
+.dark .cfg-type-default {
+  @apply bg-gray-500/20 text-gray-400;
+}
+
+/* ── Values badge (allowed choices) ── */
+.cfg-entry-badge-values {
+  @apply bg-muted/60 text-foreground gap-1;
+}
+
+.cfg-entry-badge-values code {
+  @apply text-[11px] bg-muted rounded-sm py-0 px-1 font-mono font-semibold;
+  color: hsl(var(--foreground));
+}
+
+.cfg-values-sep {
+  @apply text-muted-foreground/50 mx-0.5 font-normal;
+}
+
+.cfg-entry-body {
+  @apply px-4 py-3 text-sm text-muted-foreground;
+}
+
+.cfg-entry-body p {
+  @apply my-0;
+}
+
+.cfg-entry-body p + p {
+  @apply mt-2;
+}
+
+.cfg-entry-body a {
+  @apply text-primary underline underline-offset-2;
+}
+
+.cfg-entry-body code {
+  @apply text-[85%] bg-muted rounded-sm py-0.5 px-1;
+}

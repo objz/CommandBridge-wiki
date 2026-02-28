@@ -250,6 +250,59 @@ return `
 });
 
 
+  // Config entry shortcode: {% configentry "key-name", "type", "val1 | val2" %}description{% endconfigentry %}
+  // Type and values are optional. Pass "" to skip.
+  // The values parameter shows allowed choices (e.g. "PLAIN | TOFU | STRICT").
+  eleventyConfig.addPairedShortcode("configentry", function (content, name, type, values) {
+    const rendered = md.render(content.trim());
+
+    // Map type names to CSS modifier classes
+    const typeColorMap = {
+      "string": "cfg-type-string",
+      "boolean": "cfg-type-boolean",
+      "integer": "cfg-type-integer",
+      "integer (seconds)": "cfg-type-integer",
+      "enum": "cfg-type-enum",
+      "duration": "cfg-type-duration",
+      "list": "cfg-type-list",
+      "object": "cfg-type-object",
+    };
+
+    // Build metadata badges
+    let badges = [];
+    if (type) {
+      const colorClass = typeColorMap[type.toLowerCase()] || "cfg-type-default";
+      badges.push(`<span class="cfg-entry-badge ${colorClass}">${type}</span>`);
+    }
+    if (values) {
+      const items = values.split("|").map(v => `<code>${v.trim()}</code>`).join('<span class="cfg-values-sep">|</span>');
+      badges.push(`<span class="cfg-entry-badge cfg-entry-badge-values">${items}</span>`);
+    }
+
+    const badgeHtml = badges.length
+      ? `<div class="cfg-entry-meta">${badges.join("")}</div>`
+      : "";
+
+    return `
+<div class="cfg-entry" id="${name}">
+  <div class="cfg-entry-header">
+    <code class="cfg-entry-name">${name}</code>
+    ${badgeHtml}
+  </div>
+  <div class="cfg-entry-body">${rendered}</div>
+</div>`;
+  });
+
+  // HTML shortcode: {% html "tailwind-classes" %}raw html{% endhtml %}
+  // Renders content as raw HTML inside a div. Content is NOT processed by markdown.
+  // Blank lines are collapsed to prevent markdown-it from breaking out of the HTML block
+  // (div is a type 6 HTML block in CommonMark, which ends at any blank line).
+  eleventyConfig.addPairedShortcode("html", function (content, classes = "") {
+    const classAttr = classes ? ` class="${classes}"` : "";
+    const cleaned = content.trim().replace(/\n\s*\n/g, '\n');
+    return `<div${classAttr}>\n${cleaned}\n</div>`;
+  });
+
   // Tabs shortcode: {% tabs %}{% tab "Label" %}content{% endtab %}{% endtabs %}
   eleventyConfig.addPairedShortcode("tabs", function (content) {
     // Extract tab blocks from the rendered content
