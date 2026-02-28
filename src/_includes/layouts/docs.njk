@@ -144,10 +144,11 @@ layout: layouts/base.njk
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('pre').forEach(function (pre) {
+  document.querySelectorAll('pre:not(.mermaid)').forEach(function (pre) {
+    if (pre.querySelector('code.language-mermaid')) return;
     const btn = document.createElement('button');
     btn.textContent = 'Copy';
-    btn.className = 'copy-btn absolute top-2 right-2 px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity';
+    btn.className = 'copy-btn absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-accent opacity-0 group-hover:opacity-100 transition-all';
     btn.addEventListener('click', function () {
       const code = pre.querySelector('code');
       navigator.clipboard.writeText(code ? code.textContent : pre.textContent).then(function () {
