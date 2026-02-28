@@ -173,8 +173,7 @@ module.exports = function(eleventyConfig) {
     if (!selectedVersion) return "/docs/";
     if (selectedVersion.externalUrl) return selectedVersion.externalUrl;
 
-    const docsPath = extractDocsPath(url);
-    return buildDocsUrl(versionId, docsPath);
+    return buildDocsUrl(versionId, "/");
   });
 
   eleventyConfig.addFilter("docsMenuForVersion", function (docs, versionId) {
