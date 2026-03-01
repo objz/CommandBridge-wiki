@@ -1,6 +1,7 @@
 ---
 title: Argument Types
 order: 2
+description: "All supported argument types for CommandBridge scripts. Includes universal types like STRING and INTEGER, plus Minecraft-specific types for players, entities, and more."
 ---
 
 CommandBridge supports many argument types. Each type controls how the input is parsed, what tab completion the player sees, and where the argument can be used. Not all types work everywhere, so pay attention to the platform column.

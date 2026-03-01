@@ -1,6 +1,7 @@
 ---
 title: Syntax
 order: 1
+description: "Complete YAML script syntax reference for CommandBridge. Covers command name, arguments, permissions, execution targets, cooldowns, delays, and more."
 ---
 
 ### Default example

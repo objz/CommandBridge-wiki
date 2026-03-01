@@ -1,6 +1,7 @@
 ---
 title: Multi Proxy
 order: 4
+description: "Run CommandBridge across multiple Velocity proxies. Configure client-mode proxies that connect to a primary Velocity instance for command forwarding."
 ---
 
 CB supports setups with more than one Velocity proxy. I already talked about this in the [Configuration](/docs/configuration/) overview, but here is the full picture.

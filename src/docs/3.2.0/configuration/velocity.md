@@ -1,6 +1,7 @@
 ---
 title: Velocity
 order: 1
+description: "Full configuration reference for CommandBridge on the Velocity proxy, including WebSocket, Redis, TLS security, timeouts, and server ID settings."
 ---
 
 This config can be found at `plugins/commandbridge/config.yml`.

@@ -1,6 +1,7 @@
 ---
 title: Security
 order: 3
+description: "CommandBridge security layers explained. Shared secret HMAC-SHA256 authentication and TLS encryption for WebSocket and Redis connections."
 ---
 
 CommandBridge secures the communication between your proxy and backends with two independent layers: a **shared secret** for authentication and **TLS** for encryption. Both work in WebSocket and Redis mode.

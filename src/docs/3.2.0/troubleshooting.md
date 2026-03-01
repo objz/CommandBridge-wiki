@@ -1,6 +1,7 @@
 ---
 title: Troubleshooting
 order: 8
+description: "Common CommandBridge errors and how to fix them. Covers connection failures, authentication issues, script errors, and WebSocket/Redis problems."
 ---
 
 This page lists real error messages you may encounter and how to fix them.

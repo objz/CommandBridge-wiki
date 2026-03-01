@@ -1,6 +1,7 @@
 ---
 title: Scripting
 order: 5
+description: "Learn how CommandBridge scripts work. Define commands in YAML on the Velocity proxy and dispatch them across all connected backend servers."
 ---
 
 Scripts are the core of CommandBridge. They are YAML files that define custom commands: what they are called, what arguments they take, who can use them, and what happens when someone runs them. You write them once, drop them on the Velocity proxy, and CB handles the rest.

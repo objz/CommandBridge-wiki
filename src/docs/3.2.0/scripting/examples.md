@@ -1,6 +1,7 @@
 ---
 title: Examples
 order: 4
+description: "Real-world CommandBridge script examples. Alert broadcasts, economy commands, lobby systems, and more to help you get started quickly."
 ---
 
 Real-world script examples to get you started. Each one demonstrates a different use case. You can copy them, change the `id` values to match your setup, and they should work.

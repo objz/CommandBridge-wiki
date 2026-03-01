@@ -1,6 +1,7 @@
 ---
 title: Requirements
 order: 2
+description: "Supported platforms, Java version, Minecraft versions, and required dependencies for running CommandBridge on Velocity, Paper, Folia, Spigot, and Purpur."
 ---
 
 CommandBridge has some requirements that need to be installed alongside it. Also, the supported platforms are listed here.

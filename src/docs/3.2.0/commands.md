@@ -1,6 +1,7 @@
 ---
 title: Commands
 order: 6
+description: "Reference for all CommandBridge admin commands including reload, info, debug, ping, script listing, and backend management."
 ---
 
 CommandBridge has admin commands for managing the plugin itself. These are not the custom commands you define in your scripts, those are covered in [Scripting](/docs/scripting/). The commands here are for checking connections, reloading configs, debugging issues, and things like that.

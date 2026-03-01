@@ -1,6 +1,7 @@
 ---
 title: Getting Started
 order: 3
+description: "Step-by-step guide to installing CommandBridge, configuring WebSocket or Redis connections, and writing your first cross-server command script."
 ---
 
 ### Step 1: Install the plugin

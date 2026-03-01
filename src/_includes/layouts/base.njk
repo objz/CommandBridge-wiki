@@ -13,7 +13,7 @@
   <meta name="description" content="{{ description or site.description }}"/>
   <meta name="keywords" content="{{ keywords or site.keywords }}"/>
   <meta name="author" content="{{ site.author }}"/>
-  <meta name="robots" content="index, follow"/>
+  <meta name="robots" content="{{ robots or 'index, follow' }}"/>
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)"/>
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
   <link rel="canonical" href="{{ site.url + page.url }}"/>
@@ -130,6 +130,9 @@
   }
   </script>
   <script src="/js/alpine.js" defer></script>
+  {% include "partials/analytics.njk" %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-background antialiased font-inter flex flex-col min-h-screen {{ 'docs-body' if '/docs' in page.url }}">

@@ -1,6 +1,7 @@
 ---
 title: Configuration
 order: 4
+description: "Overview of CommandBridge configuration for Velocity and backend servers, including WebSocket, Redis, and multi-proxy networking modes."
 ---
 
 CommandBridge has two different configurations. The one on the Velocity proxy and one on each backend. For each backend, every server that is not Velocity is counted.

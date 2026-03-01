@@ -1,6 +1,7 @@
 ---
 title: Permissions
 order: 7
+description: "CommandBridge permission nodes for admin commands and per-script command access. All permissions are managed on the Velocity proxy."
 ---
 
 CommandBridge permission handling is simple.

@@ -1,6 +1,7 @@
 ---
 title: Backends
 order: 2
+description: "Configuration reference for CommandBridge on backend servers. Set up client ID, connection endpoint, TLS, authentication, and reconnect behavior."
 ---
 
 This config can be found at every backend server at `plugins/commandbridge/config.yml`.

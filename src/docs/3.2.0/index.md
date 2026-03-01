@@ -1,6 +1,7 @@
 ---
 title: Welcome
 order: 1
+description: "Documentation for CommandBridge 3.2.0, a Velocity plugin for executing commands across your entire Minecraft network using YAML scripts."
 ---
 
 This is the documentation for CommandBridge.

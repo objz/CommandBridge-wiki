@@ -1,6 +1,7 @@
 ---
 title: Placeholders
 order: 3
+description: "Use argument placeholders and PlaceholderAPI in CommandBridge scripts. Resolve dynamic values like player names, amounts, and external data in commands."
 ---
 
 CommandBridge uses `${name}` placeholders in command strings to insert argument values at runtime. It also supports PlaceholderAPI if you need external data like player ranks or balances.
