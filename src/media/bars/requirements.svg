@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 88" width="840" height="88">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="840" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+  </defs>
+  <rect width="840" height="88" rx="12" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="839" height="87" rx="12" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="24" y="38" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="15" fill="#fafafa">Requirements</text>
+  <text x="24" y="54" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="10" fill="#737373">To get started</text>
+
+  <!-- Divider -->
+  <line x1="175" y1="16" x2="175" y2="72" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+  <!-- ═══ Requirement cards (3 cards, 206×60 each) ═══ -->
+
+  <!-- Java 21+ — amber (#fbbf24) -->
+  <g transform="translate(190, 14)">
+    <rect x="0" y="0" width="196" height="60" rx="10" fill="rgba(251,191,36,0.05)" stroke="rgba(251,191,36,0.12)" stroke-width="0.75"/>
+    <circle cx="26" cy="30" r="14" fill="rgba(251,191,36,0.1)"/>
+    <!-- cpu icon -->
+    <g transform="translate(18, 22) scale(0.667)" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20v2" /><path d="M12 2v2" /><path d="M17 20v2" /><path d="M17 2v2" />
+      <path d="M2 12h2" /><path d="M2 17h2" /><path d="M2 7h2" />
+      <path d="M20 12h2" /><path d="M20 17h2" /><path d="M20 7h2" />
+      <path d="M7 20v2" /><path d="M7 2v2" />
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <rect x="8" y="8" width="8" height="8" rx="1" />
+    </g>
+    <text x="48" y="26" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#fbbf24">Java 21+</text>
+    <text x="48" y="42" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Runtime</text>
+  </g>
+
+  <!-- MC 1.20 – 1.21 — green (#6ee7b7) -->
+  <g transform="translate(394, 14)">
+    <rect x="0" y="0" width="206" height="60" rx="10" fill="rgba(110,231,183,0.05)" stroke="rgba(110,231,183,0.12)" stroke-width="0.75"/>
+    <circle cx="26" cy="30" r="14" fill="rgba(110,231,183,0.1)"/>
+    <!-- layers icon -->
+    <g transform="translate(18, 22) scale(0.667)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+      <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+      <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+    </g>
+    <text x="48" y="26" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#6ee7b7">MC 1.20 &#8211; 1.21</text>
+    <text x="48" y="42" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Game versions</text>
+  </g>
+
+  <!-- CommandAPI — indigo (#a5b4fc) -->
+  <g transform="translate(608, 14)">
+    <rect x="0" y="0" width="218" height="60" rx="10" fill="rgba(165,180,252,0.05)" stroke="rgba(165,180,252,0.12)" stroke-width="0.75"/>
+    <circle cx="26" cy="30" r="14" fill="rgba(165,180,252,0.1)"/>
+    <!-- terminal icon -->
+    <g transform="translate(18, 22) scale(0.667)" stroke="#a5b4fc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="4 17 10 11 4 5" />
+      <line x1="12" x2="20" y1="19" y2="19" />
+    </g>
+    <text x="48" y="26" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#a5b4fc">CommandAPI</text>
+    <text x="48" y="42" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">On all servers</text>
+  </g>
+</svg>

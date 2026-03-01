@@ -34,8 +34,8 @@
   <!-- Connecting line between steps -->
   <line x1="280" y1="310" x2="920" y2="310" stroke="rgba(165,180,252,0.12)" stroke-width="2" stroke-dasharray="8 6"/>
   <!-- Arrow dots on line -->
-  <polygon points="520,306 530,310 520,314" fill="rgba(165,180,252,0.25)"/>
-  <polygon points="680,306 690,310 680,314" fill="rgba(165,180,252,0.25)"/>
+  <polygon points="395,306 405,310 395,314" fill="rgba(165,180,252,0.25)"/>
+  <polygon points="795,306 805,310 795,314" fill="rgba(165,180,252,0.25)"/>
 
   <!-- ===== Step 1: Install ===== -->
   <g transform="translate(200, 200)">

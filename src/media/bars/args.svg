@@ -17,13 +17,13 @@
   <!-- Divider -->
   <line x1="108" y1="16" x2="108" y2="72" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
 
-  <!-- Row 1: Universal + important types (y=18, 22px tall pills) -->
+  <!-- ═══ Row 1 (y=18): Universal + important types ═══ -->
 
   <!-- STRING — blue (basic primitive, default) -->
   <rect x="122" y="18" width="56" height="22" rx="6" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.15)" stroke-width="0.75"/>
   <text x="150" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#60a5fa">STRING</text>
 
-  <!-- PLAYERS — green (player/entity targeting) -->
+  <!-- PLAYERS — green (player/entity) -->
   <rect x="184" y="18" width="60" height="22" rx="6" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
   <text x="214" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#6ee7b7">PLAYERS</text>
 
@@ -51,33 +51,53 @@
   <rect x="594" y="18" width="56" height="22" rx="6" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.15)" stroke-width="0.75"/>
   <text x="622" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#fb7185">SERVER</text>
 
-  <!-- Row 2: Minecraft types + overflow (y=48, 22px tall pills) -->
-
   <!-- LOCATION — cyan (spatial) -->
-  <rect x="122" y="48" width="66" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
-  <text x="155" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">LOCATION</text>
+  <rect x="656" y="18" width="66" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
+  <text x="689" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">LOCATION</text>
 
   <!-- WORLD — cyan (spatial) -->
-  <rect x="194" y="48" width="50" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
-  <text x="219" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">WORLD</text>
+  <rect x="728" y="18" width="50" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
+  <text x="753" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">WORLD</text>
+
+  <!-- TIME — rose (platform-specific) -->
+  <rect x="784" y="18" width="44" height="22" rx="6" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.15)" stroke-width="0.75"/>
+  <text x="806" y="33" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#fb7185">TIME</text>
+
+  <!-- ═══ Row 2 (y=48): Minecraft types ═══ -->
 
   <!-- ENTITIES — green (player/entity) -->
-  <rect x="250" y="48" width="66" height="22" rx="6" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
-  <text x="283" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#6ee7b7">ENTITIES</text>
+  <rect x="122" y="48" width="66" height="22" rx="6" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
+  <text x="155" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#6ee7b7">ENTITIES</text>
 
   <!-- ITEM_STACK — purple (items/effects) -->
-  <rect x="322" y="48" width="76" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
-  <text x="360" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">ITEM_STACK</text>
+  <rect x="194" y="48" width="76" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
+  <text x="232" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">ITEM_STACK</text>
 
   <!-- ENCHANTMENT — purple (items/effects) -->
-  <rect x="404" y="48" width="82" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
-  <text x="445" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">ENCHANTMENT</text>
+  <rect x="276" y="48" width="82" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
+  <text x="317" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">ENCHANTMENT</text>
 
   <!-- ENTITY_TYPE — green (player/entity) -->
-  <rect x="492" y="48" width="82" height="22" rx="6" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
-  <text x="533" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#6ee7b7">ENTITY_TYPE</text>
+  <rect x="364" y="48" width="82" height="22" rx="6" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
+  <text x="405" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#6ee7b7">ENTITY_TYPE</text>
 
-  <!-- +8 more (muted overflow indicator) -->
-  <rect x="580" y="48" width="40" height="22" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="0.75"/>
-  <text x="600" y="63" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="9" fill="#737373">+8</text>
+  <!-- POTION_EFFECT — purple (items/effects) -->
+  <rect x="452" y="48" width="94" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
+  <text x="499" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">POTION_EFFECT</text>
+
+  <!-- SOUND — purple (items/effects) -->
+  <rect x="552" y="48" width="50" height="22" rx="6" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
+  <text x="577" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#c084fc">SOUND</text>
+
+  <!-- BIOME — cyan (spatial/world) -->
+  <rect x="608" y="48" width="50" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
+  <text x="633" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">BIOME</text>
+
+  <!-- LOCATION_2D — cyan (spatial) -->
+  <rect x="664" y="48" width="82" height="22" rx="6" fill="rgba(34,211,238,0.1)" stroke="rgba(34,211,238,0.15)" stroke-width="0.75"/>
+  <text x="705" y="63" text-anchor="middle" font-family="Inter, monospace" font-weight="600" font-size="9" fill="#22d3ee">LOCATION_2D</text>
+
+  <!-- +3 more (ANGLE, ROTATION, RANGE) -->
+  <rect x="752" y="48" width="36" height="22" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="0.75"/>
+  <text x="770" y="63" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="9" fill="#737373">+3</text>
 </svg>

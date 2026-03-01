@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4736D3"/>
+      <stop offset="100%" stop-color="#8268F0"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.5" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Section label -->
+  <text x="600" y="52" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="11" fill="#8268F0" letter-spacing="3">FEATURE</text>
+
+  <!-- Title -->
+  <text x="600" y="92" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="36" fill="#fafafa" letter-spacing="-1">Powerful YAML Script Engine</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="122" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="16" fill="#a3a3a3">Define commands, arguments, permissions, and execution logic in clean YAML files</text>
+
+  <!-- Code editor panel -->
+  <g transform="translate(80, 150)">
+    <!-- Editor frame -->
+    <rect x="0" y="0" width="700" height="440" rx="12" fill="#0c1222" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Title bar -->
+    <rect x="0" y="0" width="700" height="34" rx="12" fill="rgba(255,255,255,0.04)"/>
+    <!-- Window dots -->
+    <circle cx="18" cy="17" r="5" fill="#ff5f57"/>
+    <circle cx="36" cy="17" r="5" fill="#ffbd2e"/>
+    <circle cx="54" cy="17" r="5" fill="#28c840"/>
+    <!-- Filename -->
+    <text x="350" y="22" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="11" fill="#737373">lobby.yml</text>
+
+    <!-- Line numbers gutter -->
+    <rect x="0" y="34" width="38" height="406" fill="rgba(255,255,255,0.02)"/>
+
+    <text x="30" y="54" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 1</text>
+    <text x="30" y="67" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 2</text>
+    <text x="30" y="80" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 3</text>
+    <text x="30" y="93" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 4</text>
+    <text x="30" y="106" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 5</text>
+    <text x="30" y="119" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 6</text>
+    <text x="30" y="132" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 7</text>
+    <text x="30" y="145" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 8</text>
+    <text x="30" y="158" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568"> 9</text>
+    <text x="30" y="171" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">10</text>
+    <text x="30" y="184" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">11</text>
+    <text x="30" y="197" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">12</text>
+    <text x="30" y="210" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">13</text>
+    <text x="30" y="223" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">14</text>
+    <text x="30" y="236" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">15</text>
+    <text x="30" y="249" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">16</text>
+    <text x="30" y="262" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">17</text>
+    <text x="30" y="275" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">18</text>
+    <text x="30" y="288" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">19</text>
+    <text x="30" y="301" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">20</text>
+    <text x="30" y="314" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">21</text>
+    <text x="30" y="327" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">22</text>
+    <text x="30" y="340" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">23</text>
+    <text x="30" y="353" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">24</text>
+    <text x="30" y="366" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">25</text>
+    <text x="30" y="379" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">26</text>
+    <text x="30" y="392" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">27</text>
+    <text x="30" y="405" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">28</text>
+    <text x="30" y="418" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="10" fill="#4a5568">29</text>
+
+    <!-- YAML Code — lobby.yml with syntax highlighting -->
+    <!-- Keys: #8eaadc, Strings: #86efac, Numbers: #5eead4, Constants: #c084fc -->
+
+    <!-- L1: version: 3 -->
+    <text x="48" y="54" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">version</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#5eead4">3</tspan></text>
+    <!-- L2: name: lobby -->
+    <text x="48" y="67" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">name</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">lobby</tspan></text>
+    <!-- L3: description: Send the player to the lobby -->
+    <text x="48" y="80" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">description</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">Send the player to the lobby</tspan></text>
+    <!-- L4: enabled: true -->
+    <text x="48" y="93" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">enabled</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">true</tspan></text>
+    <!-- L5: aliases: [hub] -->
+    <text x="48" y="106" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">aliases</tspan><tspan fill="#a3a3a3">: [</tspan><tspan fill="#86efac">hub</tspan><tspan fill="#a3a3a3">]</tspan></text>
+    <!-- L6: blank -->
+    <!-- L7: permissions: -->
+    <text x="48" y="132" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">permissions</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L8:   enabled: true -->
+    <text x="61" y="145" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">enabled</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">true</tspan></text>
+    <!-- L9:   silent: false -->
+    <text x="61" y="158" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">silent</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">false</tspan></text>
+    <!-- L10: blank -->
+    <!-- L11: register: -->
+    <text x="48" y="184" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">register</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L12:   - id: "survival-1" -->
+    <text x="61" y="197" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#a3a3a3">- </tspan><tspan fill="#8eaadc">id</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">"survival-1"</tspan></text>
+    <!-- L13:     location: BACKEND -->
+    <text x="74" y="210" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">location</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">BACKEND</tspan></text>
+    <!-- L14: blank -->
+    <!-- L15: defaults: -->
+    <text x="48" y="236" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">defaults</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L16:   run-as: PLAYER -->
+    <text x="61" y="249" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">run-as</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">PLAYER</tspan></text>
+    <!-- L17:   execute: -->
+    <text x="61" y="262" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">execute</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L18:     - id: "proxy-1" -->
+    <text x="74" y="275" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#a3a3a3">- </tspan><tspan fill="#8eaadc">id</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">"proxy-1"</tspan></text>
+    <!-- L19:       location: VELOCITY -->
+    <text x="88" y="288" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">location</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">VELOCITY</tspan></text>
+    <!-- L20:   server: -->
+    <text x="61" y="301" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">server</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L21:     target-required: false -->
+    <text x="74" y="314" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">target-required</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">false</tspan></text>
+    <!-- L22:     schedule-online: false -->
+    <text x="74" y="327" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">schedule-online</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#c084fc">false</tspan></text>
+    <!-- L23:   delay: 0s -->
+    <text x="61" y="340" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">delay</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">0s</tspan></text>
+    <!-- L24:   cooldown: 0s -->
+    <text x="61" y="353" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">cooldown</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">0s</tspan></text>
+    <!-- L25: blank -->
+    <!-- L26: args: [] -->
+    <text x="48" y="379" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">args</tspan><tspan fill="#a3a3a3">: []</tspan></text>
+    <!-- L27: blank -->
+    <!-- L28: commands: -->
+    <text x="48" y="405" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#8eaadc">commands</tspan><tspan fill="#a3a3a3">:</tspan></text>
+    <!-- L29:   - command: "server lobby" -->
+    <text x="61" y="418" font-family="ui-monospace, 'SF Mono', 'Cascadia Code', monospace" font-size="11"><tspan fill="#a3a3a3">- </tspan><tspan fill="#8eaadc">command</tspan><tspan fill="#a3a3a3">: </tspan><tspan fill="#86efac">"server lobby"</tspan></text>
+  </g>
+
+  <!-- Right side: Feature badges (4 badges, no "22 Argument Types") -->
+  <g transform="translate(830, 165)">
+    <!-- Badge: Tab Completion -->
+    <rect x="0" y="0" width="290" height="72" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="36" cy="36" r="18" fill="rgba(96,165,250,0.12)"/>
+    <text x="36" y="41" text-anchor="middle" font-family="ui-monospace, monospace" font-weight="700" font-size="11" fill="#60a5fa">TAB</text>
+    <text x="70" y="30" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="14" fill="#fafafa">Tab Completion</text>
+    <text x="70" y="48" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="11" fill="#737373">Full auto-complete via CommandAPI</text>
+
+    <!-- Badge: Named Placeholders -->
+    <rect x="0" y="92" width="290" height="72" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="36" cy="128" r="18" fill="rgba(110,231,183,0.12)"/>
+    <text x="36" y="133" text-anchor="middle" font-family="ui-monospace, monospace" font-weight="700" font-size="11" fill="#6ee7b7">${}</text>
+    <text x="70" y="122" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="14" fill="#fafafa">Named Placeholders</text>
+    <text x="70" y="140" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="11" fill="#737373">${name}, ${server}, ${player}...</text>
+
+    <!-- Badge: PlaceholderAPI -->
+    <rect x="0" y="184" width="290" height="72" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="36" cy="220" r="18" fill="rgba(251,191,36,0.12)"/>
+    <text x="36" y="225" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="10" fill="#fbbf24">PAPI</text>
+    <text x="70" y="214" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="14" fill="#fafafa">PlaceholderAPI</text>
+    <text x="70" y="232" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="11" fill="#737373">Optional via PapiProxyBridge</text>
+
+    <!-- Badge: Hot Reload -->
+    <rect x="0" y="276" width="290" height="72" rx="12" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <circle cx="36" cy="312" r="18" fill="rgba(251,113,133,0.12)"/>
+    <!-- Refresh-cw icon (Lucide) -->
+    <g transform="translate(24, 300) scale(1)" stroke="#fb7185" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </g>
+    <text x="70" y="306" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="14" fill="#fafafa">Hot Reload</text>
+    <text x="70" y="324" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="11" fill="#737373">/cb reload - no restart needed</text>
+  </g>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="624" width="1200" height="6" fill="url(#accent)" opacity="0.4"/>
+</svg>

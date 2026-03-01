@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 56" width="840" height="56">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="banner-bg" x1="0" y1="0" x2="840" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+    <linearGradient id="accent-line" x1="0" y1="0" x2="840" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4736D3"/>
+      <stop offset="100%" stop-color="#8268F0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="840" height="56" rx="10" fill="url(#banner-bg)"/>
+
+  <!-- Bottom accent line (2px gradient bar, clipped to rounded corners) -->
+  <clipPath id="banner-clip">
+    <rect width="840" height="56" rx="10"/>
+  </clipPath>
+  <rect x="0" y="54" width="840" height="2" fill="url(#accent-line)" clip-path="url(#banner-clip)"/>
+
+  <!-- Lightning bolt logo (24px) -->
+  <g transform="translate(11, 3.3) scale(0.1)" fill="#4736D3" stroke="#5a4be0" stroke-width="8">
+    <path d="M 230.951 356.62 L 335.726 229.892 C 340.716 221.909 335.726 214.924 325.748 214.924 L 275.855 214.924 C 265.876 214.924 264.261 211.99 265.876 201.952 L 273.859 142.08 C 275.855 132.101 269.086 126.654 260.887 137.091 L 161.101 257.832 C 156.112 265.815 161.101 270.804 171.08 270.804 L 220.973 270.804 C 230.951 270.804 233.945 273.797 230.951 283.776 L 215.983 352.628 C 213.988 362.607 218.977 366.598 225.962 361.609 L 230.951 356.62 Z"/>
+  </g>
+
+  <!-- "CommandBridge" text -->
+  <text x="50" y="33" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#ffffff">CommandBridge</text>
+
+  <!-- Right side subtitle -->
+  <text x="816" y="33" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="10" fill="#a3a3a3" text-anchor="end">Open Source Minecraft Plugin</text>
+</svg>
