@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 64" width="840" height="64">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="840" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+  </defs>
+  <rect width="840" height="64" rx="12" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="839" height="63" rx="12" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- MC Versions -->
+  <rect x="20" y="14" width="186" height="36" rx="10" fill="rgba(110,231,183,0.06)" stroke="rgba(110,231,183,0.15)" stroke-width="0.75"/>
+  <g transform="translate(28, 22) scale(0.583)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+    <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+    <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+  </g>
+  <text x="52" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#fafafa">MC 1.20 &#8211; 1.21</text>
+  <text x="160" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#6ee7b7">versions</text>
+
+  <!-- Divider -->
+  <circle cx="222" cy="32" r="1.5" fill="rgba(255,255,255,0.1)"/>
+
+  <!-- Java -->
+  <rect x="238" y="14" width="166" height="36" rx="10" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.15)" stroke-width="0.75"/>
+  <g transform="translate(246, 21) scale(0.583)" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20v2" /><path d="M12 2v2" /><path d="M17 20v2" /><path d="M17 2v2" />
+    <path d="M2 12h2" /><path d="M2 17h2" /><path d="M2 7h2" />
+    <path d="M20 12h2" /><path d="M20 17h2" /><path d="M20 7h2" />
+    <path d="M7 20v2" /><path d="M7 2v2" />
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <rect x="8" y="8" width="8" height="8" rx="1" />
+  </g>
+  <text x="272" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="12" fill="#fafafa">Java 21+</text>
+  <text x="342" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#fbbf24">required</text>
+
+  <circle cx="420" cy="32" r="1.5" fill="rgba(255,255,255,0.1)"/>
+
+  <!-- CommandAPI -->
+  <rect x="436" y="14" width="186" height="36" rx="10" fill="rgba(165,180,252,0.06)" stroke="rgba(165,180,252,0.15)" stroke-width="0.75"/>
+  <text x="450" y="36" font-family="Inter, monospace" font-weight="600" font-size="11" fill="#a5b4fc">CommandAPI</text>
+  <text x="548" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">on all instances</text>
+
+  <circle cx="638" cy="32" r="1.5" fill="rgba(255,255,255,0.1)"/>
+
+  <!-- Permissions plugin -->
+  <rect x="654" y="14" width="168" height="36" rx="10" fill="rgba(192,132,252,0.06)" stroke="rgba(192,132,252,0.15)" stroke-width="0.75"/>
+  <text x="668" y="36" font-family="Inter, monospace" font-weight="600" font-size="11" fill="#c084fc">LuckPerms</text>
+  <text x="756" y="36" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">on Velocity</text>
+</svg>

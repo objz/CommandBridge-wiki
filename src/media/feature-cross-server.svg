@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4736D3"/>
+      <stop offset="100%" stop-color="#8268F0"/>
+    </linearGradient>
+    <filter id="node-glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.647 0 0 0 0 0.635 0 0 0 0 0.945 0 0 0 0.3 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.5" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+    <marker id="arrow-indigo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#a5b4fc" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6ee7b7" opacity="0.7"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Section label -->
+  <text x="600" y="52" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="11" fill="#8268F0" letter-spacing="3">FEATURE</text>
+
+  <!-- Title -->
+  <text x="600" y="92" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="36" fill="#fafafa" letter-spacing="-1">Cross-Server Command Execution</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="122" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="16" fill="#a3a3a3">Run commands on proxy, trigger actions on backends. Full bidirectional flow.</text>
+
+  <!-- ===== Network Diagram ===== -->
+
+  <!-- Velocity Proxy (left) -->
+  <g transform="translate(130, 320)">
+    <rect x="-70" y="-45" width="140" height="90" rx="12" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
+    <circle cx="0" cy="-12" r="14" fill="rgba(96,165,250,0.15)"/>
+    <!-- Send icon (Lucide) -->
+    <g transform="translate(-10, -22) scale(0.833)" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+      <path d="m21.854 2.147-10.94 10.939" />
+    </g>
+    <text x="0" y="18" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#fafafa">Velocity</text>
+    <text x="0" y="34" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="10" fill="#737373">Proxy</text>
+  </g>
+
+  <!-- CommandBridge Hub (center) -->
+  <g transform="translate(480, 320)">
+    <rect x="-85" y="-55" width="170" height="110" rx="14" fill="rgba(99,102,241,0.1)" stroke="rgba(165,180,252,0.35)" stroke-width="2" filter="url(#node-glow)"/>
+    <circle cx="0" cy="-18" r="16" fill="rgba(165,180,252,0.15)"/>
+    <!-- Zap icon (Lucide) -->
+    <g transform="translate(-10, -28) scale(0.833)" stroke="#a5b4fc" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+    </g>
+    <text x="0" y="12" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="14" fill="#fafafa">CommandBridge</text>
+    <text x="0" y="30" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="10" fill="#a3a3a3">Hub</text>
+    <!-- Transport labels -->
+    <rect x="-72" y="40" width="56" height="18" rx="9" fill="rgba(125,211,252,0.1)" stroke="rgba(125,211,252,0.2)" stroke-width="0.75"/>
+    <text x="-44" y="52.5" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="8.5" fill="#7dd3fc">WebSocket</text>
+    <rect x="16" y="40" width="56" height="18" rx="9" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.2)" stroke-width="0.75"/>
+    <text x="44" y="52.5" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="8.5" fill="#fb7185">Redis</text>
+  </g>
+
+  <!-- Backend servers (right side, stacked) -->
+  <!-- Paper -->
+  <g transform="translate(870, 200)">
+    <rect x="-62" y="-35" width="124" height="70" rx="10" fill="rgba(110,231,183,0.06)" stroke="rgba(110,231,183,0.25)" stroke-width="1"/>
+    <circle cx="-30" cy="0" r="10" fill="rgba(110,231,183,0.15)"/>
+    <!-- Server icon (Lucide) -->
+    <g transform="translate(-38, -8) scale(0.667)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </g>
+    <text x="10" y="-4" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#fafafa">Paper</text>
+    <text x="10" y="12" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Survival</text>
+  </g>
+
+  <!-- Folia -->
+  <g transform="translate(870, 310)">
+    <rect x="-62" y="-35" width="124" height="70" rx="10" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+    <circle cx="-30" cy="0" r="10" fill="rgba(251,191,36,0.15)"/>
+    <!-- Server icon (Lucide) -->
+    <g transform="translate(-38, -8) scale(0.667)" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </g>
+    <text x="10" y="-4" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#fafafa">Folia</text>
+    <text x="10" y="12" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Creative</text>
+  </g>
+
+  <!-- Purpur -->
+  <g transform="translate(870, 420)">
+    <rect x="-62" y="-35" width="124" height="70" rx="10" fill="rgba(251,113,133,0.06)" stroke="rgba(251,113,133,0.25)" stroke-width="1"/>
+    <circle cx="-30" cy="0" r="10" fill="rgba(251,113,133,0.15)"/>
+    <!-- Server icon (Lucide) -->
+    <g transform="translate(-38, -8) scale(0.667)" stroke="#fb7185" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </g>
+    <text x="10" y="-4" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#fafafa">Purpur</text>
+    <text x="10" y="12" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Hub</text>
+  </g>
+
+  <!-- Spigot -->
+  <g transform="translate(1060, 255)">
+    <rect x="-62" y="-35" width="124" height="70" rx="10" fill="rgba(34,211,238,0.06)" stroke="rgba(34,211,238,0.25)" stroke-width="1"/>
+    <circle cx="-30" cy="0" r="10" fill="rgba(34,211,238,0.15)"/>
+    <!-- Server icon (Lucide) -->
+    <g transform="translate(-38, -8) scale(0.667)" stroke="#22d3ee" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </g>
+    <text x="10" y="-4" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#fafafa">Spigot</text>
+    <text x="10" y="12" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Minigames</text>
+  </g>
+
+  <!-- Bukkit -->
+  <g transform="translate(1060, 370)">
+    <rect x="-62" y="-35" width="124" height="70" rx="10" fill="rgba(110,231,183,0.06)" stroke="rgba(110,231,183,0.25)" stroke-width="1"/>
+    <circle cx="-30" cy="0" r="10" fill="rgba(110,231,183,0.15)"/>
+    <!-- Server icon (Lucide) -->
+    <g transform="translate(-38, -8) scale(0.667)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+      <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+      <line x1="6" x2="6.01" y1="6" y2="6" />
+      <line x1="6" x2="6.01" y1="18" y2="18" />
+    </g>
+    <text x="10" y="-4" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="13" fill="#fafafa">Bukkit</text>
+    <text x="10" y="12" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="9" fill="#737373">Legacy</text>
+  </g>
+
+  <!-- Connection arrows: Velocity -> Hub -->
+  <line x1="200" y1="320" x2="390" y2="320" stroke="rgba(165,180,252,0.35)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow-indigo)"/>
+  <!-- Command label -->
+  <rect x="262" y="298" width="60" height="18" rx="9" fill="rgba(165,180,252,0.1)" stroke="rgba(165,180,252,0.15)" stroke-width="0.75"/>
+  <text x="292" y="310.5" text-anchor="middle" font-family="Inter, monospace" font-weight="500" font-size="8" fill="#a5b4fc">/alert</text>
+
+  <!-- Hub -> Paper -->
+  <line x1="565" y1="295" x2="805" y2="210" stroke="rgba(110,231,183,0.3)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+  <!-- Hub -> Folia -->
+  <line x1="565" y1="320" x2="805" y2="310" stroke="rgba(251,191,36,0.3)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+  <!-- Hub -> Purpur -->
+  <line x1="565" y1="340" x2="805" y2="420" stroke="rgba(251,113,133,0.3)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+  <!-- Hub -> Spigot -->
+  <line x1="565" y1="305" x2="995" y2="260" stroke="rgba(34,211,238,0.25)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+  <!-- Hub -> Bukkit -->
+  <line x1="565" y1="335" x2="995" y2="370" stroke="rgba(110,231,183,0.25)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-green)"/>
+
+  <!-- Packet dots on lines -->
+  <circle cx="680" cy="254" r="3" fill="#6ee7b7" opacity="0.5"/>
+  <circle cx="690" cy="316" r="3" fill="#fbbf24" opacity="0.5"/>
+  <circle cx="680" cy="378" r="3" fill="#fb7185" opacity="0.5"/>
+  <circle cx="780" cy="282" r="3" fill="#22d3ee" opacity="0.4"/>
+  <circle cx="780" cy="352" r="3" fill="#6ee7b7" opacity="0.4"/>
+  <circle cx="300" cy="318" r="3" fill="#a5b4fc" opacity="0.5"/>
+
+  <!-- Bottom description -->
+  <text x="600" y="545" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="14" fill="#a3a3a3">No plugin messaging channels. No player-online requirements.</text>
+  <text x="600" y="570" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="14" fill="#a3a3a3">Commands go through instantly.</text>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="624" width="1200" height="6" fill="url(#accent)" opacity="0.4"/>
+</svg>

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 88" width="840" height="88">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="840" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+  </defs>
+  <rect width="840" height="88" rx="12" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="839" height="87" rx="12" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- Velocity -->
+  <circle cx="52" cy="44" r="18" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.25)" stroke-width="1"/>
+  <g transform="translate(42, 34) scale(0.833)" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+    <path d="m21.854 2.147-10.94 10.939" />
+  </g>
+  <text x="52" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#60a5fa">Velocity</text>
+
+  <!-- Divider dot -->
+  <circle cx="109" cy="44" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Paper -->
+  <circle cx="166" cy="44" r="18" fill="rgba(110,231,183,0.12)" stroke="rgba(110,231,183,0.25)" stroke-width="1"/>
+  <g transform="translate(156, 34) scale(0.833)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+    <line x1="6" x2="6.01" y1="6" y2="6" />
+    <line x1="6" x2="6.01" y1="18" y2="18" />
+  </g>
+  <text x="166" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#6ee7b7">Paper</text>
+
+  <circle cx="223" cy="44" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Folia -->
+  <circle cx="280" cy="44" r="18" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+  <g transform="translate(270, 34) scale(0.833)" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+    <line x1="6" x2="6.01" y1="6" y2="6" />
+    <line x1="6" x2="6.01" y1="18" y2="18" />
+  </g>
+  <text x="280" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#fbbf24">Folia</text>
+
+  <circle cx="337" cy="44" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Purpur -->
+  <circle cx="394" cy="44" r="18" fill="rgba(251,113,133,0.12)" stroke="rgba(251,113,133,0.25)" stroke-width="1"/>
+  <g transform="translate(384, 34) scale(0.833)" stroke="#fb7185" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+    <line x1="6" x2="6.01" y1="6" y2="6" />
+    <line x1="6" x2="6.01" y1="18" y2="18" />
+  </g>
+  <text x="394" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#fb7185">Purpur</text>
+
+  <circle cx="451" cy="44" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Spigot -->
+  <circle cx="508" cy="44" r="18" fill="rgba(34,211,238,0.12)" stroke="rgba(34,211,238,0.25)" stroke-width="1"/>
+  <g transform="translate(498, 34) scale(0.833)" stroke="#22d3ee" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+    <line x1="6" x2="6.01" y1="6" y2="6" />
+    <line x1="6" x2="6.01" y1="18" y2="18" />
+  </g>
+  <text x="508" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#22d3ee">Spigot</text>
+
+  <circle cx="565" cy="44" r="1.5" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Bukkit -->
+  <circle cx="622" cy="44" r="18" fill="rgba(110,231,183,0.12)" stroke="rgba(110,231,183,0.25)" stroke-width="1"/>
+  <g transform="translate(612, 34) scale(0.833)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+    <line x1="6" x2="6.01" y1="6" y2="6" />
+    <line x1="6" x2="6.01" y1="18" y2="18" />
+  </g>
+  <text x="622" y="72" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="8" fill="#6ee7b7">Bukkit</text>
+
+  <!-- Label -->
+  <line x1="680" y1="24" x2="680" y2="64" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="760" y="40" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="18" fill="#fafafa">6</text>
+  <text x="760" y="56" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="10" fill="#a3a3a3">Platforms</text>
+</svg>

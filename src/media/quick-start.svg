@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');</style>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#273a66"/>
+      <stop offset="100%" stop-color="#081123"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4736D3"/>
+      <stop offset="100%" stop-color="#8268F0"/>
+    </linearGradient>
+    <linearGradient id="step-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8268F0"/>
+      <stop offset="100%" stop-color="#4736D3"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="16" cy="16" r="0.5" fill="rgba(255,255,255,0.04)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Section label -->
+  <text x="600" y="52" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="600" font-size="11" fill="#8268F0" letter-spacing="3">GETTING STARTED</text>
+
+  <!-- Title -->
+  <text x="600" y="96" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="38" fill="#fafafa" letter-spacing="-1">Up and Running in Minutes</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="126" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="16" fill="#a3a3a3">Three simple steps to connect your entire Minecraft network</text>
+
+  <!-- Connecting line between steps -->
+  <line x1="280" y1="310" x2="920" y2="310" stroke="rgba(165,180,252,0.12)" stroke-width="2" stroke-dasharray="8 6"/>
+  <!-- Arrow dots on line -->
+  <polygon points="520,306 530,310 520,314" fill="rgba(165,180,252,0.25)"/>
+  <polygon points="680,306 690,310 680,314" fill="rgba(165,180,252,0.25)"/>
+
+  <!-- ===== Step 1: Install ===== -->
+  <g transform="translate(200, 200)">
+    <!-- Card -->
+    <rect x="-140" y="-10" width="280" height="340" rx="16" fill="rgba(255,255,255,0.03)" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+
+    <!-- Step number circle -->
+    <circle cx="0" cy="40" r="32" fill="url(#step-grad)" opacity="0.9"/>
+    <text x="0" y="48" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="28" fill="#fafafa">1</text>
+
+    <!-- Download icon (Lucide) -->
+    <circle cx="0" cy="110" r="22" fill="rgba(96,165,250,0.1)"/>
+    <g transform="translate(-12, 98) scale(1)" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
+    </g>
+
+    <!-- Title -->
+    <text x="0" y="160" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#fafafa">Install</text>
+
+    <!-- Description -->
+    <text x="0" y="188" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">Drop the plugin JAR on</text>
+    <text x="0" y="206" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">Velocity and every backend</text>
+    <text x="0" y="224" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">server in your network.</text>
+
+    <!-- Requirement badge -->
+    <rect x="-52" y="248" width="104" height="24" rx="12" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.2)" stroke-width="0.75"/>
+    <text x="0" y="264" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="10" fill="#60a5fa">Java 21+ required</text>
+
+    <!-- CommandAPI badge -->
+    <rect x="-52" y="280" width="104" height="24" rx="12" fill="rgba(165,180,252,0.1)" stroke="rgba(165,180,252,0.2)" stroke-width="0.75"/>
+    <text x="0" y="296" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="10" fill="#a5b4fc">+ CommandAPI</text>
+  </g>
+
+  <!-- ===== Step 2: Configure ===== -->
+  <g transform="translate(600, 200)">
+    <rect x="-140" y="-10" width="280" height="340" rx="16" fill="rgba(255,255,255,0.03)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+
+    <!-- Step number -->
+    <circle cx="0" cy="40" r="32" fill="url(#step-grad)" opacity="0.9"/>
+    <text x="0" y="48" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="28" fill="#fafafa">2</text>
+
+    <!-- Settings icon (Lucide) -->
+    <circle cx="0" cy="110" r="22" fill="rgba(251,191,36,0.1)"/>
+    <g transform="translate(-12, 98) scale(1)" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </g>
+
+    <text x="0" y="160" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#fafafa">Configure</text>
+
+    <text x="0" y="188" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">Set the shared secret and</text>
+    <text x="0" y="206" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">connection settings in your</text>
+    <text x="0" y="224" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">config.yml file.</text>
+
+    <!-- Config badge -->
+    <rect x="-44" y="248" width="88" height="24" rx="12" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.2)" stroke-width="0.75"/>
+    <text x="0" y="264" text-anchor="middle" font-family="Inter, monospace" font-weight="500" font-size="10" fill="#fbbf24">config.yml</text>
+
+    <!-- Transport badge -->
+    <rect x="-56" y="280" width="112" height="24" rx="12" fill="rgba(251,113,133,0.1)" stroke="rgba(251,113,133,0.2)" stroke-width="0.75"/>
+    <text x="0" y="296" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="10" fill="#fb7185">WS or Redis</text>
+  </g>
+
+  <!-- ===== Step 3: Script ===== -->
+  <g transform="translate(1000, 200)">
+    <rect x="-140" y="-10" width="280" height="340" rx="16" fill="rgba(255,255,255,0.03)" stroke="rgba(110,231,183,0.2)" stroke-width="1"/>
+
+    <!-- Step number -->
+    <circle cx="0" cy="40" r="32" fill="url(#step-grad)" opacity="0.9"/>
+    <text x="0" y="48" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="800" font-size="28" fill="#fafafa">3</text>
+
+    <!-- Code icon (Lucide) -->
+    <circle cx="0" cy="110" r="22" fill="rgba(110,231,183,0.1)"/>
+    <g transform="translate(-12, 98) scale(1)" stroke="#6ee7b7" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </g>
+
+    <text x="0" y="160" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="700" font-size="20" fill="#fafafa">Script</text>
+
+    <text x="0" y="188" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">Write YAML scripts that</text>
+    <text x="0" y="206" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">define commands, arguments,</text>
+    <text x="0" y="224" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="400" font-size="13" fill="#a3a3a3">and execution targets.</text>
+
+    <!-- File badge -->
+    <rect x="-52" y="248" width="104" height="24" rx="12" fill="rgba(110,231,183,0.1)" stroke="rgba(110,231,183,0.2)" stroke-width="0.75"/>
+    <text x="0" y="264" text-anchor="middle" font-family="Inter, monospace" font-weight="500" font-size="10" fill="#6ee7b7">scripts/*.yml</text>
+
+    <!-- Hot reload badge -->
+    <rect x="-52" y="280" width="104" height="24" rx="12" fill="rgba(192,132,252,0.1)" stroke="rgba(192,132,252,0.2)" stroke-width="0.75"/>
+    <text x="0" y="296" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="10" fill="#c084fc">/cb reload</text>
+  </g>
+
+  <!-- Bottom CTA area -->
+  <text x="600" y="580" text-anchor="middle" font-family="Inter, -apple-system, sans-serif" font-weight="500" font-size="15" fill="#a3a3a3">That's it. Your entire network now shares commands.</text>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="624" width="1200" height="6" fill="url(#accent)" opacity="0.4"/>
+</svg>
