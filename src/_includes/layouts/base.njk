@@ -26,11 +26,15 @@
 
         var onDocsPage = window.location.pathname.startsWith("/docs");
         if (onDocsPage) {
-          var wide = localStorage.getItem("wideLayout") === "true";
+          var widePref = localStorage.getItem("wideLayout");
+          var wide = widePref === null ? true : widePref === "true";
           document.documentElement.classList.toggle("docs-wide", wide);
         }
       } catch (e) {
         document.documentElement.classList.add("dark");
+        if (window.location.pathname.startsWith("/docs")) {
+          document.documentElement.classList.add("docs-wide");
+        }
       }
     })();
   </script>
