@@ -2,6 +2,7 @@ node_modules
 _site
 package-lock.json
 .*
+!.github
 !.gitignore
 !.eleventy.js
 !.nvmrc
