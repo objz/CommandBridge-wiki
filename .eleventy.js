@@ -131,6 +131,11 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("markdown", (content) => {
     return md.render(content);
   });
+
+  eleventyConfig.addFilter("parse", (value) => {
+    if (typeof value === "string") return JSON.parse(value);
+    return value;
+  });
   
   eleventyConfig.addPlugin(pluginTOC, {
     tags: ['h2', 'h3'],
@@ -179,6 +184,33 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("docsMenuForVersion", function (docs, versionId) {
     if (!Array.isArray(docs)) return [];
     return buildDocsMenuForVersion(docs, versionId || docVersions.latest);
+  });
+
+  // Generate breadcrumb items from a doc page URL for JSON-LD BreadcrumbList
+  eleventyConfig.addNunjucksFilter("docsBreadcrumbs", function (pageUrl, pageTitle, siteUrl) {
+    if (typeof pageUrl !== "string" || !pageUrl.startsWith("/docs/")) return "[]";
+    const version = detectDocsVersionFromUrl(pageUrl);
+    const docsPath = extractDocsPath(pageUrl);
+    const segments = docsPath.split("/").filter(Boolean);
+
+    const items = [
+      { name: "Home", url: siteUrl + "/" },
+      { name: "Docs", url: siteUrl + "/docs/" + version + "/" }
+    ];
+
+    // For sub-pages (e.g., /docs/3.2.0/configuration/backends/), add the parent
+    if (segments.length >= 2) {
+      const parentSlug = segments[0];
+      const parentName = parentSlug.charAt(0).toUpperCase() + parentSlug.slice(1).replace(/-/g, " ");
+      items.push({ name: parentName, url: siteUrl + "/docs/" + version + "/" + parentSlug + "/" });
+    }
+
+    // Add current page (if not the docs index itself)
+    if (segments.length >= 1) {
+      items.push({ name: pageTitle, url: siteUrl + pageUrl });
+    }
+
+    return JSON.stringify(items);
   });
 
   eleventyConfig.addFilter("rewriteDocsLinks", function (content, versionId) {
