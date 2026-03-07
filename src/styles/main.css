@@ -9,6 +9,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Alpine.js elements until they are initialised */
+[x-cloak] {
+  display: none !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
