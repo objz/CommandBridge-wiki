@@ -14,6 +14,9 @@
   <meta name="keywords" content="{{ keywords or site.keywords }}"/>
   <meta name="author" content="{{ site.author }}"/>
   <meta name="robots" content="{{ robots or 'index, follow' }}"/>
+  {# Search engine verification — replace with your actual codes from Google Search Console and Bing Webmaster Tools #}
+  {# <meta name="google-site-verification" content="YOUR_GOOGLE_VERIFICATION_CODE" /> #}
+  {# <meta name="msvalidate.01" content="YOUR_BING_VERIFICATION_CODE" /> #}
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)"/>
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
   <link rel="canonical" href="{{ site.url + page.url }}"/>
@@ -70,8 +73,9 @@
   <meta property="og:description" content="{{ description or site.description }}"/>
   <meta property="og:url" content="{{ site.url + page.url }}"/>
   <meta property="og:image" content="{{ site.url }}{{ site.cover }}"/>
-  <meta property="og:image:width" content="720"/>
-  <meta property="og:image:height" content="180"/>
+  <meta property="og:image:alt" content="CommandBridge - Bridge commands across your Minecraft network"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
   <meta property="og:image:type" content="image/png"/>
   {# Twitter / X Card #}
   <meta name="twitter:card" content="summary_large_image"/>
@@ -79,6 +83,7 @@
   <meta name="twitter:title" content="{{ site.title + ": " + title if page.url === "/" else title + " - " + site.title }}"/>
   <meta name="twitter:description" content="{{ description or site.description }}"/>
   <meta name="twitter:image" content="{{ site.url }}{{ site.cover }}"/>
+  <meta name="twitter:image:alt" content="CommandBridge - Bridge commands across your Minecraft network"/>
   {# JSON-LD Structured Data #}
   <script type="application/ld+json">
   {
@@ -86,9 +91,16 @@
     "@graph": [
       {
         "@type": "WebSite",
+        "@id": "{{ site.url }}/#website",
         "name": "{{ site.title }}",
         "url": "{{ site.url }}",
         "description": "{{ site.description }}",
+        "image": {
+          "@type": "ImageObject",
+          "url": "{{ site.url }}{{ site.cover }}",
+          "width": 720,
+          "height": 180
+        },
         "author": {
           "@type": "Person",
           "name": "{{ site.author }}"
@@ -96,11 +108,19 @@
       },
       {
         "@type": "SoftwareApplication",
+        "@id": "{{ site.url }}/#software",
         "name": "{{ site.title }}",
         "url": "{{ site.url }}",
         "description": "{{ site.description }}",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Java",
+        "image": [
+          "{{ site.url }}{{ site.cover }}",
+          "{{ site.url }}/media/svg/commandbridge.svg",
+          "{{ site.url }}/android-chrome-512x512.png"
+        ],
+        "screenshot": "{{ site.url }}{{ site.cover }}",
+        "logo": "{{ site.url }}/media/svg/commandbridge.svg",
         "author": {
           "@type": "Person",
           "name": "{{ site.author }}"
@@ -116,6 +136,7 @@
         "headline": "{{ title }}",
         "url": "{{ site.url + page.url }}",
         "description": "{{ description or site.description }}",
+        "image": "{{ site.url }}{{ site.cover }}",
         "author": {
           "@type": "Person",
           "name": "{{ site.author }}"
@@ -126,13 +147,34 @@
         },
         "isPartOf": {
           "@type": "WebSite",
-          "name": "{{ site.title }}",
-          "url": "{{ site.url }}"
+          "@id": "{{ site.url }}/#website"
         }
       }{% endif %}
     ]
   }
   </script>
+  {% if type == "article" %}
+  {# BreadcrumbList for doc pages — helps Google show breadcrumb trails in search results #}
+  {% set breadcrumbItems = page.url | docsBreadcrumbs(title, site.url) | parse %}
+  {% if breadcrumbItems.length > 0 %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {% for item in breadcrumbItems %}
+      {
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "name": "{{ item.name }}",
+        "item": "{{ item.url }}"
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+  </script>
+  {% endif %}
+  {% endif %}
   <script src="/js/alpine.js" defer></script>
   {% include "partials/analytics.njk" %}
   <link rel="preconnect" href="https://fonts.googleapis.com">

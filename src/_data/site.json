@@ -1,10 +1,10 @@
 {
   "title": "CommandBridge",
-  "description": "Bridge commands between Velocity and all kinds of servers using scripts. This helps to execute commands global across all your network",
+  "description": "Connect all your servers and bridge commands across your entire Minecraft network with scripts, WebSocket or Redis.",
   "url": "https://cb.objz.dev",
   "author": "objz",
   "keywords": "minecraft, velocity, paper, purpur, bukkit, spigot, folia, proxy, commands, commandbridge, bridge, network, plugin, forwarding, sync, cross server, multi server",
-  "cover": "/cover.png",
+  "cover": "/assets/og-cover.png",
   "locale": "en_US"
 }
 

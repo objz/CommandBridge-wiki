@@ -3,7 +3,8 @@ permalink: /sitemap.xml
 eleventyExcludeFromCollections: true
 ---
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   {%- for item in collections.all %}
   {%- if not item.data.eleventyExcludeFromCollections %}
   <url>
@@ -12,9 +13,25 @@ eleventyExcludeFromCollections: true
     {%- if item.url == "/" %}
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>{{ site.url }}{{ site.cover }}</image:loc>
+      <image:title>CommandBridge - Bridge commands across your Minecraft network</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>{{ site.url }}/media/svg/commandbridge.svg</image:loc>
+      <image:title>CommandBridge Logo</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>{{ site.url }}/android-chrome-512x512.png</image:loc>
+      <image:title>CommandBridge Icon</image:title>
+    </image:image>
     {%- elif "/docs/" in item.url %}
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>{{ site.url }}{{ site.cover }}</image:loc>
+      <image:title>CommandBridge - {{ item.data.title }}</image:title>
+    </image:image>
     {%- else %}
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
