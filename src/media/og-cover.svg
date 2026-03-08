@@ -85,10 +85,10 @@
 
   <!-- Description (pushed down for better spacing) -->
   <text font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-weight="400" font-size="15" fill="#94a3b8">
-    <tspan x="72" y="278">Bridge commands between your Velocity</tspan>
-    <tspan x="72" y="299">proxy and backend servers. Define once</tspan>
-    <tspan x="72" y="320">in YAML, execute anywhere on your network.</tspan>
+        font-weight="400" font-size="17" fill="#94a3b8">
+    <tspan x="72" y="288">Bridge commands between your Velocity</tspan>
+    <tspan x="72" y="309">proxy and backend servers. Define once</tspan>
+    <tspan x="72" y="330">in YAML, execute anywhere on your network.</tspan>
 
   </text>
 
