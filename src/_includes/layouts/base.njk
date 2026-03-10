@@ -188,7 +188,9 @@
     {{ content | safe }}
   </main>
 
+  {% if not hideFooter %}
   {% include "partials/footer.njk" %}
+  {% endif %}
   {% include "partials/cookie-banner.njk" %}
 </body>
 

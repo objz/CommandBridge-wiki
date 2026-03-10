@@ -1,477 +1,1222 @@
 ---
 layout: layouts/base.njk
-title: Dump
+title: Dump Viewer
 permalink: /dump/
+description: "Inspect CommandBridge support dumps — servers, scripts, config, and diagnostics."
+hideFooter: true
 ---
 
-<div x-data="decoder()" x-init="init()" class="h-screen bg-background overflow-hidden flex flex-col">
-  <!-- Main Content Area -->
-  <div class="flex h-full overflow-hidden min-h-0">
-    <!-- Left Sidebar: Servers & Scripts -->
-    <div class="flex flex-col w-80 bg-card border-r shadow-sm overflow-hidden">
-      <!-- Servers Section -->
-      <div class="flex-none px-4 py-3 border-b bg-muted/50">
-        <h2 class="text-sm font-semibold text-foreground">Servers</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+
+<div x-data="dumpViewer()" x-init="init()" class="dv-root">
+
+  {# ── Error overlay ── #}
+  <div x-show="error" x-cloak class="dv-overlay dv-overlay-err">
+    <span x-text="error"></span>
+    <button class="dv-link" @click="error = ''">dismiss</button>
+  </div>
+
+  {# ══════════ LEFT COLUMN ══════════ #}
+  <aside class="dv-col dv-left">
+
+    {# ── Servers ── #}
+    <div class="dv-panel">
+      <div class="dv-panel-head">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        <span>Servers</span>
+        <span class="dv-panel-count" x-show="hasDump" x-text="servers().length" x-cloak></span>
       </div>
-      <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
-        <template x-for="(entry, i) in entries" :key="entry.id">
-          <button
-            @click="selectServer(i)"
-            :class="i===activeServer ? 'button w-full text-left justify-start' : 'button-outline w-full text-left justify-start hover:bg-accent'"
-            class="text-sm truncate transition-colors"
-          >
-            <span x-text="entry.label" class="truncate"></span>
+      <div class="dv-list" x-show="hasDump">
+        <template x-for="(srv, i) in servers()" :key="i">
+          <button class="dv-item" :class="isActive('server', i) && 'dv-item-active'" @click="openServer(i)">
+            <span class="dv-dot" :class="srv.connected ? 'dv-dot-on' : 'dv-dot-off'"></span>
+            <span class="dv-item-name" x-text="srv.label"></span>
+            <span class="dv-item-tag" x-text="srv.location"></span>
           </button>
         </template>
-        <template x-if="entries.length === 0">
-          <div class="text-muted-foreground text-sm p-4 text-center">
-            <p>No servers loaded</p>
-            <p class="text-xs mt-1">Add an ID parameter to the URL</p>
-          </div>
-        </template>
       </div>
-      
-      <!-- Scripts Section -->
-      <div class="flex-none px-4 py-3 border-t bg-muted/50">
-        <h2 class="text-sm font-semibold text-foreground">Scripts</h2>
+      <div class="dv-sidebar-empty" x-show="!hasDump" x-cloak>
+        <p>No servers loaded</p>
       </div>
-      <div class="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
-        <template x-for="(script, j) in activeEntry.scripts" :key="j">
-          <button
-            @click="selectScript(j)"
-            :class="j===activeScript ? 'button w-full text-left justify-start' : 'button-outline w-full text-left justify-start hover:bg-accent'"
-            class="text-sm truncate transition-colors"
-          >
-            <div class="flex items-center gap-2 w-full">
-              <div :class="script.enabled ? 'bg-gray-400' : 'bg-gray-600'" class="w-2 h-2 rounded-full flex-shrink-0"></div>
-              <span x-text="script.name || 'Unnamed Script'" class="truncate"></span>
-            </div>
-          </button>
-        </template>
-        <template x-if="activeEntry.scripts && activeEntry.scripts.length === 0">
-          <div class="text-muted-foreground text-sm p-4 text-center">
-            <p>No scripts available</p>
-          </div>
-        </template>
+      <div class="dv-sidebar-empty" x-show="hasDump && servers().length === 0" x-cloak>
+        <p>No servers in dump</p>
       </div>
     </div>
 
-    <!-- Main Content: Selected Script -->
-    <div class="flex-1 bg-card border-r shadow-sm overflow-hidden min-w-0 flex flex-col">
-      <div class="flex-none px-4 py-3 border-b bg-muted/50">
-        <h2 class="text-sm font-semibold text-foreground">Script Details</h2>
+    {# ── Scripts ── #}
+    <div class="dv-panel dv-panel-grow">
+      <div class="dv-panel-head">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Scripts</span>
+        <span class="dv-panel-count" x-show="hasDump" x-text="scriptsList().length" x-cloak></span>
       </div>
-      <div class="flex-1 p-4 overflow-hidden min-h-0">
-        <template x-if="activeScriptObject">
-          <div class="h-full border rounded-lg overflow-auto">
-            <pre class="text-sm leading-relaxed m-0 p-4 h-full overflow-auto"><code x-html="highlightedYaml(activeScriptObject)" class="language-yaml block"></code></pre>
-          </div>
+      <div class="dv-list" x-show="hasDump">
+        <template x-for="(s, i) in scriptsList()" :key="i">
+          <button class="dv-item" :class="isActive('script', i) && 'dv-item-active'" @click="openScript(i)">
+            <span class="dv-dot" :class="s.enabled ? 'dv-dot-on' : 'dv-dot-off'"></span>
+            <span class="dv-item-name" x-text="scriptName(s, i)"></span>
+          </button>
         </template>
-        <template x-if="!activeScriptObject">
-          <div class="flex items-center justify-center h-full text-muted-foreground">
-            <div class="text-center">
-              <div class="w-12 h-12 mx-auto mb-4 rounded-lg bg-muted flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-              </div>
-              <p class="text-sm">Select a script to view its configuration</p>
-              <p class="text-xs mt-1">Choose from the scripts list on the left</p>
-            </div>
-          </div>
-        </template>
+      </div>
+      <div class="dv-sidebar-empty" x-show="!hasDump" x-cloak>
+        <p>No scripts available</p>
+      </div>
+      <div class="dv-sidebar-empty" x-show="hasDump && scriptsList().length === 0" x-cloak>
+        <p>No scripts in dump</p>
       </div>
     </div>
+  </aside>
 
-    <!-- Right Panels: Meta & Config -->
-    <div class="flex flex-col w-80 bg-card shadow-sm overflow-hidden">
-      <!-- Meta Information -->
-      <div class="flex-1 overflow-hidden border-b flex flex-col min-h-0">
-        <div class="flex-none px-4 py-3 border-b bg-muted/50">
-          <h3 class="text-sm font-semibold text-foreground">Meta Information</h3>
+  {# ══════════ CENTER COLUMN ══════════ #}
+  <main class="dv-col dv-center">
+
+    {# ── Loading (inline) ── #}
+    <div class="dv-center-empty" x-show="loading" x-cloak>
+      <span class="dv-spinner dv-spinner-lg"></span>
+      <p>Loading dump...</p>
+    </div>
+
+    {# ── No dump loaded ── #}
+    <div class="dv-landing" x-show="!hasDump && !loading" x-cloak>
+      <div class="dv-landing-inner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="dv-landing-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <h2 class="dv-landing-title">Dump Viewer</h2>
+        <p class="dv-landing-desc">View and inspect CommandBridge support dumps.</p>
+        <div class="dv-landing-input-wrap">
+          <label class="dv-landing-label" for="dv-id-input">Dump ID</label>
+          <div class="dv-landing-row">
+            <input id="dv-id-input" type="text" class="dv-landing-input" placeholder="Paste a dump ID..." x-model="queryId" @keydown.enter="loadDump(queryId)"/>
+            <button class="dv-landing-btn" @click="loadDump(queryId)" :disabled="!queryId.trim()">Load</button>
+          </div>
         </div>
-        <div class="flex-1 p-4 pt-6 overflow-y-auto min-h-0">
-          <template x-if="Object.keys(activeEntry.header || {}).length > 0">
-            <div class="space-y-4">
-              <template x-for="[key, value] in Object.entries(activeEntry.header || {})" :key="key">
-                <div class="flex flex-col space-y-2">
-                  <div class="text-xs font-medium text-muted-foreground uppercase tracking-wide" x-text="key.replace(/([A-Z])/g, ' $1').trim()"></div>
-                  <div class="text-sm text-foreground font-mono bg-muted rounded px-2 py-1.5" x-text="value || 'N/A'"></div>
+        <div class="dv-landing-hint">
+          <p>Run <code>/cb dump</code> in-game to generate a dump, then paste the ID above.</p>
+          <p>Or open <code>/dump/?id=&lt;id&gt;</code> directly.</p>
+        </div>
+      </div>
+    </div>
+
+    {# ── No selection (dump loaded) ── #}
+    <div class="dv-center-empty" x-show="hasDump && !view" x-cloak>
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="dv-center-icon"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      <p>Select a server or script</p>
+      <p class="dv-muted">Choose an item from the left sidebar</p>
+    </div>
+
+    {# ── Script detail ── #}
+    <div x-show="view === 'script'" x-cloak class="dv-detail">
+      <div class="dv-detail-head">
+        <h2 class="dv-detail-title" x-text="detailTitle"></h2>
+        <span class="dv-dot dv-dot-inline" :class="activeScript()?.enabled ? 'dv-dot-on' : 'dv-dot-off'"></span>
+        <span class="dv-detail-subtitle" x-text="activeScript()?.enabled ? 'Enabled' : 'Disabled'"></span>
+        <button class="dv-link dv-ml-auto" @click="copyYaml(activeScript())">copy yaml</button>
+      </div>
+
+      <template x-if="activeScript()">
+        <div>
+          <div class="dv-card">
+            <div class="dv-card-head">Script</div>
+            <pre class="dv-pre"><code class="language-yaml" x-html="highlightScriptYaml(activeScript())"></code></pre>
+          </div>
+
+          {# Per-script graph #}
+          <template x-if="scriptGraphData()">
+            <div class="dv-card">
+              <div class="dv-card-head">Execution Map</div>
+              <div :id="'cy-script-' + activeScriptIndex" class="dv-cy" x-init="$nextTick(() => renderScriptGraph())"></div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    {# ── Server detail ── #}
+    <div x-show="view === 'server'" x-cloak class="dv-detail">
+      <div class="dv-detail-head">
+        <h2 class="dv-detail-title" x-text="detailTitle"></h2>
+        <span class="dv-dot dv-dot-inline" :class="activeServerData()?.connected ? 'dv-dot-on' : 'dv-dot-off'"></span>
+        <span class="dv-detail-subtitle" x-text="activeServerData()?.isProxy ? 'Proxy' : (activeServerData()?.connected ? 'Connected' : 'Disconnected')"></span>
+      </div>
+
+      {# Velocity proxy view #}
+      <template x-if="activeServerData() && activeServerData().isProxy">
+        <div>
+          <div class="dv-card">
+            <div class="dv-card-head">Server Information</div>
+            <dl class="dv-dl">
+              <dt>Platform</dt>
+              <dd x-text="pluginMetric('platform')"></dd>
+              <dt>Plugin</dt>
+              <dd><span x-text="pluginMetric('name')"></span> <span class="dv-muted" x-text="pluginMetric('version')"></span></dd>
+              <dt>Java</dt>
+              <dd x-text="runtimeMetric('javaVersion')"></dd>
+              <dt>OS</dt>
+              <dd><span x-text="runtimeMetric('os')"></span> <span class="dv-muted" x-text="runtimeMetric('osArch')"></span></dd>
+              <dt>Uptime</dt>
+              <dd x-text="formatDuration(runtimeMetric('uptimeMs'))"></dd>
+              <dt>Memory</dt>
+              <dd x-text="memoryLabel()"></dd>
+              <dt>Clients</dt>
+              <dd x-text="summaryMetric('totalClients') + ' total, ' + summaryMetric('connectedClients') + ' connected'"></dd>
+            </dl>
+          </div>
+
+          <div class="dv-card">
+            <div class="dv-card-head">Configuration</div>
+            <pre class="dv-pre"><code class="language-yaml" x-html="highlightYaml(dv('config', {}))"></code></pre>
+          </div>
+        </div>
+      </template>
+
+      {# Backend server view #}
+      <template x-if="activeServerData() && !activeServerData().isProxy">
+        <div>
+          <div class="dv-card">
+            <div class="dv-card-head">Session</div>
+            <dl class="dv-dl">
+              <dt>ID</dt>
+              <dd><code x-text="activeServerData().id"></code></dd>
+              <dt>Location</dt>
+              <dd x-text="activeServerData().location"></dd>
+              <dt>Status</dt>
+              <dd><span class="dv-status-badge" :class="statusClass(activeServerData().status)" x-text="activeServerData().status"></span></dd>
+              <dt>Endpoint</dt>
+              <dd><code class="dv-code-sm" x-text="safe(activeServerData().endpoint)"></code></dd>
+              <dt>Targeted Scripts</dt>
+              <dd x-text="safe(activeServerData().targetedScriptCount, 0)"></dd>
+            </dl>
+          </div>
+
+          {# Remote snapshot #}
+          <template x-if="activeServerRemote()">
+            <div>
+              <template x-if="activeServerRemote().snapshot && activeServerRemote().snapshot.runtime">
+                <div class="dv-card">
+                  <div class="dv-card-head">Remote Snapshot</div>
+                  <dl class="dv-dl">
+                    <dt>Platform</dt>
+                    <dd x-text="safe(activeServerRemote().snapshot.runtime.platform)"></dd>
+                    <dt>Java</dt>
+                    <dd x-text="safe(activeServerRemote().snapshot.runtime.javaVersion)"></dd>
+                    <dt>OS</dt>
+                    <dd><span x-text="safe(activeServerRemote().snapshot.runtime.os)"></span> <span class="dv-muted" x-text="safe(activeServerRemote().snapshot.runtime.osArch)"></span></dd>
+                    <dt>Uptime</dt>
+                    <dd x-text="formatDuration(activeServerRemote().snapshot.runtime.uptimeMs)"></dd>
+                    <dt>Players</dt>
+                    <dd x-text="safe(activeServerRemote().snapshot.runtime.playerCount, 0)"></dd>
+                  </dl>
+                </div>
+              </template>
+              <template x-if="!activeServerRemote().collected">
+                <div class="dv-card">
+                  <div class="dv-card-head">Remote Snapshot</div>
+                  <p class="dv-muted" style="padding:12px 14px;font-size:12px">Collection failed: <span class="text-destructive" x-text="safe(activeServerRemote().reason, 'unknown')"></span></p>
+                </div>
+              </template>
+
+              {# Client config #}
+              <template x-if="activeServerRemote().snapshot && activeServerRemote().snapshot.config">
+                <div class="dv-card">
+                  <div class="dv-card-head">Configuration</div>
+                  <pre class="dv-pre"><code class="language-yaml" x-html="highlightYaml(activeServerRemote().snapshot.config)"></code></pre>
+                </div>
+              </template>
+
+              {# Registered commands #}
+              <template x-if="activeServerRemote().snapshot && activeServerRemote().snapshot.registeredCommands && activeServerRemote().snapshot.registeredCommands.length">
+                <div class="dv-card">
+                  <div class="dv-card-head">Registered Commands <span class="dv-card-count" x-text="activeServerRemote().snapshot.registeredCommands.length"></span></div>
+                  <div class="dv-tags" style="padding:12px 14px">
+                    <template x-for="cmd in activeServerRemote().snapshot.registeredCommands" :key="cmd">
+                      <code class="dv-tag" x-text="cmd"></code>
+                    </template>
+                  </div>
                 </div>
               </template>
             </div>
           </template>
-          <template x-if="Object.keys(activeEntry.header || {}).length === 0">
-            <div class="flex items-center justify-center h-full">
-              <div class="text-center">
-                <p class="text-sm text-muted-foreground">No meta information available</p>
-              </div>
+
+          {# Server connection graph #}
+          <template x-if="serverGraphData()">
+            <div class="dv-card">
+              <div class="dv-card-head">Connection Map</div>
+              <div :id="'cy-server-' + activeServerIndex" class="dv-cy" x-init="$nextTick(() => renderServerGraph())"></div>
             </div>
           </template>
+        </div>
+      </template>
+    </div>
+  </main>
+
+  {# ══════════ RIGHT COLUMN ══════════ #}
+  <aside class="dv-col dv-right">
+    <div class="dv-panel dv-panel-grow">
+      <div class="dv-panel-head">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>General</span>
+      </div>
+      <div x-show="hasDump" class="dv-meta">
+        <dl class="dv-dl-meta">
+          <dt>Dump ID</dt>
+          <dd><code class="dv-code-sm" x-text="dumpId"></code></dd>
+
+          <dt>Plugin</dt>
+          <dd>
+            <span x-text="pluginMetric('name')"></span>
+            <span class="dv-muted" x-text="pluginMetric('version')"></span>
+          </dd>
+
+          <dt>Platform</dt>
+          <dd x-text="pluginMetric('platform')"></dd>
+
+          <dt>Java</dt>
+          <dd x-text="runtimeMetric('javaVersion')"></dd>
+
+          <dt>OS</dt>
+          <dd>
+            <span x-text="runtimeMetric('os')"></span>
+            <span class="dv-muted" x-text="runtimeMetric('osArch')"></span>
+          </dd>
+
+          <dt>Uptime</dt>
+          <dd x-text="formatDuration(runtimeMetric('uptimeMs'))"></dd>
+
+          <dt>Memory</dt>
+          <dd x-text="memoryLabel()"></dd>
+
+          <dt>Created</dt>
+          <dd x-text="formatTime(envelopeValue('createdAt'))"></dd>
+
+          <dt>Expires</dt>
+          <dd x-text="formatTime(envelopeValue('expiresAt'))"></dd>
+        </dl>
+        <div class="dv-meta-actions">
+          <button class="dv-link" @click="copyViewerUrl()">copy link</button>
+          <a class="dv-link" :href="rawApiUrl()" target="_blank">raw json</a>
         </div>
       </div>
-
-      <!-- Configuration -->
-      <div class="flex-1 overflow-hidden flex flex-col min-h-0">
-        <div class="flex-none px-4 py-3 border-b bg-muted/50">
-          <h3 class="text-sm font-semibold text-foreground">Configuration</h3>
-        </div>
-        <div class="flex-1 p-4 overflow-hidden min-h-0">
-          <template x-if="Object.keys(activeEntry.config || {}).length > 0">
-            <div class="border rounded-lg h-full overflow-auto">
-              <pre class="text-sm leading-relaxed m-0 p-4 h-full overflow-auto"><code x-html="highlightedYaml(activeEntry.config)" class="language-yaml block"></code></pre>
-            </div>
-          </template>
-          <template x-if="Object.keys(activeEntry.config || {}).length === 0">
-            <div class="flex items-center justify-center h-full">
-              <div class="text-center">
-                <div class="w-10 h-10 mx-auto mb-3 rounded-lg bg-muted flex items-center justify-center">
-                  <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                </div>
-                <p class="text-sm text-muted-foreground">No configuration available</p>
-              </div>
-            </div>
-          </template>
-        </div>
+      <div class="dv-sidebar-empty" x-show="!hasDump" x-cloak>
+        <p>No dump loaded</p>
       </div>
     </div>
-  </div>
+  </aside>
 </div>
 
-<!-- Loading State -->
-<div x-data="{ loading: true }" x-init="setTimeout(() => loading = false, 1000)" x-show="loading" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center" x-transition:opacity>
-  <div class="bg-card border rounded-lg p-6 shadow-lg">
-    <div class="flex items-center gap-3">
-      <div class="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
-      <p class="text-sm text-foreground">Loading...</p>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 <script>
-function decoder() {
+const DUMP_API = "https://cb.objz.dev/api/dump";
+
+function dumpViewer() {
   return {
-    entries: [], 
-    activeServer: 0, 
-    activeScript: 0,
-    
-    async init() {
-      const id = new URLSearchParams(location.search).get('id');
-      if (!id) return;
-      
+    queryId: "",
+    dumpId: "",
+    loading: false,
+    error: "",
+    hasDump: false,
+    envelope: null,
+    dump: null,
+
+    view: "",
+    viewKey: null,
+    detailTitle: "",
+
+    activeScriptIndex: -1,
+    activeServerIndex: -1,
+
+    cyInstances: {},
+
+    init() {
+      const id = this.extractId();
+      if (id) this.loadDump(id);
+    },
+
+    extractId() {
+      const params = new URLSearchParams(window.location.search);
+      const q = (params.get("id") || "").trim();
+      if (q) return q;
+      const parts = window.location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+      if (parts.length === 2 && parts[0] === "dump") return parts[1];
+      return "";
+    },
+
+    async loadDump(id) {
+      if (!id || typeof id !== "string") return;
+      id = id.trim();
+      if (!/^[a-zA-Z0-9_-]{8,64}$/.test(id)) {
+        this.error = "Invalid dump ID.";
+        return;
+      }
+      this.loading = true;
+      this.error = "";
+      this.hasDump = false;
+      this.view = "";
       try {
-        const res = await fetch(`https://cb.objz.dev/api/fetch?id=${encodeURIComponent(id)}`);
-        const raw = await res.text();
-        const parts = this.splitPayload(raw);
-        this.entries = parts.map(p => {
-          const d = this.parseDecoded(p.text);
-          return { 
-            id: p.id, 
-            label: p.label, 
-            header: d.header, 
-            config: d.config, 
-            scripts: d.scripts 
-          };
-        });
+        const res = await fetch(`${DUMP_API}/${encodeURIComponent(id)}`, { headers: { Accept: "application/json" } });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+        this.dumpId = id;
+        this.envelope = body;
+        this.dump = body.data || {};
+        this.hasDump = true;
+        try {
+          const url = new URL(window.location.href);
+          url.search = `?id=${encodeURIComponent(id)}`;
+          window.history.replaceState({}, "", url.toString());
+        } catch {}
       } catch (e) {
-        console.error('Failed to load decoder data:', e);
+        this.error = e?.message || "Failed to load dump.";
+      } finally {
+        this.loading = false;
       }
     },
-    
-    selectServer(i) { 
-      this.activeServer = i; 
-      this.activeScript = 0;
-    },
-    
-    selectScript(j) { 
-      this.activeScript = j;
-    },
-    
-    get activeEntry() { 
-      return this.entries[this.activeServer] || { scripts: [], header: {}, config: {} }; 
-    },
-    
-    get activeScriptObject() { 
-      return (this.activeEntry.scripts || [])[this.activeScript] || null; 
+
+    /* ── Navigation ── */
+
+    isActive(type, key) {
+      return this.view === type && this.viewKey === key;
     },
 
-    highlightedYaml(obj) {
-      const yamlText = this.formatAsYaml(obj);
-      return this.customYamlHighlight(yamlText);
+    openScript(i) {
+      this.view = "script";
+      this.viewKey = i;
+      this.activeScriptIndex = i;
+      this.detailTitle = this.scriptName(this.scriptsList()[i], i);
+      this.$nextTick(() => this.renderScriptGraph());
     },
 
-    customYamlHighlight(yamlText) {
-      const lines = yamlText.split('\n');
-      const highlightedLines = [];
-      
+    openServer(i) {
+      this.view = "server";
+      this.viewKey = i;
+      this.activeServerIndex = i;
+      const srv = this.servers()[i];
+      this.detailTitle = srv ? srv.label : "Server";
+      this.$nextTick(() => this.renderServerGraph());
+    },
+
+    /* ── Data helpers ── */
+
+    dv(key, fb) { return this.dump?.[key] ?? fb; },
+    summaryMetric(key) { return this.dv("network", {}).summary?.[key] ?? 0; },
+    scriptsMetric(key) { return this.dv("scripts", {})[key] ?? 0; },
+    registrationMetric(key) { return this.dv("registrations", {})[key] ?? "-"; },
+    pluginMetric(key) { return this.dv("plugin", {})[key] ?? "-"; },
+    runtimeMetric(key) { return this.dv("runtime", {})[key] ?? "-"; },
+    envelopeValue(key) { return this.envelope?.[key] ?? "-"; },
+
+    servers() {
+      const proxy = {
+        id: this.registrationMetric("localServerId") || "velocity",
+        label: this.registrationMetric("localServerId") || "Velocity",
+        location: "VELOCITY",
+        connected: true,
+        status: "PROXY",
+        isProxy: true
+      };
+
+      const clients = this.dv("network", {}).clients;
+      const backends = Array.isArray(clients) ? clients.map(c => ({
+        ...c,
+        label: c.id || c.location || "unknown",
+        isProxy: false
+      })) : [];
+
+      return [proxy, ...backends];
+    },
+
+    scriptsList() {
+      const list = this.dv("scripts", {}).entries;
+      return Array.isArray(list) ? list.filter(x => x && typeof x === "object") : [];
+    },
+
+    activeScript() {
+      const list = this.scriptsList();
+      if (this.activeScriptIndex < 0 || this.activeScriptIndex >= list.length) return null;
+      return list[this.activeScriptIndex];
+    },
+
+    activeServerData() {
+      const list = this.servers();
+      if (this.activeServerIndex < 0 || this.activeServerIndex >= list.length) return null;
+      return list[this.activeServerIndex];
+    },
+
+    activeServerRemote() {
+      const srv = this.activeServerData();
+      if (!srv || srv.isProxy) return null;
+      const entries = this.dv("remoteClients", {}).entries;
+      if (!Array.isArray(entries)) return null;
+      return entries.find(e => e.id === srv.id) || null;
+    },
+
+    scriptName(s, i) {
+      if (!s) return `script-${i + 1}`;
+      return s.name || s.id || `script-${i + 1}`;
+    },
+
+    statusClass(status) {
+      if (status === "AUTH_OK") return "dv-status-ok";
+      if (status === "AUTH_FAIL" || status === "UNKNOWN") return "dv-status-err";
+      return "dv-status-warn";
+    },
+
+    safe(v, fb = "-") { return v == null || v === "" ? fb : v; },
+
+    /* ── Deep equality (used by highlightScriptYaml) ── */
+
+    deepEqual(a, b) {
+      if (a === b) return true;
+      if (a == null && b == null) return true;
+      if (a == null || b == null) return false;
+      if (typeof a !== typeof b) return false;
+      if (typeof a !== "object") return String(a) === String(b);
+      if (Array.isArray(a) !== Array.isArray(b)) return false;
+      if (Array.isArray(a)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+          if (!this.deepEqual(a[i], b[i])) return false;
+        }
+        return true;
+      }
+      const ka = Object.keys(a), kb = Object.keys(b);
+      if (ka.length !== kb.length) return false;
+      for (const k of ka) {
+        if (!this.deepEqual(a[k], b[k])) return false;
+      }
+      return true;
+    },
+
+    /* ── Formatting ── */
+
+    formatTime(v) {
+      if (!v || v === "-") return "-";
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? String(v) : d.toLocaleString();
+    },
+
+    formatDuration(ms) {
+      const v = Number(ms);
+      if (!Number.isFinite(v) || v < 0) return "-";
+      const s = Math.floor(v / 1000);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const r = s % 60;
+      if (h > 0) return `${h}h ${m}m ${r}s`;
+      if (m > 0) return `${m}m ${r}s`;
+      return `${r}s`;
+    },
+
+    formatBytes(b) {
+      const v = Number(b);
+      if (!Number.isFinite(v) || v < 0) return "-";
+      if (v < 1024) return `${v} B`;
+      if (v < 1048576) return `${(v / 1024).toFixed(1)} KB`;
+      return `${(v / 1048576).toFixed(1)} MB`;
+    },
+
+    memoryLabel() {
+      const m = this.runtimeMetric("memory");
+      if (!m || typeof m !== "object") return "-";
+      const used = this.formatBytes(m.usedBytes || 0);
+      const max = m.maxBytes ? this.formatBytes(m.maxBytes) : null;
+      return max ? `${used} / ${max}` : used;
+    },
+
+    /* ── YAML / highlighting ── */
+
+    toYaml(v) {
+      try {
+        if (typeof jsyaml !== "undefined") return jsyaml.dump(v, { indent: 2, lineWidth: 120, noRefs: true });
+      } catch {}
+      try { return JSON.stringify(v, null, 2); } catch { return String(v); }
+    },
+
+    highlightYaml(v) {
+      const yaml = this.toYaml(v);
+      try {
+        if (typeof hljs !== "undefined") return hljs.highlight(yaml, { language: "yaml" }).value;
+      } catch {}
+      return this.esc(yaml);
+    },
+
+    /* Build YAML for a script with inherited command fields grayed out */
+    highlightScriptYaml(script) {
+      if (!script) return "";
+      const yaml = this.toYaml(script);
+      const lines = yaml.split("\n");
+      const defaults = script.defaults || {};
+      const mergeFields = ["runAs", "execute", "server", "delay", "cooldown"];
+
+      /* Find each command entry in commands array and check its fields */
+      let inCommands = false;
+      let commandIndent = -1;
+      let listItemIndent = -1;  /* indent of "- " for command array entries */
+      let entryIndent = -1;     /* indent of fields within a command entry */
+      let currentCmd = -1;
+      let currentField = null;
+      let currentFieldIndent = -1;
+      const inheritedLines = new Set();
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        
-        if (/^\s*-\s+[a-zA-Z0-9_-]+\s*:\s*/.test(line)) {
-          const highlighted = line.replace(/^(\s*)(- )([a-zA-Z0-9_-]+)(\s*:\s*)(.*)$/, (match, indent, dash, key, colon, value) => {
-            return `${indent}<span class="syntax-dash">${dash}</span><span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span><span class="syntax-value">${value}</span>`;
-          });
-          highlightedLines.push(highlighted);
-          continue;
-        }
-        
-        if (/^\s*- /.test(line)) {
-          const highlighted = line.replace(/^(\s*)(- )(.*)$/, (match, indent, dash, value) => {
-            return `${indent}<span class="syntax-dash">${dash}</span><span class="syntax-value">${value}</span>`;
-          });
-          highlightedLines.push(highlighted);
-          continue;
-        }
-        
-        if (/^\s*[a-zA-Z0-9_-]+\s*:\s*/.test(line)) {
-          const highlighted = line.replace(/^(\s*)([a-zA-Z0-9_-]+)(\s*:\s*)(.*)$/, (match, indent, key, colon, value) => {
-            const isParentKey = !value.trim();
-            if (isParentKey) {
-              return `${indent}<span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span>`;
-            } else {
-              return `${indent}<span class="syntax-key">${key}</span><span class="syntax-colon">${colon}</span><span class="syntax-value">${value}</span>`;
-            }
-          });
-          highlightedLines.push(highlighted);
-          continue;
-        }
-        
-        highlightedLines.push(line);
-      }
-      
-      return highlightedLines.join('\n');
-    },
+        const trimmed = line.trimStart();
+        const indent = line.length - trimmed.length;
 
-    formatAsYaml(obj, indent = 0) {
-      if (obj === null || obj === undefined) {
-        return 'null';
-      }
-      
-      if (typeof obj === 'string') {
-        if (obj === '' || obj.includes(':') || obj.includes('#') || obj.includes('\n') || obj.match(/^\d+$/) || obj === 'true' || obj === 'false') {
-          return `"${obj.replace(/"/g, '\\"')}"`;
+        /* Detect "commands:" top-level key */
+        if (/^commands:/.test(trimmed) && indent === 0) {
+          inCommands = true;
+          commandIndent = indent;
+          listItemIndent = commandIndent + 2; /* "- " entries are 2 deeper */
+          currentCmd = -1;
+          currentField = null;
+          continue;
         }
-        return obj;
-      }
-      
-      if (typeof obj === 'number' || typeof obj === 'boolean') {
-        return String(obj);
-      }
-      
-      if (Array.isArray(obj)) {
-        if (obj.length === 0) {
-          return '[]';
+
+        /* Left another top-level key */
+        if (inCommands && indent === 0 && trimmed && !trimmed.startsWith("-") && !trimmed.startsWith("#")) {
+          inCommands = false;
+          currentField = null;
+          continue;
         }
-        const spaces = ' '.repeat(indent);
-        return obj.map(item => `${spaces}- ${this.formatAsYaml(item, indent + 2).replace(/^\s+/, '')}`).join('\n');
-      }
-      
-      if (typeof obj === 'object') {
-        const entries = Object.entries(obj);
-        if (entries.length === 0) {
-          return '{}';
+
+        if (!inCommands) continue;
+
+        /* Detect command array entry "- command: ..." — only at the expected list indent */
+        if (trimmed.startsWith("- ") && indent === listItemIndent) {
+          currentCmd++;
+          entryIndent = indent + 2;
+          currentField = null;
+
+          /* The "- command: xxx" line itself is the template — never gray */
+          continue;
         }
-        
-        const spaces = ' '.repeat(indent);
-        return entries.map(([key, value]) => {
-          const formattedValue = this.formatAsYaml(value, indent + 2);
-          if (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length > 0) {
-            return `${spaces}${key}:\n${formattedValue}`;
-          } else if (Array.isArray(value) && value.length > 0) {
-            return `${spaces}${key}:\n${formattedValue}`;
+
+        if (currentCmd < 0 || !script.commands || currentCmd >= script.commands.length) continue;
+        const cmd = script.commands[currentCmd];
+
+        /* Detect a field key at entry indent level */
+        const fieldMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9]*)\s*:/);
+        if (fieldMatch && indent === entryIndent) {
+          currentField = fieldMatch[1];
+          currentFieldIndent = indent;
+
+          if (mergeFields.includes(currentField) && this.deepEqual(cmd[currentField], defaults[currentField])) {
+            inheritedLines.add(i);
           } else {
-            return `${spaces}${key}: ${formattedValue}`;
+            currentField = null;
           }
-        }).join('\n');
-      }
-      
-      return String(obj);
-    },
+          continue;
+        }
 
-    decodePayload(b64) { 
-      let s = b64.replace(/-/g,'+').replace(/_/g,'/'); 
-      while(s.length % 4) s += '='; 
-      const bin = atob(s), a = new Uint8Array(bin.length); 
-      for(let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); 
-      return pako.ungzip(a, {to: 'string'}); 
-    },
-    
-    splitPayload(payload) { 
-      const ps = payload.split('#'), main = ps.shift(); 
-      const out = [{id: 'main', label: 'Main', text: this.decodePayload(main)}]; 
-      for(const p of ps) {
-        const [val, b] = p.split(','); 
-        if(val && b) out.push({id: val, label: val, text: this.decodePayload(b)});
-      } 
-      return out; 
-    },
-    
-    parseDecoded(text) { 
-      const r = {header: {}, config: {}, scripts: []}; 
-      const [h, rest = ''] = text.split('&', 2), hdr = h.split('/'); 
-      
-      if(hdr[0] === 'V') {
-        r.header = {
-          type: 'Velocity',
-          javaVersion: hdr[1] || '',
-          serverVersion: hdr[2] || '',
-          pluginVersion: hdr[3] || ''
-        };
-      } else if(hdr[0] === 'Paper') {
-        r.header = {
-          type: 'Paper',
-          javaVersion: hdr[1] || '',
-          serverVersion: hdr[2] || '',
-          pluginVersion: hdr[3] || ''
-        };
-      } else {
-        r.header = {
-          type: hdr[0] || 'Client',
-          javaVersion: hdr[1] || '',
-          serverVersion: hdr[2] || '',
-          pluginVersion: hdr[3] || ''
-        };
-      }
-      
-      const [cfg, ...sr] = rest.split('@'), vals = cfg.split(','); 
-      
-      if(r.header.type === 'Velocity') { 
-        const [s, d, hst, san, prt, to] = vals; 
-        r.config = {
-          'server-id': this.decFld(s),
-          debug: this.decFld(d) === 'true',
-          host: this.decFld(hst),
-          san: this.decFld(san),
-          port: +this.decFld(prt) || 8080,
-          timeout: +this.decFld(to) || 8
-        }; 
-      } else { 
-        const [c, d, rm, prt, to] = vals; 
-        r.config = {
-          'client-id': this.decFld(c),
-          debug: this.decFld(d) === 'true',
-          remote: this.decFld(rm),
-          port: +this.decFld(prt) || 8080,
-          timeout: +this.decFld(to) || 120
-        }; 
-      } 
-      
-      for(const raw of sr.filter(x => x.trim())) {
-        try { 
-          r.scripts.push(this.parseScript(raw, r.header.type === 'Velocity')); 
-        } catch(e) {
-          console.warn('Failed to parse script:', e);
+        /* If we're inside an inherited field's nested lines, mark those too */
+        if (currentField && indent > currentFieldIndent) {
+          inheritedLines.add(i);
+          continue;
+        }
+
+        /* Moved out of the nested block */
+        if (currentField && indent <= currentFieldIndent) {
+          currentField = null;
+          /* Re-check this line as a new field */
+          const fm2 = trimmed.match(/^([a-zA-Z][a-zA-Z0-9]*)\s*:/);
+          if (fm2 && indent === entryIndent && mergeFields.includes(fm2[1]) && this.deepEqual(cmd[fm2[1]], defaults[fm2[1]])) {
+            currentField = fm2[1];
+            currentFieldIndent = indent;
+            inheritedLines.add(i);
+          }
         }
       }
-      
-      return r; 
+
+      /* Highlight then wrap inherited lines */
+      let highlighted;
+      try {
+        highlighted = (typeof hljs !== "undefined") ? hljs.highlight(yaml, { language: "yaml" }).value : this.esc(yaml);
+      } catch { highlighted = this.esc(yaml); }
+
+      if (inheritedLines.size === 0) return highlighted;
+
+      const hLines = highlighted.split("\n");
+      /* Map highlighted lines back — hljs can split spans across lines but line count stays same */
+      for (const li of inheritedLines) {
+        if (li < hLines.length) {
+          hLines[li] = `<span class="dv-yaml-inherited">${hLines[li]}</span>`;
+        }
+      }
+      return hLines.join("\n");
     },
-    
-    parseScript(raw, isV) { 
-      const [info, ...cs] = raw.split(';'), [nm, al, f36] = info.split(','); 
-      const flags = parseInt(f36 || '0', 36);
-      const s = {
-        name: this.decFld(nm),
-        aliases: this.decList(al),
-        enabled: !!(flags & 4),
-        'ignore-permission-check': !!(flags & 2),
-        'hide-permission-warning': !!(flags & 1),
-        commands: []
-      }; 
-      
-      for(const c of cs) { 
-        const p = c.split(','); 
-        if(p.length < (isV ? 4 : 3)) continue; 
-        
-        const cmd = {
-          command: this.decFld(p[0]),
-          delay: +p[1] || 0
-        }; 
-        
-        if(isV) { 
-          cmd['target-client-ids'] = this.decList(p[2]); 
-          cmd['target-executor'] = p[3] === 'p' ? 'player' : 'console'; 
-          if(p[4]) { 
-            const cf = parseInt(p[4], 36); 
-            cmd['wait-until-player-is-online'] = !!(cf & 4); 
-            cmd['check-if-executor-is-player'] = !!(cf & 2); 
-            cmd['check-if-executor-is-on-server'] = !!(cf & 1);
-          } 
-        } else { 
-          cmd['target-executor'] = p[2] === 'p' ? 'player' : 'console'; 
-          if(p[3]) cmd['check-if-executor-is-player'] = !!(parseInt(p[3], 36) & 1);
-        } 
-        
-        s.commands.push(cmd);
-      } 
-      
-      return s; 
+
+    esc(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     },
-    
-    decFld(v) { 
-      return v === '.' ? '' : v.replace(/\\,/g, ',').replace(/\\;/g, ';'); 
+
+    /* ── Clipboard ── */
+
+    rawApiUrl() { return this.dumpId ? `${DUMP_API}/${encodeURIComponent(this.dumpId)}` : DUMP_API; },
+    async copyViewerUrl() { await this.clip(`https://cb.objz.dev/dump/?id=${encodeURIComponent(this.dumpId)}`); },
+    async copyYaml(v) { await this.clip(this.toYaml(v)); },
+    async clip(t) { try { await navigator.clipboard.writeText(t); } catch { this.error = "Clipboard failed."; } },
+
+    /* ── Cytoscape: per-script graph ── */
+
+    scriptGraphData() {
+      const s = this.activeScript();
+      if (!s) return null;
+      const topo = this.dv("topology", null);
+      if (!topo?.nodes?.length) return null;
+      const sName = s.name || s.id;
+      const scriptNode = topo.nodes.find(n => n.kind === "SCRIPT" && (n.label === sName || n.id === sName));
+      if (!scriptNode) return null;
+      const edges = topo.edges.filter(e => e.from === scriptNode.id || e.to === scriptNode.id);
+      const nodeIds = new Set([scriptNode.id]);
+      edges.forEach(e => { nodeIds.add(e.from); nodeIds.add(e.to); });
+      const extraEdges = topo.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+      const nodes = topo.nodes.filter(n => nodeIds.has(n.id));
+      return { nodes, edges: extraEdges };
     },
-    
-    decList(v) { 
-      return v === '.' ? [] : v.split('|').map(x => this.decFld(x)); 
+
+    renderScriptGraph() {
+      const data = this.scriptGraphData();
+      const id = `cy-script-${this.activeScriptIndex}`;
+      const el = document.getElementById(id);
+      if (!el || !data) return;
+      this.renderCy(el, data);
+    },
+
+    /* ── Cytoscape: per-server graph ── */
+
+    serverGraphData() {
+      const srv = this.activeServerData();
+      if (!srv || srv.isProxy) return null;
+      const topo = this.dv("topology", null);
+      if (!topo?.nodes?.length) return null;
+      const sessionNode = topo.nodes.find(n => n.kind === "SESSION" && (n.id === srv.id || n.label === srv.id));
+      if (!sessionNode) return null;
+      const nodeIds = new Set([sessionNode.id]);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const e of topo.edges) {
+          if (nodeIds.has(e.to) && !nodeIds.has(e.from)) { nodeIds.add(e.from); changed = true; }
+          if (nodeIds.has(e.from) && !nodeIds.has(e.to)) { nodeIds.add(e.to); changed = true; }
+        }
+      }
+      const nodes = topo.nodes.filter(n => nodeIds.has(n.id));
+      const edges = topo.edges.filter(e => nodeIds.has(e.from) && nodeIds.has(e.to));
+      return { nodes, edges };
+    },
+
+    renderServerGraph() {
+      const data = this.serverGraphData();
+      const id = `cy-server-${this.activeServerIndex}`;
+      const el = document.getElementById(id);
+      if (!el || !data) return;
+      this.renderCy(el, data);
+    },
+
+    /* ── Shared Cytoscape renderer ── */
+
+    renderCy(container, data) {
+      const prev = this.cyInstances[container.id];
+      if (prev) { prev.destroy(); delete this.cyInstances[container.id]; }
+
+      const isDark = document.documentElement.classList.contains("dark");
+
+      const kindColors = {
+        VELOCITY_LOCAL: "#3b82f6",
+        SCRIPT: "#8b5cf6",
+        TARGET: "#06b6d4",
+        SESSION: "#10b981"
+      };
+      const kindShapes = {
+        VELOCITY_LOCAL: "round-rectangle",
+        SCRIPT: "diamond",
+        TARGET: "round-rectangle",
+        SESSION: "ellipse"
+      };
+
+      const elements = [];
+      for (const n of data.nodes) {
+        let color = kindColors[n.kind] || "#6b7280";
+        if ((n.kind === "TARGET" || n.kind === "SESSION") && n.connected === false) color = "#ef4444";
+        const shape = kindShapes[n.kind] || "ellipse";
+        elements.push({ group: "nodes", data: { id: n.id, label: n.label || n.id, kind: n.kind, color, shape } });
+      }
+      for (const e of data.edges) {
+        elements.push({ group: "edges", data: { source: e.from, target: e.to, type: e.type } });
+      }
+
+      const edgeColor = isDark ? "rgba(148,163,184,0.35)" : "rgba(100,116,139,0.35)";
+      const textColor = isDark ? "#e2e8f0" : "#1e293b";
+
+      const cy = cytoscape({
+        container,
+        elements,
+        style: [
+          { selector: "node", style: {
+            "background-color": "data(color)",
+            "background-opacity": 0.15,
+            "border-width": 2,
+            "border-color": "data(color)",
+            shape: "data(shape)",
+            label: "data(label)",
+            "font-size": "11px",
+            "font-family": "Inter, system-ui, sans-serif",
+            "font-weight": 500,
+            color: textColor,
+            "text-valign": "center",
+            "text-halign": "center",
+            width: "label",
+            height: 32,
+            "padding": "12px",
+            "text-wrap": "none"
+          }},
+          { selector: 'node[kind="VELOCITY_LOCAL"]', style: {
+            "font-weight": 600,
+            "font-size": "12px",
+            "border-width": 2.5
+          }},
+          { selector: 'node[kind="SCRIPT"]', style: {
+            height: 36,
+            "padding": "16px"
+          }},
+          { selector: "edge", style: {
+            "line-color": edgeColor,
+            "target-arrow-color": edgeColor,
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            width: 1.5,
+            "arrow-scale": 0.7,
+            opacity: 0.8
+          }}
+        ],
+        layout: {
+          name: "concentric",
+          concentric: function(node) {
+            const k = node.data("kind");
+            if (k === "VELOCITY_LOCAL") return 4;
+            if (k === "SCRIPT") return 3;
+            if (k === "TARGET") return 2;
+            if (k === "SESSION") return 1;
+            return 0;
+          },
+          levelWidth: function() { return 1; },
+          spacingFactor: 1.6,
+          padding: 30,
+          minNodeSpacing: 40,
+          avoidOverlap: true,
+          animate: false
+        },
+        userZoomingEnabled: true,
+        userPanningEnabled: true,
+        boxSelectionEnabled: false,
+        minZoom: 0.4,
+        maxZoom: 3
+      });
+
+      cy.on("layoutstop", () => { cy.fit(undefined, 30); });
+      this.cyInstances[container.id] = cy;
     }
   };
 }
 </script>
 
 <style>
-.syntax-key {
-  color: #3665c9;
-  font-weight: normal;
+/* ═══════ Layout ═══════ */
+.dv-root {
+  display: grid;
+  grid-template-columns: 210px 1fr 280px;
+  height: calc(100vh - 64px);
+  overflow: hidden;
 }
 
-.syntax-value {
-  color: #d17224;
-  font-weight: normal;
+.dv-col {
+  overflow-y: auto;
+  border-right: 1px solid hsl(var(--border));
+}
+.dv-col:last-child { border-right: none; }
+
+.dv-left { display: flex; flex-direction: column; }
+.dv-right { display: flex; flex-direction: column; border-left: 1px solid hsl(var(--border)); border-right: none; }
+.dv-center { overflow-y: auto; }
+
+/* ═══════ Panels ═══════ */
+.dv-panel { border-bottom: 1px solid hsl(var(--border)); }
+.dv-panel-grow { border-bottom: none; flex: 1; display: flex; flex-direction: column; }
+.dv-panel-grow .dv-list { flex: 1; overflow-y: auto; }
+
+.dv-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+.dv-panel-head svg { opacity: 0.45; flex-shrink: 0; }
+
+.dv-panel-count {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--accent));
+  border-radius: 999px;
+  padding: 1px 6px;
+  line-height: 1.4;
 }
 
-.syntax-dash,
-.syntax-colon {
-  color: #abb2bf;
+/* ═══════ Lists ═══════ */
+.dv-list { padding: 4px; }
+
+.dv-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+.dv-item:hover { background: hsl(var(--accent)); }
+.dv-item-active {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--border));
 }
 
-@media (prefers-color-scheme: dark) {
-  .syntax-key {
-    color: #3665c9;
-    font-weight: normal;
+.dv-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-item-tag { font-size: 10px; color: hsl(var(--muted-foreground)); text-transform: uppercase; letter-spacing: 0.03em; flex-shrink: 0; }
+
+/* ═══════ Sidebar empty ═══════ */
+.dv-sidebar-empty {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ═══════ Landing (no dump) ═══════ */
+.dv-landing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.dv-landing-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 380px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.dv-landing-icon {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+.dv-landing-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: hsl(var(--foreground));
+}
+.dv-landing-desc {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  margin: 0 0 24px 0;
+}
+.dv-landing-input-wrap {
+  width: 100%;
+  margin-bottom: 20px;
+}
+.dv-landing-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  text-align: left;
+  margin-bottom: 6px;
+}
+.dv-landing-row {
+  display: flex;
+  gap: 8px;
+}
+.dv-landing-input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  outline: none;
+  transition: border-color 0.15s;
+}
+.dv-landing-input:focus { border-color: hsl(var(--ring, var(--border))); }
+.dv-landing-input::placeholder { color: hsl(var(--muted-foreground)); opacity: 0.5; }
+.dv-landing-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--accent));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dv-landing-btn:hover { background: hsl(var(--border)); }
+.dv-landing-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dv-landing-hint {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+}
+.dv-landing-hint code {
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: hsl(var(--accent));
+  border: 1px solid hsl(var(--border));
+}
+
+/* ═══════ Center empty (dump loaded, no selection) ═══════ */
+.dv-center-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 6px;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+}
+.dv-center-icon { opacity: 0.2; }
+
+/* ═══════ Detail panel ═══════ */
+.dv-detail { padding: 20px 24px; }
+.dv-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.dv-detail-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.dv-detail-subtitle {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.dv-ml-auto { margin-left: auto; }
+
+/* ═══════ Cards (unified sections) ═══════ */
+.dv-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--card));
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.dv-card-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+}
+.dv-card-count {
+  font-size: 10px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--accent));
+  border-radius: 999px;
+  padding: 1px 6px;
+  line-height: 1.4;
+}
+
+.dv-card > .dv-dl { padding: 12px 14px; }
+.dv-card > .dv-pre { border: none; border-radius: 0; }
+
+/* ═══════ Definition lists ═══════ */
+.dv-dl {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 5px 12px;
+  font-size: 13px;
+}
+.dv-dl dt { color: hsl(var(--muted-foreground)); font-size: 12px; }
+.dv-dl dd { margin: 0; }
+
+/* Meta definition list (right sidebar) */
+.dv-dl-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  font-size: 13px;
+}
+.dv-dl-meta dt {
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 10px;
+}
+.dv-dl-meta dt:first-child { margin-top: 0; }
+.dv-dl-meta dd {
+  margin: 2px 0 0 0;
+  line-height: 1.4;
+}
+
+/* ═══════ Dots ═══════ */
+.dv-dot {
+  width: 8px; height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.dv-dot-inline {
+  width: 7px; height: 7px;
+}
+.dv-dot-on { background: #22c55e; }
+.dv-dot-off { background: #ef4444; }
+
+/* ═══════ Status badges ═══════ */
+.dv-status-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.dv-status-ok { color: #15803d; border-color: rgba(21,128,61,0.3); background: rgba(21,128,61,0.08); }
+.dv-status-err { color: #b91c1c; border-color: rgba(185,28,28,0.3); background: rgba(185,28,28,0.08); }
+.dv-status-warn { color: #b45309; border-color: rgba(180,83,9,0.3); background: rgba(180,83,9,0.08); }
+
+/* ═══════ Code / pre ═══════ */
+.dv-pre {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--background));
+  font-size: 12px;
+  line-height: 1.55;
+  max-height: 55vh;
+  overflow: auto;
+}
+.dv-pre .hljs { background: transparent; padding: 0; }
+.dv-pre .hljs-attr { color: #5c6bc0; }
+.dark .dv-pre .hljs-attr { color: #8eaadc; }
+.dv-pre .hljs-literal { color: #d97706; font-weight: 500; }
+.dark .dv-pre .hljs-literal { color: #f59e0b; }
+.dv-pre .hljs-number { color: #0d9488; }
+.dark .dv-pre .hljs-number { color: #5eead4; }
+.dv-pre .hljs-string { color: #16a34a; }
+.dark .dv-pre .hljs-string { color: #86efac; }
+
+.dv-yaml-inherited {
+  opacity: 0.3;
+}
+
+.dv-code-sm { font-size: 12px; word-break: break-all; }
+
+/* ═══════ Tags ═══════ */
+.dv-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.dv-tag { font-size: 11px; padding: 2px 8px; border: 1px solid hsl(var(--border)); border-radius: 4px; background: hsl(var(--background)); }
+
+/* ═══════ Misc ═══════ */
+.dv-muted { color: hsl(var(--muted-foreground)); font-size: 11px; }
+.dv-link {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  background: none; border: none; padding: 0;
+}
+.dv-link:hover { color: hsl(var(--foreground)); }
+
+.dv-meta { padding: 12px 14px; }
+.dv-meta-actions { margin-top: 14px; padding-top: 10px; border-top: 1px solid hsl(var(--border)); display: flex; gap: 14px; }
+
+.dv-spinner {
+  width: 14px; height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(56,189,248,0.25);
+  border-top-color: #0284c7;
+  animation: dv-spin 0.8s linear infinite;
+}
+.dv-spinner-lg {
+  width: 24px; height: 24px;
+  border-width: 2.5px;
+}
+
+.dv-overlay {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 24px;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  font-size: 13px;
+  z-index: 50;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+}
+.dv-overlay-err { border-color: hsl(var(--destructive)); color: hsl(var(--destructive)); }
+
+.dv-cy {
+  width: 100%;
+  height: 480px;
+  background: hsl(var(--background));
+}
+
+.contents { display: contents; }
+
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+
+/* ═══════ Responsive ═══════ */
+@media (max-width: 900px) {
+  .dv-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: auto;
+    min-height: calc(100vh - 64px);
   }
-
-  .syntax-value {
-    color: #d17224;
-    font-weight: normal;
-  }
-
-  .syntax-dash,
-  .syntax-colon {
-    color: #5c6370;
-  }
-}
-
-.dark .syntax-key {
-  color: #61afef;
-  font-weight: normal;
-}
-
-.dark .syntax-value {
-  color: #ffa459;
-  font-weight: normal;
-}
-
-.dark .syntax-dash,
-.dark .syntax-colon {
-  color: #abb2bf;
-}
-
-.hljs {
-  background: transparent !important;
+  .dv-col { border-right: none; border-bottom: 1px solid hsl(var(--border)); }
+  .dv-right { border-left: none; }
+  .dv-center { min-height: 400px; }
+  .dv-landing-inner { padding: 24px 16px; }
 }
 </style>
