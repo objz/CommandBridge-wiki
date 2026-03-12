@@ -33,9 +33,6 @@ Do not copy old v2 script files into v3 and expect them to load.
 - So yes: no folder copy is needed. Keep old files only as reference while rewriting.
 - v3 scripts are managed on Velocity only: `plugins/commandbridge/scripts/`.
 
-In v2, you could treat scripts more like "drop in and hope". In v3 that is not a good strategy anymore.
-The system validates strictly and has clearer execution rules. That is good long-term, but it means migration is a rewrite task, not a rename task.
-
 ---
 
 ## Migration flow (practical)
