@@ -115,7 +115,7 @@ The dump still contains configuration and script metadata, so review it before s
 
 ### `/cb migrate`
 
-Migrates script files in `plugins/commandbridge/scripts/` to the latest script schema (currently `version: 4`).
+Migrates script files in `plugins/commandbridge/scripts/` to the latest script schema.
 
 It prints a per-file result (`MIGRATED`, `SKIPPED`, or `ERROR`) and only touches script files (not `config.yml`).
 

@@ -6,7 +6,7 @@ description: "Short migration guide for updating CommandBridge scripts to the la
 
 This page is for migrating **older scripts** to the current script schema.
 
-Short version: make a backup, run `/cb migrate`, then test your commands.
+Short version: maybe? make a backup, run `/cb migrate`, then test your commands.
 
 ---
 
