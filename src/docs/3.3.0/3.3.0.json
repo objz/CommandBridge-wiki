@@ -1,0 +1,6 @@
+{
+  "layout": "layouts/docs.njk",
+  "type": "article",
+  "tags": [ "docs" ],
+  "docVersion": "3.3.0"
+}
