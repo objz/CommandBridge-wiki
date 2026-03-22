@@ -50,7 +50,7 @@ jobs:
 
           echo -e "URLs to submit:\n$URLS"
 
-          JSON_ARRAY=$(echo -e "$URLS" | jq -R -s 'split("\n") | map(select(length > 0))')
+          JSON_ARRAY=$(echo -e "$URLS" | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "url_list=$JSON_ARRAY" >> "$GITHUB_OUTPUT"
           echo "has_urls=true" >> "$GITHUB_OUTPUT"
 
