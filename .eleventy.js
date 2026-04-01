@@ -350,17 +350,17 @@ return `
       `<button @click="active = ${i}" :class="active === ${i} ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-4 py-2 text-sm font-medium border-b-2 transition-colors">${t.label}</button>`
     ).join("\n");
     const panels = tabs.map((t, i) =>
-      `<div x-show="active === ${i}" x-cloak>${md.render(t.content)}</div>`
+      `<div x-show="active === ${i}" x-cloak>${t.content}</div>`
     ).join("\n");
 
     return `<div x-data="{ active: 0 }" class="my-4">
   <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">${buttons}</div>
   <div class="prose dark:prose-invert">${panels}</div>
-</div>`;
+</div>`.replace(/\n\n/g, '\n&#10;');
   });
 
   eleventyConfig.addPairedShortcode("tab", function (content, label) {
-    return `<!--tab:${label}-->${content}<!--/tab-->`;
+    return `<!--tab:${label}-->${md.render(content)}<!--/tab-->`;
   });
 
   return {

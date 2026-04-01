@@ -258,84 +258,167 @@
   background-color: rgba(250, 204, 21, 0.25);
 }
 
-/* ── Enhanced YAML / code syntax highlighting ── */
-/* Scoped to .prose to override hljs CDN theme styles */
+/* ── YAML / config syntax highlighting — One Dark Pro ── */
 
-/* Keys (attributes) - softer blue */
+/* Keys (attributes) — blue */
 .prose .hljs-attr {
-  color: #5c6bc0;
+  color: #4078f2;
 }
 .dark .prose .hljs-attr {
-  color: #8eaadc;
+  color: #61afef;
 }
 
-/* Booleans (true/false/null) - orange/amber */
+/* Booleans (true/false/null) — cyan */
 .prose .hljs-literal {
-  color: #d97706;
+  color: #0184bc;
   font-weight: 500;
 }
 .dark .prose .hljs-literal {
-  color: #f59e0b;
+  color: #56b6c2;
+  font-weight: 500;
 }
 
-/* Numbers - teal */
+/* Numbers — orange */
 .prose .hljs-number {
-  color: #0d9488;
+  color: #986801;
 }
 .dark .prose .hljs-number {
-  color: #5eead4;
+  color: #d19a66;
 }
 
-/* Strings (quoted and unquoted values) - green */
+/* Strings (quoted and unquoted values) — green */
 .prose .hljs-string {
-  color: #16a34a;
+  color: #50a14f;
 }
 .dark .prose .hljs-string {
-  color: #86efac;
+  color: #98c379;
 }
 
 /* Comments */
 .prose .hljs-comment {
-  color: #94a3b8;
+  color: #a0a1a7;
   font-style: italic;
 }
 .dark .prose .hljs-comment {
-  color: #64748b;
+  color: #5c6370;
 }
 
-/* UPPERCASE enum values (custom class added via JS post-processing) */
+/* UPPERCASE enum values (custom class added via JS post-processing) — purple */
 .prose .hljs-enum {
-  color: #9333ea;
+  color: #a626a4;
   font-weight: 500;
 }
 .dark .prose .hljs-enum {
-  color: #c084fc;
+  color: #c678dd;
+  font-weight: 500;
 }
 
 /* Empty strings '' / "" */
 .prose .hljs-string-empty {
-  color: #94a3b8;
+  color: #a0a1a7;
   font-style: italic;
 }
 .dark .prose .hljs-string-empty {
-  color: #64748b;
+  color: #5c6370;
 }
 
-/* File paths (custom class added via JS post-processing) */
+/* File paths (custom class added via JS post-processing) — yellow */
 .prose .hljs-path {
-  color: #0284c7;
+  color: #986801;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 2px;
 }
 .dark .prose .hljs-path {
-  color: #7dd3fc;
+  color: #e5c07b;
 }
 
-/* IP addresses and hostnames in strings */
+/* IP addresses and hostnames in strings — cyan */
 .prose .hljs-ip {
-  color: #0891b2;
+  color: #0184bc;
 }
 .dark .prose .hljs-ip {
-  color: #67e8f9;
+  color: #56b6c2;
+}
+
+/* ── Java syntax highlighting via Prism.js — One Dark Pro ── */
+
+/* Keywords — purple */
+.prose .language-java .token.keyword {
+  color: #a626a4;
+  font-weight: 500;
+}
+.dark .prose .language-java .token.keyword {
+  color: #c678dd;
+  font-weight: 500;
+}
+
+/* Boolean literals and null — purple */
+.prose .language-java .token.boolean {
+  color: #a626a4;
+  font-weight: 500;
+}
+.dark .prose .language-java .token.boolean {
+  color: #c678dd;
+  font-weight: 500;
+}
+
+/* String and char literals — green */
+.prose .language-java .token.string,
+.prose .language-java .token.char {
+  color: #50a14f;
+}
+.dark .prose .language-java .token.string,
+.dark .prose .language-java .token.char {
+  color: #98c379;
+}
+
+/* Class names — yellow */
+.prose .language-java .token.class-name {
+  color: #986801;
+}
+.dark .prose .language-java .token.class-name {
+  color: #e5c07b;
+}
+
+/* Function and method names — blue */
+.prose .language-java .token.function {
+  color: #4078f2;
+}
+.dark .prose .language-java .token.function {
+  color: #61afef;
+}
+
+/* Numbers — orange */
+.prose .language-java .token.number {
+  color: #c07a29;
+}
+.dark .prose .language-java .token.number {
+  color: #d19a66;
+}
+
+/* Comments */
+.prose .language-java .token.comment {
+  color: #a0a1a7;
+  font-style: italic;
+}
+.dark .prose .language-java .token.comment {
+  color: #5c6370;
+  font-style: italic;
+}
+
+/* Annotations (@Override, @Plugin, etc.) — red */
+.prose .language-java .token.annotation {
+  color: #e45649;
+}
+.dark .prose .language-java .token.annotation {
+  color: #e06c75;
+}
+
+/* Operators (->, ::, =, +, etc.) — cyan */
+.prose .language-java .token.operator {
+  color: #0184bc;
+}
+.dark .prose .language-java .token.operator {
+  color: #56b6c2;
 }
