@@ -9,6 +9,10 @@ Delivery conditions let you gate a message on whether a specific player is prese
 The easiest way to explain it is with an example:
 
 ```java
+import dev.objz.commandbridge.api.channel.command.CommandPayload;
+import dev.objz.commandbridge.api.channel.command.RunAs;
+import static dev.objz.commandbridge.api.platform.Platform.backend;
+
 channel.to(List.of(backend("survival-1")))
        .requirePlayer(playerUUID)
        .send(new CommandPayload("home", RunAs.PLAYER, playerUUID));
@@ -44,13 +48,15 @@ channel.to(List.of(backend("survival-1")))
        .send(new CommandPayload("give " + playerUUID + " diamond 1", RunAs.CONSOLE));
 ```
 
-The queue has a few constraints:
+The queue lives in memory on the Velocity proxy and is not persisted to disk. If the proxy restarts, queued messages are lost.
 
-Messages are held for up to 5 minutes. After that, they are discarded when the player joins.
+If you need delivery to survive a proxy restart, use the scripting system's [`schedule-online`](/docs/scripting/syntax/) instead. That saves tasks to disk and has no TTL. The API queue is intentionally lightweight and in-memory. There is no persistent equivalent for custom payload types since the scripting system only supports command execution.
 
-The total queue across all players is capped at 1000 entries. If it is full, new messages are dropped with a warning logged.
+Each queued message has a 5-minute TTL, but this is not a background timer. The TTL is checked when the player joins the target server. If they join within 5 minutes of the message being queued, it is delivered. If they join after that, the message is discarded at that point.
 
-If the target server disconnects before the player joins, all queued messages for that server are removed.
+The total number of queued messages across all players and all target servers is capped at 1000. If the cap is reached, new messages are dropped with a warning logged.
+
+If the target server disconnects before the player joins, all messages queued for that server are removed.
 
 {% hint "warning" %}
 `whenOnline` is not supported with `request()`. It throws `UnsupportedOperationException`.
@@ -82,7 +88,7 @@ These only work with `CommandPayload`. The implementation calls `.player()` on t
 |---|---|
 | `requirePlayer` + player absent + `send()` | message dropped, future completes with `null` |
 | `requirePlayer` + player absent + `request()` | `IllegalStateException` |
-| `whenOnline` + player absent + `send()` | queued, 5-min TTL, max 1000 total |
+| `whenOnline` + player absent + `send()`                     | queued (in-memory, lazy 5-min TTL, 1000 global cap) |
 | `whenOnline` + `request()` | `UnsupportedOperationException` |
 | `requirePlayer` + `whenOnline` combined | `IllegalStateException` |
 | `requirePlayer` or `whenOnline` on broadcast sender | `UnsupportedOperationException` |

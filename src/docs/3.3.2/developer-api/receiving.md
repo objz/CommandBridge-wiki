@@ -9,12 +9,15 @@ To receive messages on a channel, register a `MessageListener` with `channel.lis
 The easiest way to explain it is with an example:
 
 ```java
+import dev.objz.commandbridge.api.channel.MessageChannel;
+import dev.objz.commandbridge.api.channel.command.CommandPayload;
+import dev.objz.commandbridge.api.message.Subscription;
+
 MessageChannel<CommandPayload> channel = api.channel(CommandPayload.class);
 
 Subscription sub = channel.listen((ctx, payload) -> {
     String from = ctx.from().id();
     String command = payload.command();
-    getLogger().info(from + " sent: " + command);
 });
 ```
 
@@ -50,15 +53,20 @@ On backends, `ctx.from().type()` is always `BACKEND`. On Velocity, the type is i
 
 `Subscription.cancel()` unregisters the listener. It is idempotent, so calling it more than once is safe.
 
+Use a single `Subscription` field when you register one listener. Use `List<Subscription>` when you register multiple listeners that need to be canceled together (as shown on the [Events](/docs/developer-api/events/) page for `onServerConnected` and `onServerDisconnected`).
+
 {% tabs %}
 {% tab "Velocity" %}
 ```java
+import dev.objz.commandbridge.api.message.Subscription;
+
 private Subscription commandListener;
 
-@Subscribe(order = PostOrder.LATE)
+@Subscribe
 public void onProxyInitialize(ProxyInitializeEvent event) {
     commandListener = channel.listen((ctx, payload) -> {
-        getLogger().info(ctx.from().id() + ": " + payload.command());
+        String from = ctx.from().id();
+        String command = payload.command();
     });
 }
 
@@ -70,12 +78,15 @@ public void onProxyShutdown(ProxyShutdownEvent event) {
 {% endtab %}
 {% tab "Paper / Bukkit" %}
 ```java
+import dev.objz.commandbridge.api.message.Subscription;
+
 private Subscription commandListener;
 
 @Override
 public void onEnable() {
     commandListener = channel.listen((ctx, payload) -> {
-        getLogger().info(ctx.from().id() + ": " + payload.command());
+        String from = ctx.from().id();
+        String command = payload.command();
     });
 }
 

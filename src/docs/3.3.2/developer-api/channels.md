@@ -9,6 +9,13 @@ Channels are how you send and receive messages across the CommandBridge network.
 The easiest way to explain it is with an example:
 
 ```java
+import dev.objz.commandbridge.api.CommandBridgeAPI;
+import dev.objz.commandbridge.api.CommandBridgeProvider;
+import dev.objz.commandbridge.api.channel.MessageChannel;
+import dev.objz.commandbridge.api.channel.command.CommandPayload;
+import dev.objz.commandbridge.api.channel.command.RunAs;
+import static dev.objz.commandbridge.api.platform.Platform.backend;
+
 CommandBridgeAPI api = CommandBridgeProvider.get();
 MessageChannel<CommandPayload> channel = api.channel(CommandPayload.class);
 

@@ -70,7 +70,7 @@
 }
 
 .prose pre code {
-  @apply p-4 block break-words whitespace-pre-wrap;
+  @apply p-4 block whitespace-pre overflow-x-auto;
 }
 
 .prose ul,

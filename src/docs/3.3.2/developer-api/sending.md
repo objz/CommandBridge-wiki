@@ -9,6 +9,11 @@ Sending messages is done through a `Sender` you get from `channel.to()` or `chan
 The easiest way to explain it is with an example:
 
 ```java
+import dev.objz.commandbridge.api.channel.MessageChannel;
+import dev.objz.commandbridge.api.channel.command.CommandPayload;
+import dev.objz.commandbridge.api.channel.command.RunAs;
+import static dev.objz.commandbridge.api.platform.Platform.backend;
+
 MessageChannel<CommandPayload> channel = api.channel(CommandPayload.class);
 
 channel.to(List.of(backend("survival-1")))
@@ -47,7 +52,7 @@ If a target is not connected at dispatch time, `send()` returns a failed future 
 channel.to(List.of(backend("survival-1")))
        .request(new CommandPayload("ping", RunAs.CONSOLE))
        .thenAccept(response -> {
-           getLogger().info("Got response: " + response.command());
+           String command = response.command();
        });
 ```
 
@@ -56,7 +61,7 @@ The default timeout is 15 seconds. Pass a `Duration` to use a different one:
 ```java
 channel.to(List.of(backend("survival-1")))
        .request(new CommandPayload("ping", RunAs.CONSOLE), Duration.ofSeconds(3))
-       .thenAccept(response -> getLogger().info(response.command()));
+       .thenAccept(response -> response.command());
 ```
 
 If the remote does not respond within the timeout, the future completes exceptionally.

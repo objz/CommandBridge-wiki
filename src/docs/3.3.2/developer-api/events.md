@@ -15,16 +15,20 @@ The API exposes events for server lifecycle, connection state changes, and playe
 `onServerConnected` fires when a backend completes authentication. `onServerDisconnected` fires when a session is removed, either from a clean disconnect or a lost connection.
 
 ```java
+import dev.objz.commandbridge.api.message.Subscription;
+import dev.objz.commandbridge.api.platform.Platform;
+
 private final List<Subscription> subs = new ArrayList<>();
 
-@Subscribe(order = PostOrder.LATE)
+@Subscribe
 public void onProxyInitialize(ProxyInitializeEvent event) {
     api.onServerConnected(server -> {
-        getLogger().info(server.id() + " joined the network");
+        String id = server.id();
+        Platform type = server.type();
     }).ifPresent(subs::add);
 
     api.onServerDisconnected(server -> {
-        getLogger().info(server.id() + " left the network");
+        String id = server.id();
     }).ifPresent(subs::add);
 }
 
@@ -37,7 +41,7 @@ public void onProxyShutdown(ProxyShutdownEvent event) {
 
 The `ServerTarget` passed to each listener has `.id()` (the server's configured identifier) and `.type()` (`Platform.BACKEND` or `Platform.VELOCITY`).
 
-`.ifPresent(subs::add)` works on both platforms without any platform checks. On Velocity you get a `Subscription`, on backends you get an empty `Optional` and nothing happens. These methods are proxy-only, so in practice they only register on Velocity.
+`.ifPresent(subs::add)` works on both platforms without any platform checks. On Velocity you get a `Subscription`, on backends you get an empty `Optional` and nothing happens. These methods are proxy-only, so in practice they only register on Velocity. `List<Subscription>` is used here because two listeners are registered together and need to be canceled as a pair.
 
 ---
 
@@ -48,16 +52,16 @@ The `ServerTarget` passed to each listener has `.id()` (the server's configured 
 {% tabs %}
 {% tab "Velocity" %}
 ```java
+import dev.objz.commandbridge.api.message.Subscription;
+import dev.objz.commandbridge.api.platform.ConnectionState;
+
 private Subscription connectionListener;
 
-@Subscribe(order = PostOrder.LATE)
+@Subscribe
 public void onProxyInitialize(ProxyInitializeEvent event) {
     connectionListener = api.onConnectionStateChanged(state -> {
-        if (state == ConnectionState.AUTHENTICATED) {
-            getLogger().info("Bridge ready");
-        } else if (state == ConnectionState.AUTH_FAILED) {
-            getLogger().severe("Bridge auth failed. Check your secret key.");
-        }
+        boolean active = state.isActive();
+        ConnectionState current = state;
     });
 }
 
@@ -69,16 +73,16 @@ public void onProxyShutdown(ProxyShutdownEvent event) {
 {% endtab %}
 {% tab "Paper / Bukkit" %}
 ```java
+import dev.objz.commandbridge.api.message.Subscription;
+import dev.objz.commandbridge.api.platform.ConnectionState;
+
 private Subscription connectionListener;
 
 @Override
 public void onEnable() {
     connectionListener = api.onConnectionStateChanged(state -> {
-        if (state == ConnectionState.AUTHENTICATED) {
-            getLogger().info("Bridge ready");
-        } else if (state == ConnectionState.AUTH_FAILED) {
-            getLogger().severe("Bridge auth failed. Check your secret key.");
-        }
+        boolean active = state.isActive();
+        ConnectionState current = state;
     });
 }
 
@@ -131,9 +135,8 @@ If you see `AUTH_FAILED` on a backend, check that `secret` in the backend's `con
 ```java
 api.playerLocator().ifPresent(locator -> {
     Optional<Platform.ServerTarget> location = locator.locate(playerUUID);
-    location.ifPresent(server -> {
-        getLogger().info("Player is on " + server.id());
-    });
+    // location.isPresent() — player is tracked
+    // location.get().id() — server identifier
 });
 ```
 
@@ -149,7 +152,7 @@ api.playerLocator().ifPresent(locator -> {
 
 ```java
 api.connectedServers().ifPresent(servers -> {
-    getLogger().info("Connected: " + String.join(", ", servers));
+    // servers — Set<String> of authenticated server IDs
 });
 ```
 
@@ -163,7 +166,8 @@ Available on all platforms. `api.server()` returns a `ServerTarget` with the cur
 
 ```java
 Platform.ServerTarget me = api.server();
-getLogger().info(me.id() + " on " + me.type());
+String id = me.id();
+Platform type = me.type();
 ```
 
 On Velocity, `server()` returns `Platform.VELOCITY.target(serverId)` where `serverId` is the `server-id` from `config.yml`. On backends, it returns `Platform.BACKEND.target(clientId)` where `clientId` is the `client-id` from `config.yml`.

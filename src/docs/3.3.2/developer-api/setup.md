@@ -82,6 +82,9 @@ Call `CommandBridgeProvider.get()` to get the API instance. Store it as a field 
 {% tabs %}
 {% tab "Velocity" %}
 ```java
+import dev.objz.commandbridge.api.CommandBridgeAPI;
+import dev.objz.commandbridge.api.CommandBridgeProvider;
+
 private CommandBridgeAPI api;
 
 @Subscribe
@@ -92,6 +95,9 @@ public void onProxyInitialize(ProxyInitializeEvent event) {
 {% endtab %}
 {% tab "Paper / Bukkit" %}
 ```java
+import dev.objz.commandbridge.api.CommandBridgeAPI;
+import dev.objz.commandbridge.api.CommandBridgeProvider;
+
 private CommandBridgeAPI api;
 
 @Override
