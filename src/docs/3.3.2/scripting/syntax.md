@@ -137,7 +137,7 @@ Where to send the command for execution. This is where the command actually runs
     {% endconfigentry %}
 
 {% configentry "location", "enum", "VELOCITY | BACKEND" %}
-Whether the target is the proxy or a backend server. The `VELOCITY` option can only be used for proxies that have `act-as-client` enabled.
+Whether the target is the proxy or a backend server.
 {% endconfigentry %}
 {% endconfigentry %}
 
