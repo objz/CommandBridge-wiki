@@ -1,0 +1,20 @@
+---
+layout: false
+eleventyExcludeFromCollections: true
+pagination:
+  data: docsRedirects
+  size: 1
+  alias: redirect
+permalink: "/docs{{ redirect.docPath }}index.html"
+---
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="0; url={{ redirect.targetUrl }}">
+  <link rel="canonical" href="{{ redirect.targetUrl }}">
+  <title>Redirecting...</title>
+</head>
+<body>
+  <p>Redirecting to <a href="{{ redirect.targetUrl }}">{{ redirect.targetUrl }}</a>...</p>
+</body>
+</html>
