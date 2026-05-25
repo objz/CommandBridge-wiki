@@ -1,5 +1,5 @@
 module.exports = {
-  latest: "3.3.3",
+  latest: "3.3.5",
   versions: [
     {
       id: "3.3.5",
