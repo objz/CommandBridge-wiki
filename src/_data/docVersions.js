@@ -1,6 +1,11 @@
 module.exports = {
-  latest: "3.3.5",
+  latest: "3.3.6",
   versions: [
+    {
+      id: "3.3.6",
+      label: "3.3.6",
+      pathPrefix: "/docs/3.3.6",
+    },
     {
       id: "3.3.5",
       label: "3.3.5",
