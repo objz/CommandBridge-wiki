@@ -32,12 +32,16 @@
     "@theatre/core": "^0.7.2",
     "canvas-sketch": "^0.7.7",
     "canvas-sketch-util": "^1.10.0",
+    "d3-array": "^3.2.4",
+    "d3-geo": "^3.1.1",
     "eleventy-plugin-toc": "^1.1.5",
     "glsl-noise": "^0.0.0",
     "lucide": "^0.507.0",
     "lucide-static": "^0.508.0",
     "markdown-it-task-lists": "^2.1.1",
     "theatre": "^0.2.3",
-    "three": "^0.176.0"
+    "three": "^0.176.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
   }
 }

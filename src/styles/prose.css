@@ -65,6 +65,12 @@
   @apply text-[90%] bg-muted rounded-sm py-1 px-1.5;
 }
 
+/* long inline paths in running text may break instead of widening the page on phones; tables scroll instead */
+.prose p > code,
+.prose li > code {
+  overflow-wrap: anywhere;
+}
+
 .prose pre {
   @apply my-6;
 }
@@ -124,6 +130,13 @@
 
 .prose table {
   @apply my-6 w-full text-sm border-separate border-spacing-0 rounded-lg border border-border/70;
+}
+
+/* phones: wide tables scroll inside themselves instead of pushing the whole page sideways */
+@media (max-width: 767px) {
+  .prose table {
+    @apply block overflow-x-auto;
+  }
 }
 
 .prose table thead tr {
@@ -192,36 +205,46 @@ html.dark .prose table td strong code {
 
 /* ── Per-type badge colors ── */
 
-/* string - blue */
+/* string, boolean, integer and enum use the same colors as their values in the code blocks (main.css, One Dark Pro) */
+
+/* string - green */
 .cfg-type-string {
-  @apply bg-blue-100 text-blue-700;
+  color: #50a14f;
+  background-color: rgb(80 161 79 / 0.12);
 }
 .dark .cfg-type-string {
-  @apply bg-blue-500/20 text-blue-300;
+  color: #98c379;
+  background-color: rgb(152 195 121 / 0.15);
 }
 
-/* boolean - amber */
+/* boolean - cyan */
 .cfg-type-boolean {
-  @apply bg-amber-100 text-amber-700;
+  color: #0184bc;
+  background-color: rgb(1 132 188 / 0.12);
 }
 .dark .cfg-type-boolean {
-  @apply bg-amber-500/20 text-amber-300;
+  color: #56b6c2;
+  background-color: rgb(86 182 194 / 0.15);
 }
 
-/* integer - teal */
+/* integer - orange */
 .cfg-type-integer {
-  @apply bg-teal-100 text-teal-700;
+  color: #986801;
+  background-color: rgb(152 104 1 / 0.12);
 }
 .dark .cfg-type-integer {
-  @apply bg-teal-500/20 text-teal-300;
+  color: #d19a66;
+  background-color: rgb(209 154 102 / 0.15);
 }
 
 /* enum - purple */
 .cfg-type-enum {
-  @apply bg-purple-100 text-purple-700;
+  color: #a626a4;
+  background-color: rgb(166 38 164 / 0.12);
 }
 .dark .cfg-type-enum {
-  @apply bg-purple-500/20 text-purple-300;
+  color: #c678dd;
+  background-color: rgb(198 120 221 / 0.15);
 }
 
 /* duration - rose */
@@ -288,4 +311,9 @@ html.dark .prose table td strong code {
 
 .cfg-entry-body code {
   @apply text-[85%] bg-muted rounded-sm py-0.5 px-1;
+}
+
+/* entries nested inside another entry's description keep their badge size */
+.cfg-entry-body .cfg-entry-badge code {
+  @apply text-[11px];
 }

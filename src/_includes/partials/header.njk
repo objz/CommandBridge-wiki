@@ -1,29 +1,33 @@
-<header class="border-b flex items-center gap-x-4 py-2 px-4 lg:py-3 lg:px-6 mx-auto sticky top-0 w-full bg-background z-50">
-  <a class="inline-flex items-center" href="/">
+<header class="border-b flex items-center gap-x-4 max-sm:gap-x-2 max-sm:py-0 py-2 px-4 lg:py-3 lg:px-6 mx-auto sticky top-0 w-full bg-background z-50">
+  <a class="inline-flex items-center max-sm:min-h-11 max-sm:min-w-11" href="/" aria-label="CommandBridge home">
     <img src="/media/svg/commandbridge.svg" alt="CommandBridge Logo" class="max-sm:h-4 max-sm:w-4 h-5 w-5" />
     <span class="hidden sm:inline-block ml-2 text-sm font-semibold">CommandBridge</span>
   </a>
-  <a class="ml-auto text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary font-medium' if page.url == '/' }}" href="/">
+  <a class="ml-auto inline-flex items-center max-sm:min-h-11 max-sm:px-1 text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary font-medium' if page.url == '/' }}" href="/">
     About
   </a>
-  <a class="text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary' if '/docs' in page.url }}" href="/docs/{{ docVersions.latest }}/">
+  <a class="inline-flex items-center max-sm:min-h-11 max-sm:px-1 text-sm font-medium text-muted-foreground hover:text-primary {{ '!text-primary' if '/docs' in page.url }}" href="/docs/{{ docVersions.latest }}/">
     Docs
   </a>
 
 
 
-<div class="h-4 w-px bg-border mx-2"></div>
+<div class="hidden sm:block h-4 w-px bg-border mx-2"></div>
 
-  <a class="flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://github.com/objz/CommandBridge" target="_blank">
+  <button class="inline-flex h-8 w-8 max-sm:h-11 max-sm:w-11 items-center justify-center rounded-md text-muted-foreground hover:text-primary" @click="darkMode = !darkMode" :aria-label="darkMode ? 'Switch to light mode' : 'Switch to dark mode'" aria-label="Toggle color theme">
+    <template x-if="darkMode">{% lucide "sun", { "class" : "h-4 w-4" } %}</template>
+    <template x-if="!darkMode">{% lucide "moon", { "class" : "h-4 w-4" } %}</template>
+  </button>
+  <a class="hidden sm:flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://github.com/objz/CommandBridge" target="_blank">
     GitHub
     {% lucide "arrow-up-right", { "class" : "h-3 w-3" } %}
   </a>
-  <a class="flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://discord.gg/QPqBYb44ce" target="_blank">
+  <a class="hidden sm:flex gap-x-1 items-center text-sm font-medium text-muted-foreground hover:text-primary" href="https://discord.gg/QPqBYb44ce" target="_blank">
     Discord
     {% lucide "arrow-up-right", { "class" : "h-3 w-3" } %}
   </a>
 
-<a class="button-outline !h-8 inline-flex items-center" href="https://modrinth.com/plugin/commandbridge#download">
+<a class="button-outline !h-8 max-sm:!h-10 inline-flex items-center" href="https://modrinth.com/plugin/commandbridge#download">
   <span>Download</span>
   <span class="ml-1">{% lucide "download", { "class" : "h-3 w-3" } %}</span>
 </a>

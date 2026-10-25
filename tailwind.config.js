@@ -7,7 +7,7 @@ module.exports = {
 
 
 safelist: [
-  "w-4", "h-4", "mt-[1px]", "flex", "gap-2", "gap-4", "rounded-md", "p-4", "pl-12", "pr-4",
+  "w-4", "h-4", "mt-[1px]", "mt-[2px]", "my-6", "flex-shrink-0", "flex", "gap-2", "gap-4", "rounded-md", "p-4", "pl-12", "pr-4",
   // Info
   "bg-blue-100", "dark:bg-blue-900/40", "text-blue-900", "dark:text-blue-200",
   // Warning 

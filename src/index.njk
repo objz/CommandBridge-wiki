@@ -2,641 +2,124 @@
 layout: layouts/base.njk
 title: About
 permalink: /
-promotion:
-  text: Try CommandBridge now — unleash server automation
-  url: https://modrinth.com/plugin/commandbridge
-description: Bridge commands between your Velocity proxy and backend servers. Define commands once in YAML, execute them anywhere across your Minecraft network.
+description: Connect your Velocity proxy and Minecraft servers. Send commands between them in any direction, with no code and no player online.
 ---
-
 <style>
-  .cb-bg {
-    filter: blur(1.5px);
-    -webkit-filter: blur(1.5px);
-  }
-  .stat-number {
-    font-variant-numeric: tabular-nums;
-  }
+  /* height of the shared sticky header at each breakpoint */
+  .lp { --lp-header: 45px; }
+  @media (min-width: 640px) { .lp { --lp-header: 49px; } }
+  @media (min-width: 1024px) { .lp { --lp-header: 57px; } }
+  .lp-wrap { width: min(100% - 2rem, 72rem); margin-inline: auto; }
 
-  /* ── Network graph ── */
-  .graph-canvas {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    min-height: 320px;
-  }
+  /* the copy scrolls on the left while the globe stays pinned on the right */
+  .lp-story { display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; }
+  .lp-visual { grid-column: 2; grid-row: 1; position: sticky; top: var(--lp-header); height: calc(100vh - var(--lp-header)); }
+  .lp-visual canvas { display: block; width: 100%; height: 100%; }
+  .lp-labels { position: absolute; inset: 0; pointer-events: none; }
+  .lp-labels span { position: absolute; left: 0; top: 0; font-size: 0.875rem; font-weight: 500; white-space: nowrap; color: hsl(var(--muted-foreground)); transition: color 200ms; text-shadow: 0 0 3px hsl(var(--background)), 0 0 6px hsl(var(--background)); }
+  .lp-labels span.is-on { color: hsl(var(--foreground)); }
+  .lp-copy { grid-column: 1; grid-row: 1; }
+  .lp-block { min-height: calc(100vh - var(--lp-header)); display: flex; flex-direction: column; justify-content: center; }
 
-  .graph-svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
+  .lp-hero h1 { font-size: clamp(2.25rem, 4.6vw, 3.75rem); line-height: 1.03; letter-spacing: -0.045em; font-weight: 600; text-wrap: balance; margin-bottom: 1.25rem; }
+  .lp-hero p { color: hsl(var(--muted-foreground)); font-size: 1.125rem; line-height: 1.5; max-width: 28rem; margin-bottom: 2rem; }
+  .lp-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .lp-step .lp-n { font: 0.875rem ui-monospace, monospace; color: hsl(var(--muted-foreground)); margin-bottom: 0.875rem; }
+  .lp-step h2 { font-size: clamp(1.875rem, 3.6vw, 2.75rem); letter-spacing: -0.035em; font-weight: 600; margin-bottom: 0.75rem; }
+  .lp-step p { color: hsl(var(--muted-foreground)); font-size: 1.125rem; line-height: 1.5; max-width: 24rem; }
 
-  .graph-node {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    z-index: 2;
-  }
+  .lp-facts { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid hsl(var(--border)); margin-top: 1.5rem; }
+  .lp-facts > div { padding: 2.25rem 1.5rem; }
+  .lp-facts > div + div { border-left: 1px solid hsl(var(--border)); }
+  .lp-facts svg { width: 1.375rem; height: 1.375rem; color: hsl(var(--muted-foreground)); margin-bottom: 1rem; }
+  .lp-facts h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .lp-facts p { color: hsl(var(--muted-foreground)); font-size: 0.875rem; line-height: 1.5; }
 
-  .graph-node-inner {
-    padding: 0.45rem 0.65rem;
-    border-radius: 0.75rem;
-    border: 1px solid hsl(var(--border));
-    background: hsl(var(--card));
-    transition: border-color .3s, box-shadow .3s;
-    min-width: 4.5rem;
-  }
+  .lp-proof { text-align: center; font: 0.8125rem ui-monospace, monospace; color: hsl(var(--muted-foreground)); margin-top: 3rem; }
+  .lp-proof span + span::before { content: "·"; margin: 0 0.75rem; }
+  .lp-proof [hidden] + span::before { content: none; }
 
-  .graph-node-inner.is-source {
-    border-color: rgba(99, 102, 241, 0.7);
-    box-shadow: 0 0 14px rgba(99, 102, 241, 0.2);
-  }
-  .graph-node-inner.is-target {
-    border-color: rgba(16, 185, 129, 0.7);
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.2);
-  }
+  .lp-closing { text-align: center; padding: 7.5rem 0 8rem; }
+  .lp-closing h2 { font-size: clamp(2rem, 4.4vw, 3.25rem); letter-spacing: -0.04em; font-weight: 600; margin-bottom: 1.75rem; }
+  .lp-closing .lp-actions { justify-content: center; }
+  .lp-closing p { color: hsl(var(--muted-foreground)); font-size: 0.9375rem; margin-top: 1.75rem; }
+  .lp-closing p a { color: hsl(var(--foreground)); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: hsl(var(--border)); }
+  .lp-closing p a:hover { text-decoration-color: currentColor; }
+  .lp-closing .lp-compat { font: 0.75rem ui-monospace, monospace; margin-top: 0.875rem; }
+  .lp-compat span { display: inline-block; margin: 0.125rem 0.625rem; }
 
-  .graph-node h4 {
-    margin: 0;
-    font-size: 0.78rem;
-    font-weight: 700;
-    line-height: 1.3;
+  @media (max-width: 1023px) {
+    /* phones and tablets: the globe stays pinned at the top while the copy scrolls underneath */
+    .lp-story { display: block; }
+    .lp-visual { height: 44vh; z-index: 10; background: hsl(var(--background)); }
+    .lp-block { min-height: auto; padding: 2rem 0; }
+    .lp-hero { padding-top: 0.5rem; }
+    .lp-hero p, .lp-step p { font-size: 1rem; }
+    .lp-hero .lp-actions a { flex: 1 1 100%; }
+    .lp-step { min-height: 56vh; justify-content: flex-start; }
+    .lp-labels span { font-size: 0.75rem; }
+    .lp-facts { grid-template-columns: 1fr 1fr; }
+    .lp-facts > div { padding: 1.5rem 1rem; }
+    .lp-facts > div:nth-child(3) { border-left: none; }
+    .lp-facts > div:nth-child(n + 3) { border-top: 1px solid hsl(var(--border)); }
+    .lp-closing { padding: 4.5rem 0 5.5rem; }
   }
-  .graph-node .graph-sub {
-    margin: 0.05rem 0 0;
-    font-size: 0.6rem;
-    line-height: 1.3;
-    color: hsl(var(--muted-foreground));
-  }
-
-  .graph-icon {
-    width: 1.3rem;
-    height: 1.3rem;
-    margin: 0 auto 0.15rem;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .graph-icon-blue   { background: rgba(59,130,246,0.14); color: #60a5fa; }
-  .graph-icon-indigo { background: rgba(99,102,241,0.17); color: #a5b4fc; }
-  .graph-icon-green  { background: rgba(16,185,129,0.14); color: #6ee7b7; }
-  .graph-icon-amber  { background: rgba(245,158,11,0.14); color: #fbbf24; }
-  .graph-icon-rose   { background: rgba(244,63,94,0.14);  color: #fb7185; }
-  .graph-icon-cyan   { background: rgba(6,182,212,0.14);  color: #22d3ee; }
-
-  /* Hub center */
-  .graph-hub {
-    border-color: rgba(99, 102, 241, 0.45);
-    box-shadow: 0 0 28px rgba(99, 102, 241, 0.08);
-    min-width: 6rem;
-  }
-
-  /* Lines */
-  .graph-line {
-    stroke: hsl(var(--border));
-    stroke-width: 1.5;
-    fill: none;
-  }
-
-  /* Animated packet */
-  @keyframes packet-travel {
-    0%   { offset-distance: 0%;   opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    100% { offset-distance: 100%; opacity: 0; }
-  }
-
-  .graph-packet {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    position: absolute;
-    opacity: 0;
-    z-index: 1;
-    offset-rotate: 0deg;
-    animation: packet-travel 1.2s ease-in-out forwards;
-    filter: blur(0.5px);
-    box-shadow: 0 0 6px currentColor;
-  }
-
-  /* Idle pulse dots on lines */
-  @keyframes idle-pulse {
-    0%, 100% { opacity: .15; r: 2; }
-    50%      { opacity: .5;  r: 2.5; }
-  }
-  .idle-dot {
-    fill: #7dd3fc;
-    animation: idle-pulse 2.4s ease-in-out infinite;
-  }
-  .idle-dot:nth-child(2n)  { animation-delay: .6s;  }
-  .idle-dot:nth-child(3n)  { animation-delay: 1.2s; }
-  .idle-dot:nth-child(5n)  { animation-delay: 1.8s; }
-
-  /* Command log */
-  @keyframes log-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .cmd-log-entry {
-    animation: log-in .3s ease-out forwards;
-    font-size: 0.68rem;
-    line-height: 1.4;
-    padding: 0.15rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    opacity: 0;
-  }
-  .cmd-log-entry .log-arrow {
-    color: hsl(var(--muted-foreground));
-    font-size: 0.6rem;
-  }
-  .cmd-log-entry .log-node { font-weight: 600; }
-  .cmd-log-entry .log-cmd  { color: hsl(var(--muted-foreground)); font-family: ui-monospace, monospace; }
-
-  @media (max-width: 640px) {
-    .hero-graph-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin: 0 -1rem;
-      padding: 0 1rem;
-    }
-    .hero-graph-inner {
-      min-width: 520px;
-    }
-    .graph-canvas {
-      min-height: 280px;
-    }
-  }
+  @media (prefers-reduced-motion: reduce) { .lp-labels span { transition: none; } }
 </style>
-<canvas id="cb-background"
-        class="absolute inset-0 w-full h-full z-0 block cb-bg">
-</canvas>
-<div class="relative min-h-screen overflow-hidden">
-  <div class="relative z-10 px-4 lg:px-8">
 
-    {# ── Hero ── #}
-    <section class="max-w-6xl mx-auto py-32 grid lg:grid-cols-12 gap-12 items-center">
-      <div class="lg:col-span-5 space-y-6">
-        <span class="inline-block text-xs font-semibold tracking-widest uppercase text-indigo-400">Open Source Minecraft Plugin</span>
-        <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">Command<wbr>Bridge</h1>
-        <p class="text-muted-foreground text-lg leading-relaxed">
-          Bridge commands between your <strong>Velocity</strong> proxy and backend servers. Define commands once in YAML, execute them anywhere across your network over <strong>WebSocket</strong> or <strong>Redis</strong>.
-        </p>
-        <div class="flex gap-4 flex-wrap">
-          <a class="button !text-base !h-12 !px-8" href="/docs/{{ docVersions.latest }}/">Get Started</a>
-          <a class="button-outline !text-base !h-12 !px-8"
-             href="https://modrinth.com/plugin/commandbridge"
-             target="_blank">Modrinth</a>
-          <a class="button-outline !text-base !h-12 !px-8"
-             href="https://github.com/objz/commandbridge"
-             target="_blank">GitHub</a>
+<div class="lp">
+  <section class="lp-wrap lp-story" aria-label="What CommandBridge does">
+    <div class="lp-visual" data-globe aria-hidden="true">
+      <canvas></canvas>
+      <div class="lp-labels" data-globe-labels></div>
+    </div>
+    <div class="lp-copy">
+      <div class="lp-block lp-hero">
+        <h1>Connect your network. Let your plugins talk.</h1>
+        <p>Send commands between your proxy and servers, in any direction. No code, no player online.</p>
+        <div class="lp-actions">
+          <a class="button !h-11 !px-5 !text-[0.9375rem]" href="https://modrinth.com/plugin/commandbridge#download" target="_blank" rel="noopener">Download on Modrinth</a>
+          <a class="button-outline !h-11 !px-5 !text-[0.9375rem]" href="/docs/{{ docVersions.latest }}/">Read the docs</a>
         </div>
       </div>
+      <div class="lp-block lp-step" data-globe-step><div class="lp-n">01</div><h2>One to one</h2><p>A plugin on one server runs a command on another.</p></div>
+      <div class="lp-block lp-step" data-globe-step><div class="lp-n">02</div><h2>One to all</h2><p>One command reaches every server at once.</p></div>
+      <div class="lp-block lp-step" data-globe-step><div class="lp-n">03</div><h2>Any direction</h2><p>Proxy to server, server to server. Everything can talk.</p></div>
+    </div>
+  </section>
 
-      {# ── Network Graph ── #}
-      <div class="lg:col-span-7">
-        <div class="rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md overflow-hidden p-5 lg:p-6">
-          <div class="hero-graph-wrap">
-            <div class="hero-graph-inner">
-              <div class="graph-canvas" id="networkGraph">
+  <section class="lp-wrap lp-facts" aria-label="Highlights">
+    <div>{% lucide "code-xml" %}<h3>No code</h3><p>Set it up, don't program it.</p></div>
+    <div>{% lucide "plug" %}<h3>Works with any plugin</h3><p>If it runs commands, it works.</p></div>
+    <div>{% lucide "hourglass" %}<h3>Never misses a player</h3><p>Queued until they join, even after a restart.</p></div>
+    <div>{% lucide "shield-check" %}<h3>Secure by default</h3><p>Every connection is authenticated and encrypted.</p></div>
+  </section>
 
-                {# SVG lines drawn behind nodes #}
-                <svg class="graph-svg" id="graphLines" xmlns="http://www.w3.org/2000/svg"></svg>
+  <p class="lp-wrap lp-proof"><span data-downloads hidden></span><span>Open source</span><span>v{{ docVersions.latest }}</span></p>
 
-                {# ── Center hub ── #}
-                <div class="graph-node" id="node-hub" style="left:50%; top:50%;">
-                  <div class="graph-node-inner graph-hub">
-                    <div class="graph-icon graph-icon-indigo">{% lucide "workflow", { "class" : "h-3 w-3" } %}</div>
-                    <h4>CommandBridge</h4>
-                    <div class="flex justify-center gap-2.5 mt-1 pt-1 border-t" style="border-color: hsl(var(--border))">
-                      <span class="flex items-center gap-1 text-[0.55rem] text-muted-foreground">{% lucide "radio", { "class" : "h-2.5 w-2.5" } %} WS</span>
-                      <span class="flex items-center gap-1 text-[0.55rem] text-muted-foreground">{% lucide "database", { "class" : "h-2.5 w-2.5" } %} Redis</span>
-                    </div>
-                  </div>
-                </div>
-
-                {# ── Surrounding server nodes (positioned by JS) ── #}
-                <div class="graph-node" id="node-velocity" data-role="proxy">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-blue">{% lucide "send", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Velocity</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Proxy</div>
-                  </div>
-                </div>
-
-                <div class="graph-node" id="node-paper" data-role="backend">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Paper</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Survival</div>
-                  </div>
-                </div>
-
-                <div class="graph-node" id="node-folia" data-role="backend">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-amber">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Folia</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Creative</div>
-                  </div>
-                </div>
-
-                <div class="graph-node" id="node-purpur" data-role="backend">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-rose">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Purpur</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Hub</div>
-                  </div>
-                </div>
-
-                <div class="graph-node" id="node-spigot" data-role="backend">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-cyan">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Spigot</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Minigames</div>
-                  </div>
-                </div>
-
-                <div class="graph-node" id="node-bukkit" data-role="backend">
-                  <div class="graph-node-inner">
-                    <div class="graph-icon graph-icon-green">{% lucide "server", { "class" : "h-3 w-3" } %}</div>
-                    <h4>Bukkit</h4>
-                    <div class="graph-sub" style="font-size:.58rem; color:hsl(var(--muted-foreground))">Legacy</div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {# Command log #}
-          <div class="mt-3 pt-3 border-t">
-            <div id="cmdLog" class="h-[5rem] overflow-hidden flex flex-col justify-end px-1"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    {# ── Stats bar ── #}
-    <section class="max-w-4xl mx-auto mb-24">
-      <div class="grid grid-cols-3 gap-6 text-center items-stretch">
-        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
-          <div class="text-3xl font-bold stat-number">6</div>
-          <div class="text-sm text-muted-foreground mt-1">Platforms</div>
-          <div class="text-xs text-muted-foreground/70 mt-0.5">Paper, Folia, Purpur, Spigot, Bukkit, Velocity</div>
-        </div>
-        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
-          <div class="text-3xl font-bold stat-number">22</div>
-          <div class="text-sm text-muted-foreground mt-1">Argument Types</div>
-          <div class="text-xs text-muted-foreground/70 mt-0.5">Tab completion + optional PlaceholderAPI support</div>
-        </div>
-        <div class="p-5 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md flex flex-col justify-center">
-          <div class="text-3xl font-bold stat-number">1.20–1.21</div>
-          <div class="text-sm text-muted-foreground mt-1">MC Versions</div>
-          <div class="text-xs text-muted-foreground/70 mt-0.5">Java 21+ required</div>
-        </div>
-      </div>
-    </section>
-
-    {# ── How it works ── #}
-    <section class="max-w-4xl mx-auto my-28">
-      <h2 class="text-3xl lg:text-4xl font-semibold tracking-tight mb-12 text-center">Up and Running in Minutes</h2>
-      <div class="grid md:grid-cols-3 gap-8 text-center">
-        <div class="space-y-3">
-          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">1</div>
-          <h3 class="text-lg font-semibold">Install</h3>
-          <p class="text-sm text-muted-foreground">Drop the plugin JAR on Velocity and every backend server. Java 21+ required.</p>
-        </div>
-        <div class="space-y-3">
-          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">2</div>
-          <h3 class="text-lg font-semibold">Configure</h3>
-          <p class="text-sm text-muted-foreground">Set the shared secret and connection settings in <code>config.yml</code>.</p>
-        </div>
-        <div class="space-y-3">
-          <div class="mx-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-bold">3</div>
-          <h3 class="text-lg font-semibold">Script</h3>
-          <p class="text-sm text-muted-foreground">Write YAML scripts that define commands, arguments, and what happens where. One file per command.</p>
-        </div>
-      </div>
-    </section>
-
-    {# ── Transport comparison ── #}
-    <section class="max-w-5xl mx-auto my-24">
-      <h2 class="text-3xl lg:text-4xl font-semibold tracking-tight mb-10 text-center">Choose Your Transport</h2>
-      <div class="grid md:grid-cols-2 gap-8">
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <h3 class="text-xl font-semibold flex items-center gap-2 mb-3">
-            {% lucide "radio", { "class" : "h-5 w-5 text-sky-400" } %} WebSocket
-          </h3>
-          <ul class="space-y-2 text-sm text-muted-foreground">
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Direct proxy-to-backend connections</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} TLS encryption support</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} No external dependencies</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Built-in reconnect handling</li>
-          </ul>
-        </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <h3 class="text-xl font-semibold flex items-center gap-2 mb-3">
-            {% lucide "database", { "class" : "h-5 w-5 text-red-400" } %} Redis
-          </h3>
-          <ul class="space-y-2 text-sm text-muted-foreground">
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Centralized message broker</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Works behind NATs & firewalls</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Leverage existing Redis infra</li>
-            <li class="flex gap-2">{% lucide "check", { "class" : "h-4 w-4 text-emerald-400 shrink-0 mt-0.5" } %} Pub/sub channel isolation</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    {# ── Features ── #}
-    <section class="max-w-5xl mx-auto my-24 text-center">
-      <h2 class="text-4xl font-semibold tracking-tight mb-4">What Makes It Unique?</h2>
-      <p class="text-muted-foreground mb-12 max-w-2xl mx-auto">No plugin messaging channels, no player-online requirements. Commands go through instantly.</p>
-      <div class="grid md:grid-cols-2 gap-8 text-left">
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <div class="flex items-center gap-2">{% lucide "zap" %}</div>
-          <h3 class="text-xl font-medium mt-4">Cross-Server Execution</h3>
-          <p class="text-muted-foreground">
-            Run a command on the proxy and trigger actions on any backend instantly. Run it on a backend and the proxy picks it up. Full bidirectional flow.
-          </p>
-        </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <div class="flex items-center gap-2">{% lucide "code" %}</div>
-          <h3 class="text-xl font-medium mt-4">YAML Script Engine</h3>
-          <p class="text-muted-foreground">
-            22 argument types with full tab completion via CommandAPI. Named placeholders, player/server variables, and optional PlaceholderAPI support via PapiProxyBridge.
-          </p>
-        </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <div class="flex items-center gap-2">{% lucide "lock" %}</div>
-          <h3 class="text-xl font-medium mt-4">Secure by Default</h3>
-          <p class="text-muted-foreground">
-            HMAC-SHA256 mutual authentication during connection setup, plus optional TLS encryption. Three trust modes: TOFU, STRICT, or PLAIN.
-          </p>
-        </div>
-        <div class="p-6 rounded-xl border bg-card shadow-sm bg-white/5 backdrop-blur-md">
-          <div class="flex items-center gap-2">{% lucide "user-cog" %}</div>
-          <h3 class="text-xl font-medium mt-4">Flexible Execution</h3>
-          <p class="text-muted-foreground">
-            Run commands as console, as the player, or with temporary operator permissions. Cooldowns, per-target overrides, and conditional logic included.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    {# ── CTA ── #}
-    <section class="max-w-4xl mx-auto my-32 text-center">
-      <h2 class="text-3xl lg:text-4xl font-semibold mb-6">Ready to Link Your Servers?</h2>
-      <p class="text-muted-foreground mb-8 text-lg">
-        Drop in the plugin, write a few YAML scripts, and your entire network shares commands. It's that simple.
-      </p>
-      <div class="flex gap-4 flex-wrap justify-center">
-        <a href="/docs/{{ docVersions.latest }}/" class="button !text-base !h-12 !px-8">Read the Docs</a>
-        <a href="https://modrinth.com/plugin/commandbridge" target="_blank" class="button-outline !text-base !h-12 !px-8">Download on Modrinth</a>
-      </div>
-    </section>
-  </div>
+  <section class="lp-wrap lp-closing" aria-label="Get CommandBridge">
+    <h2>Connect your network.</h2>
+    <div class="lp-actions">
+      <a class="button !h-11 !px-5 !text-[0.9375rem]" href="https://modrinth.com/plugin/commandbridge#download" target="_blank" rel="noopener">Download on Modrinth</a>
+      <a class="button-outline !h-11 !px-5 !text-[0.9375rem]" href="/docs/{{ docVersions.latest }}/">Read the docs</a>
+    </div>
+    <p>Questions? Ask on <a href="https://discord.gg/QPqBYb44ce" target="_blank" rel="noopener">Discord</a> or browse the source on <a href="https://github.com/objz/CommandBridge" target="_blank" rel="noopener">GitHub</a>.</p>
+    <p class="lp-compat"><span>Velocity · Paper · Folia · Spigot · Purpur</span><span>Minecraft 1.20 and newer</span><span>Java 21</span></p>
+  </section>
 </div>
-{# ── Three.js background ── #}
-<script type="module">
-  import * as THREE from 'https://cdn.skypack.dev/three@0.152.2';
 
-  const bgCanvas = document.getElementById('cb-background');
-  const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
-  const bgScene = new THREE.Scene();
-  const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  bgCamera.position.z = 2.5;
-
-  const geometry = new THREE.IcosahedronGeometry(1.2, 2);
-  const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x000000, wireframe: true });
-  const voidMesh = new THREE.Mesh(geometry, material);
-  bgScene.add(voidMesh);
-
-  const pointLight = new THREE.PointLight(0xffffff, 1);
-  pointLight.position.set(5, 5, 5);
-  bgScene.add(pointLight);
-
-  function animateBg() {
-    requestAnimationFrame(animateBg);
-    voidMesh.rotation.x += 0.002;
-    voidMesh.rotation.y += 0.004;
-    bgRenderer.setSize(bgCanvas.clientWidth, bgCanvas.clientHeight, false);
-    bgRenderer.render(bgScene, bgCamera);
-  }
-  animateBg();
-
-  window.addEventListener('resize', () => {
-    bgCamera.aspect = window.innerWidth / window.innerHeight;
-    bgCamera.updateProjectionMatrix();
-    bgRenderer.setSize(bgCanvas.clientWidth, bgCanvas.clientHeight, false);
-  });
-</script>
-
-{# ── Network graph engine ── #}
 <script>
-(function() {
-  const canvas = document.getElementById('networkGraph');
-  const svgEl  = document.getElementById('graphLines');
-  const logEl  = document.getElementById('cmdLog');
-  if (!canvas || !svgEl) return;
-
-  /* Node definitions: id, label (for log), angle offset for ring placement */
-  const nodeIds = ['velocity','paper','folia','purpur','spigot','bukkit'];
-  const nodeLabels = {
-    velocity: 'Velocity',
-    paper: 'Paper',
-    folia: 'Folia',
-    purpur: 'Purpur',
-    spigot: 'Spigot',
-    bukkit: 'Bukkit'
-  };
-  const nodeColors = {
-    velocity: '#60a5fa',
-    paper: '#6ee7b7',
-    folia: '#fbbf24',
-    purpur: '#fb7185',
-    spigot: '#22d3ee',
-    bukkit: '#6ee7b7'
-  };
-
-  /* Scenarios: commands that fly between servers */
-  const scenarios = [
-    { from: 'paper',    to: ['velocity'],                          cmd: '/lobby' },
-    { from: 'velocity', to: ['paper','folia','purpur','spigot','bukkit'], cmd: '/alert' },
-    { from: 'folia',    to: ['paper'],                             cmd: '/tp' },
-    { from: 'paper',    to: ['folia','spigot'],                    cmd: '/sync-inv' },
-    { from: 'spigot',   to: ['velocity'],                          cmd: '/send' },
-    { from: 'velocity', to: ['purpur'],                            cmd: '/hub-reload' },
-    { from: 'purpur',   to: ['paper','folia','spigot','bukkit'],   cmd: '/broadcast' },
-    { from: 'bukkit',   to: ['velocity'],                          cmd: '/report' },
-    { from: 'velocity', to: ['bukkit','paper'],                    cmd: '/whitelist' },
-    { from: 'folia',    to: ['purpur','spigot'],                   cmd: '/transfer' },
-  ];
-
-  const hubCx = 50; // percent
-  const hubCy = 50;
-
-  /* Place nodes in a ring around the hub */
-  function layoutNodes() {
-    const count = nodeIds.length;
-    const rx = 38; // horizontal radius %
-    const ry = 38; // vertical radius %
-
-    nodeIds.forEach((id, i) => {
-      const angle = (Math.PI * 2 * i / count) - Math.PI / 2;
-      const x = hubCx + rx * Math.cos(angle);
-      const y = hubCy + ry * Math.sin(angle);
-      const el = document.getElementById('node-' + id);
-      if (el) {
-        el.style.left = x + '%';
-        el.style.top  = y + '%';
-      }
-    });
-  }
-
-  /* Draw SVG lines from hub to each node + idle pulse dots */
-  function drawLines() {
-    const rect = canvas.getBoundingClientRect();
-    const cx = rect.width  * hubCx / 100;
-    const cy = rect.height * hubCy / 100;
-
-    let svg = '';
-    nodeIds.forEach((id, i) => {
-      const el = document.getElementById('node-' + id);
-      if (!el) return;
-      const nx = parseFloat(el.style.left) / 100 * rect.width;
-      const ny = parseFloat(el.style.top)  / 100 * rect.height;
-
-      /* The line */
-      svg += '<line class="graph-line" data-node="' + id + '" x1="' + cx + '" y1="' + cy + '" x2="' + nx + '" y2="' + ny + '" />';
-
-      /* Idle dot at midpoint */
-      const mx = (cx + nx) / 2;
-      const my = (cy + ny) / 2;
-      svg += '<circle class="idle-dot" cx="' + mx + '" cy="' + my + '" r="2" />';
-    });
-
-    svgEl.innerHTML = svg;
-  }
-
-  /* Get pixel center of a node */
-  function nodeCenter(id) {
-    const el = document.getElementById('node-' + id);
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: parseFloat(el.style.left) / 100 * rect.width,
-      y: parseFloat(el.style.top)  / 100 * rect.height
-    };
-  }
-
-  /* Animate a packet from src to hub, then hub to each target */
-  function firePacket(fromId, toIds, cmd) {
-    const fromEl = document.getElementById('node-' + fromId);
-    const hub    = { x: canvas.getBoundingClientRect().width * hubCx / 100,
-                     y: canvas.getBoundingClientRect().height * hubCy / 100 };
-    const src    = nodeCenter(fromId);
-
-    /* Highlight source */
-    fromEl.querySelector('.graph-node-inner').classList.add('is-source');
-
-    /* Leg 1: source -> hub */
-    createDot(src, hub, nodeColors[fromId], 1000, function() {
-      /* Leg 2: hub -> each target (fan out) */
-      toIds.forEach(function(tid, idx) {
-        const tgt = nodeCenter(tid);
-        const tgtEl = document.getElementById('node-' + tid);
-        setTimeout(function() {
-          tgtEl.querySelector('.graph-node-inner').classList.add('is-target');
-          createDot(hub, tgt, nodeColors[tid], 900, function() {
-            setTimeout(function() {
-              tgtEl.querySelector('.graph-node-inner').classList.remove('is-target');
-            }, 600);
-          });
-        }, idx * 120);
-      });
-    });
-
-    /* Remove source highlight */
-    setTimeout(function() {
-      fromEl.querySelector('.graph-node-inner').classList.remove('is-source');
-    }, 1200);
-
-    /* Log the command */
-    addLog(fromId, toIds, cmd);
-  }
-
-  /* Create an animated dot along a straight path */
-  function createDot(from, to, color, duration, onDone) {
-    const dot = document.createElement('div');
-    dot.className = 'graph-packet';
-    dot.style.color = color;
-    dot.style.background = color;
-
-    /* Use CSS offset-path for the travel */
-    const pathD = 'M ' + from.x + ' ' + from.y + ' L ' + to.x + ' ' + to.y;
-    dot.style.offsetPath = 'path("' + pathD + '")';
-    dot.style.animationDuration = duration + 'ms';
-
-    canvas.appendChild(dot);
-    dot.addEventListener('animationend', function() {
-      dot.remove();
-      if (onDone) onDone();
-    });
-  }
-
-  /* Add entry to the command log */
-  function addLog(fromId, toIds, cmd) {
-    const entry = document.createElement('div');
-    entry.className = 'cmd-log-entry';
-
-    const targets = toIds.map(function(t) {
-      return '<span class="log-node" style="color:' + nodeColors[t] + '">' + nodeLabels[t] + '</span>';
-    }).join('<span class="log-arrow">,</span> ');
-
-    entry.innerHTML =
-      '<span class="log-node" style="color:' + nodeColors[fromId] + '">' + nodeLabels[fromId] + '</span>' +
-      '<span class="log-arrow">&rarr;</span>' +
-      targets +
-      '<span class="log-cmd">' + cmd + '</span>';
-
-    logEl.appendChild(entry);
-
-    /* Keep max 4 entries */
-    while (logEl.children.length > 4) {
-      logEl.removeChild(logEl.firstChild);
-    }
-  }
-
-  /* Init */
-  layoutNodes();
-  /* Small delay to let layout settle before drawing lines */
-  requestAnimationFrame(function() {
-    drawLines();
-  });
-
-  /* Redraw on resize */
-  let resizeTimer;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      drawLines();
-    }, 100);
-  });
-
-  /* Fire scenarios in a loop */
-  let idx = 0;
-  function nextScenario() {
-    const s = scenarios[idx % scenarios.length];
-    firePacket(s.from, s.to, s.cmd);
-    idx++;
-    /* Stagger timing: single-target commands are faster, multi-target get more time */
-    const delay = s.to.length > 2 ? 3800 : 2800;
-    setTimeout(nextScenario, delay);
-  }
-  /* Start after 800ms */
-  setTimeout(nextScenario, 800);
-})();
+  // live download count from Modrinth; if the API can't be reached the item stays hidden
+  fetch("https://api.modrinth.com/v2/project/commandbridge")
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error("Modrinth API " + r.status))))
+    .then((project) => {
+      const el = document.querySelector("[data-downloads]");
+      el.textContent = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(project.downloads) + " downloads";
+      el.hidden = false;
+    })
+    .catch((error) => console.warn("Download count unavailable:", error.message));
 </script>
+<script src="/js/d3-array.js" defer></script>
+<script src="/js/d3-geo.js" defer></script>
+<script src="/js/topojson-client.js" defer></script>
+<script type="module" src="/globe.js?build={% now %}"></script>

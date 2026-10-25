@@ -111,6 +111,10 @@ module.exports = function(eleventyConfig) {
      "src/media": "/media",
      "src/assets": "/",
      "node_modules/alpinejs/dist/cdn.min.js": "js/alpine.js",
+     "node_modules/d3-array/dist/d3-array.min.js": "js/d3-array.js",
+     "node_modules/d3-geo/dist/d3-geo.min.js": "js/d3-geo.js",
+     "node_modules/topojson-client/dist/topojson-client.min.js": "js/topojson-client.js",
+     "node_modules/world-atlas/land-110m.json": "land-110m.json",
      "src/lib": "/lib",
   });
 
