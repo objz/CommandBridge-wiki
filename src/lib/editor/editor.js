@@ -4,13 +4,14 @@
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const splitList = (v) => String(v ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const isZero = (v) => v != null && /^\s*0+(\.0+)?\s*(ms|s|m|h)?\s*$/i.test(String(v));
+const CONFIRM_CODE = /^[abcdefghjkmnpqrstuvwxyz23456789]{6}$/;
 
 // the same rules the proxy validates with, checked while typing
 const RULES = {
   name: [/^[a-z][a-z0-9-]{2,32}$/, "3 to 33 lowercase letters, digits or -, starting with a letter"],
   argname: [/^[A-Za-z][A-Za-z0-9_-]*$/, "letters, digits, _ or -, starting with a letter"],
   duration: [/^\s*\d+(\.\d+)?\s*(ms|s|m|h)?\s*$/i, "a duration like 500ms, 5s, 1m or 1h"],
-  // CB itself doesn't limit alias length (and short ones like /ft work), so only the characters are checked
+  // Aliases may be shorter than script names, e.g. /ft.
   alias: [/^[a-z][a-z0-9-]{0,32}$/, "lowercase letters, digits or -, starting with a letter"],
   suggestions: [/^\s*([a-z0-9._+\-]+\s*(,\s*[a-z0-9._+\-]+\s*)*)?$/, "words of lowercase letters, digits and . _ + -, separated by commas"],
   serverid: [/^\S+$/, "a server id without spaces"],
@@ -128,7 +129,7 @@ const ARG_FAMILIES = [
   ["Items and effects", ["ITEM_STACK", "ENCHANTMENT", "POTION_EFFECT", "SOUND"]],
   ["Network", ["SERVER"]],
 ];
-// the software a server runs, by its real logo; Bukkit servers are shown as Spigot, which nearly all of them are
+// Bukkit uses the Spigot logo.
 const logo = (file) => `<img class="logo" src="/lib/editor/logos/${file}" alt="" draggable="false">`;
 Object.assign(SRV_ICONS, {
   VELOCITY: logo("velocity.svg"), PAPER: logo("paper.svg"), FOLIA: logo("folia.svg"), BUKKIT: logo("spigot.svg"), FORGE: logo("forge.svg"), FABRIC: logo("fabric.png"),
@@ -138,6 +139,8 @@ const srvKind = (loc, platform) => (SRV_ICONS[platform] && platform !== "VELOCIT
 const SRV_COLORS = { BACKEND: "#f59e0b", VELOCITY: "#60a5fa" };
 const MINIMAP_COLORS = { command: "#8b5cf6", run: "#22c55e", wait: "#64748b", arg: "#38bdf8", server: "#f59e0b", alias: "#ec4899", defaults: "#14b8a6", runas: "#eab308", cooldown: "#94a3b8", rules: "#f97316" };
 const GROUP_COLORS = ["#8b5cf6", "#22c55e", "#38bdf8", "#f59e0b", "#ef4444", "#94a3b8"];
+const validGroup = (g) => g && typeof g.id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(g.id) && typeof g.title === "string" && /^#[0-9a-f]{6}$/i.test(g.color)
+  && Array.isArray(g.members) && g.members.every((m) => typeof m === "string") && [g.x, g.y, g.w, g.h].every(Number.isFinite);
 const kindOf = (node) => node.class.replace("cb-", "");
 const portType = (kind, side, port) => PORTS[kind][side][Number(port.split("_")[1]) - 1]?.[1];
 const portLabel = (kind, side, port) => PORTS[kind][side][Number(port.split("_")[1]) - 1]?.[0];
@@ -160,7 +163,6 @@ const playerPick = (f, v) => pick(f, "player", v, v || "who ran it", v ? svg(LUC
 const PLAYER_TIP = "Target required and schedule online look at this player's server. Normally that's the player who ran the command; pick an argument to use the player it names instead.";
 // one alias: a row of the list, edited in place
 const tag = (a) => `<div class="tag" data-v="${esc(a)}"><i>/</i><input type="text" class="al-in" value="${esc(a)}" data-rule="alias" aria-label="Alias" autocomplete="off" spellcheck="false"><button type="button" class="tag-x" aria-label="Remove /${esc(a)}">${svg(LUCIDE["trash-2"], 14)}</button></div>`;
-// a placeholder inside the command text: one piece that is moved or removed as a whole
 // a placeholder inside the command text: one piece, dragged to move it or out to remove it
 const ph = (name) => `<span class="ph" contenteditable="false" data-arg="${esc(name)}">${esc(name)}</span>`;
 const textHtml = (t) => String(t ?? "").split(/(\$\{[^}]*\})/).map((part) => (/^\$\{[^}]*\}$/.test(part) ? ph(part.slice(2, -1)) : esc(part))).join("");
@@ -254,7 +256,10 @@ function cbEditor() {
   let wireShown = null; // the wire the delete button belongs to
   const aim = { p0: null, p1: null, t: 0, timer: null }; // pointer trail for submenus' safe triangle
   let clipboard = null; // { nodes, edges } copied with Ctrl+C
-  const bases = {}; // file -> YAML text edited in the panel, the base its YAML is written onto
+  const bases = {}; // file -> source YAML whose list indexes the graph's metadata refers to
+  let unread = new Set(); // files skipped by the current snapshot must not become deletions
+  let latestScripts = null; // external changes wait for Revert while the graph has edits
+  const applied = new Map(); // successful writes awaiting their state snapshot
   let staged = null; // the change set waiting on the proxy for /cb editor confirm, as JSON
   let draftTimer = null, lastDraft = "";
   let yamlTimer = null;
@@ -287,13 +292,13 @@ function cbEditor() {
     copied: false,
     yamlDraft: null, // { file, text } being typed in the YAML panel
     yamlError: "",
+    externalChanges: false,
     yamlSugg: null,  // { items, sel, x, y, from, to } completion popup at the caret
     yamlLine: -1,    // the caret's line, for the message of a problem on it
     pop: null,       // { x, y, title, items: [{ label, hint, kind, keys, run, sub }] } for port and context menus
     tool: "select",  // left-drag on the canvas: "select" draws a selection box, "grab" pans
     wireX: null,     // { x, y } of the delete button on a selected wire
     relay: null,
-    justSaved: [],
     deferred: false,
     removingNodes: false,
     dragId: 0,
@@ -1396,7 +1401,6 @@ function cbEditor() {
       return this.argNodesOf(nodeId).map((n) => this.fields(n.id)).filter((a) => a.name);
     },
 
-    // options that depend on the graph: argument chips, player-arg choices, inherited values, server lists
     // what depends on the whole graph: argument chips, unknown placeholders, required fields and ports, muted scripts
     refreshDynamic(scripts) {
       const byCmd = new Map(scripts.map((s) => [s.id, s]));
@@ -1629,7 +1633,6 @@ function cbEditor() {
       this.drawMinimap();
     },
 
-    // same-type ports only, and the flow stays a single chain
     // same-type ports only; the flow stays a single chain; single-value inputs take one wire
     allowed(from, outPort, to, inPort, preview = false) {
       if (String(from.id) === String(to.id)) return false;
@@ -1680,8 +1683,6 @@ function cbEditor() {
       this.refresh();
     },
 
-    // Drawflow removes a node's wires before it reports the node removed; deferring keeps the old
-    // ownership around so removing a Command can still take its own nodes with it
     // Drawflow removes a node's wires before it reports the node removed; deferring keeps the old
     // ownership around so removing a Command can still take its own nodes with it
     onDisconnect(c) {
@@ -1863,16 +1864,15 @@ function cbEditor() {
 
     /* ================= scripts -> graph ================= */
 
-    // one row per script: its servers, arguments, the command, then its steps left to right
     // one row per script: servers, arguments and aliases, the command with its defaults, then its steps
     // left to right with their own settings underneath
     // texts: the scripts to lay out, by file; the saved ones unless the YAML panel hands in edited text
     snapshotFromScripts(texts = this.scripts) {
-      const nodes = [], edges = [];
+      const nodes = [], edges = [], unread = [];
       let next = 0;
       for (const file of Object.keys(texts).sort()) {
         let m;
-        try { m = conv.toModel(YAML, texts[file]); } catch { continue; } // listed as a problem in collect()
+        try { m = conv.toModel(YAML, texts[file]); } catch { unread.push(file); continue; }
         const count = {};
         const add = (kind, values, extra = {}) => {
           const key = kind === "command" ? "cmd" : kind + (count[kind] = (count[kind] ?? -1) + 1);
@@ -1919,13 +1919,15 @@ function cbEditor() {
         });
       }
       // groups are by file name since version 2 and still fit
-      return { nodes, edges, groups: layout.version >= 2 ? layout.groups || [] : [] };
+      return { nodes, edges, bases: texts, unread, groups: layout.version >= 2 && Array.isArray(layout.groups) ? layout.groups.filter(validGroup) : [] };
     },
 
     // places nodes from a snapshot; nodes without a stored position get a tidy spot in their script's row
-    // places nodes from a snapshot; nodes without a stored position get a tidy spot in their script's row
     buildFrom(snap, auto = false) {
       building = true;
+      for (const f of Object.keys(bases)) delete bases[f];
+      Object.assign(bases, snap.bases);
+      unread = new Set(snap.unread);
       df.clear();
       meta.clear();
       selected.clear();
@@ -1939,7 +1941,7 @@ function cbEditor() {
       const keep = !auto || layout.version === LAYOUT_VERSION;
       for (const n of snap.nodes) {
         const stored = auto ? (keep ? layout.nodes?.[n.key] : null) : n;
-        const has = stored && stored.x != null;
+        const has = stored && Number.isFinite(stored.x) && Number.isFinite(stored.y);
         const id = this.place(n.kind, has ? stored.x : 0, has ? stored.y : 0, n.values);
         ids.set(n.id, id);
         if (n.meta) meta.set(id, n.meta);
@@ -2045,9 +2047,16 @@ function cbEditor() {
     },
 
     rebuild() {
-      for (const f of Object.keys(bases)) delete bases[f];
+      clearTimeout(yamlTimer);
+      this.yamlDraft = null;
+      this.yamlError = "";
+      if (latestScripts) this.scripts = latestScripts;
+      latestScripts = null;
+      this.externalChanges = false;
       this.results = [];
-      this.buildFrom(this.snapshotFromScripts(), true);
+      const snap = this.snapshotFromScripts();
+      this.loadedFiles = snap.nodes.filter((n) => n.kind === "command" && n.meta?.file).map((n) => n.meta.file);
+      this.buildFrom(snap, true);
       history.past = []; history.future = []; history.last = this.serialize();
       this.canUndo = this.canRedo = false;
       this.fit();
@@ -2062,7 +2071,7 @@ function cbEditor() {
       for (const n of Object.values(data)) {
         for (const [out, o] of Object.entries(n.outputs)) for (const c of o.connections) edges.push([String(n.id), out, String(c.node), c.output]);
       }
-      return JSON.stringify({ nodes, edges, groups });
+      return JSON.stringify({ nodes, edges, groups, bases: { ...bases }, unread: [...unread] });
     },
 
     // every action is its own undo step; only typing is grouped, so a word isn't one step per letter
@@ -2098,6 +2107,8 @@ function cbEditor() {
       restoring = false;
       this.canUndo = history.past.length > 0;
       this.canRedo = history.future.length > 0;
+      this.saveLayoutSoon(this.collect().scripts);
+      this.saveDraftSoon();
     },
 
     undo() {
@@ -2115,8 +2126,6 @@ function cbEditor() {
       this.restore(history.future.pop());
     },
 
-    // A step calls a script when its command starts with that script's name or alias AND it runs where
-    // that script is registered. Elsewhere the same word is just that server's own command (e.g. /eco).
     // A step calls a script when its command starts with that script's name or alias AND it runs where
     // that script is registered. Elsewhere the same word is just that server's own command (e.g. /eco).
     syncCalls() {
@@ -2291,13 +2300,12 @@ function cbEditor() {
         }
         if (s.isNew && this.scripts[s.file] !== undefined) err(`${s.file} already exists on the proxy`, { node: s.id, sel: '[data-f="name"]' });
       }
-      for (const file of Object.keys(this.scripts)) {
-        try { conv.toModel(YAML, this.scripts[file]); } catch (e) { problems.push({ file, text: `${file} is not valid YAML. Fix it in a text editor: ${e.message}`, blocking: false }); }
+      for (const [file, text] of Object.entries({ ...this.scripts, ...bases })) {
+        try { conv.toModel(YAML, text); } catch (e) { problems.push({ file, text: `${file} is not valid YAML. Fix it in a text editor: ${e.message}`, blocking: false }); }
       }
       return { scripts, problems };
     },
 
-    // positions and groups for editor-layout.json, keyed so they survive reloads
     // positions and groups for editor-layout.json, keyed so they survive reloads
     layoutNow(scripts) {
       const data = df.drawflow.drawflow.Home.data;
@@ -2324,7 +2332,7 @@ function cbEditor() {
       const out = {};
       for (const s of scripts) {
         try {
-          // text edited in the YAML panel is the base, so its comments and layout stay
+          // Keep the source tied to its indexes, even after the proxy saves a reordered list.
           out[s.file] = conv.fromModel(YAML, bases[s.file] ?? this.scripts[s.file] ?? this.newScript(s.model.name), s.model);
         } catch (e) {
           problems.push({ file: s.file, text: `${s.file} could not be turned into YAML: ${e.message}`, blocking: true });
@@ -2343,7 +2351,7 @@ function cbEditor() {
       this.fitGroups();
       this.renderGroups();
       const present = new Set([...meta.values()].map((m) => m.file).filter(Boolean));
-      this.deletions = this.loadedFiles.filter((f) => !present.has(f) && this.scripts[f] !== undefined);
+      this.deletions = this.loadedFiles.filter((f) => !present.has(f) && !unread.has(f) && this.scripts[f] !== undefined);
       this.out = out;
       // only problems in scripts that would be saved, or loose nodes, block saving
       const pinned = this.markProblems(problems);
@@ -2352,7 +2360,7 @@ function cbEditor() {
       this.saveLayoutSoon(scripts);
       this.saveDraftSoon();
       // a change after Save makes the waiting code save something older: take it back
-      if (staged && this.confirmCode && JSON.stringify(this.changeSet()) !== staged) this.cancelStage();
+      if (staged && JSON.stringify(this.changeSet()) !== staged) this.cancelStage();
       this.drawMinimap();
     },
 
@@ -2370,10 +2378,17 @@ function cbEditor() {
     },
 
     changes() {
-      return Object.keys(this.out).filter((f) => this.out[f] !== this.scripts[f]).length + this.deletions.length;
+      const files = new Set(Object.keys(this.out).filter((f) => this.out[f] !== this.scripts[f]));
+      if (this.yamlDraft && this.yamlDraft.text !== this.out[this.yamlDraft.file]) files.add(this.yamlDraft.file);
+      return Math.max(files.size + this.deletions.length, this.externalChanges ? 1 : 0);
     },
 
-    blocking() { return this.problems.filter((p) => p.blocking); },
+    blocking() {
+      const problems = this.problems.filter((p) => p.blocking);
+      if (this.yamlDraft && this.yamlError) problems.push({ file: this.yamlDraft.file, text: this.yamlError, blocking: true });
+      if (this.externalChanges) problems.push({ text: "Scripts changed on the proxy. Copy your edits before using Revert to load them.", blocking: true });
+      return problems;
+    },
 
     // the YAML panel: every script file with what saving does to it, and the chosen one, highlighted
     yamlFiles() {
@@ -2408,7 +2423,7 @@ function cbEditor() {
     yamlText() {
       const f = this.yamlFile();
       if (this.yamlDraft && this.yamlDraft.file === f) return this.yamlDraft.text;
-      return (this.deletions.includes(f) ? this.scripts[f] : this.out[f] ?? this.scripts[f]) ?? "";
+      return (this.deletions.includes(f) ? this.scripts[f] : this.out[f] ?? bases[f] ?? this.scripts[f]) ?? "";
     },
 
     // problems in the YAML with where they are: parse errors, wrong value types, unknown or missing keys
@@ -2419,7 +2434,8 @@ function cbEditor() {
       let doc;
       try { doc = YAML.parseDocument(text); } catch (e) { doc = null; }
       for (const e of doc?.errors || []) marks.push({ from: e.pos[0], to: Math.max(e.pos[1], e.pos[0] + 1), msg: e.message.split("\n")[0] });
-      const argNames = new Set((doc?.toJS?.()?.args || []).map((a) => a?.name).filter(Boolean));
+      const args = doc && !doc.errors.length ? doc.toJS()?.args : [];
+      const argNames = new Set((Array.isArray(args) ? args : []).map((a) => a?.name).filter(Boolean));
       const types = window.cbArgTypes || [];
       const walk = (node, sch) => {
         if (!sch || node == null) return;
@@ -2439,14 +2455,18 @@ function cbEditor() {
           node.items.forEach((item) => walk(item, sch.of));
         } else if (!scalar) {
           at(node, `Should be ${Y_HINTS[sch.type] === "text" ? "text" : "a single value"}`);
-        } else if (sch.type === "bool" && typeof v !== "boolean") at(node, "Should be true or false");
+        } else if (sch.type === "str" && typeof v !== "string") at(node, "Should be text");
+        else if (sch.type === "bool" && typeof v !== "boolean") at(node, "Should be true or false");
         else if (sch.type === "int" && !Number.isInteger(v)) at(node, "Should be a whole number");
         else if (sch.type === "dur" && !RULES.duration[0].test(String(v))) at(node, "Should be " + RULES.duration[1]);
         else if (sch.type === "name" && !RULES.name[0].test(String(v))) at(node, "Should be " + RULES.name[1]);
         else if (sch.type === "enum" && !(sch.values || types).includes(String(v))) at(node, `Should be one of ${(sch.values || types).join(", ")}`);
         else if (sch.type === "arg" && v && !argNames.has(String(v))) at(node, `No argument named ${v}`);
       };
-      if (doc && !doc.errors.length) walk(doc.contents, Y_SCRIPT);
+      if (doc && !doc.errors.length) {
+        if (!doc.contents) marks.push({ from: 0, to: 1, msg: "Should be a section of keys" });
+        else walk(doc.contents, Y_SCRIPT);
+      }
       const lines = [];
       const starts = [0];
       for (let i = 0; i < text.length; i++) if (text[i] === "\n") starts.push(i + 1);
@@ -2577,6 +2597,7 @@ function cbEditor() {
     yamlInput(e) {
       this.yamlError = ""; // the underlines show what's wrong while typing
       this.yamlDraft = { file: this.yamlFile(), text: e.target.value };
+      if (staged || this.confirmCode) this.cancelStage();
       clearTimeout(yamlTimer);
       yamlTimer = setTimeout(() => this.yamlApply(), 700);
     },
@@ -2586,12 +2607,15 @@ function cbEditor() {
       clearTimeout(yamlTimer);
       const draft = this.yamlDraft;
       if (!draft) return;
-      try { conv.toModel(YAML, draft.text); } catch (e) { this.yamlError = e.message.split("\n")[0]; return; }
+      try {
+        conv.toModel(YAML, draft.text);
+        const error = this.yamlLint(draft.text).marks.find((m) => !m.warn);
+        if (error) throw new Error(error.msg);
+      } catch (e) { this.yamlError = e.message.split("\n")[0]; return; }
       this.yamlError = "";
       if (draft.text === this.out[draft.file]) { this.yamlDraft = null; return; }
       const texts = { ...this.scripts, ...this.out, [draft.file]: draft.text };
       for (const f of this.deletions) delete texts[f];
-      bases[draft.file] = draft.text;
       layout = this.layoutNow(this.collect().scripts);
       const view = [df.zoom, df.canvas_x, df.canvas_y];
       this.buildFrom(this.snapshotFromScripts(texts), true);
@@ -2642,7 +2666,6 @@ function cbEditor() {
     },
 
     // a new script gets its own row below everything else, one step, and is registered on the proxy
-    // a new script gets its own row below everything else, one step, and is registered on the proxy
     addScript(at) {
       const taken = new Set(Object.values(df.drawflow.drawflow.Home.data).filter((n) => kindOf(n) === "command").map((n) => this.fields(n.id).name));
       let name = "new-command", i = 2;
@@ -2678,8 +2701,10 @@ function cbEditor() {
 
     // Save stages the changes on the proxy; they are written once someone runs the confirm command there
     save() {
+      if (this.yamlDraft) this.yamlApply();
+      if (this.busy || this.confirmCode) return;
       this.refresh();
-      if (this.blocking().length || !this.changes()) return;
+      if (this.yamlDraft || this.blocking().length || !this.changes()) return;
       this.results = [];
       this.busy = true;
       const set = this.changeSet();
@@ -2716,7 +2741,6 @@ function cbEditor() {
     restoreDraft(d) {
       const texts = { ...this.scripts, ...d.files };
       for (const f of d.deletions || []) delete texts[f];
-      for (const [f, t] of Object.entries(d.files)) bases[f] = t;
       this.buildFrom(this.snapshotFromScripts(texts), true);
       history.past = []; history.future = []; history.last = this.serialize();
       this.canUndo = this.canRedo = false;
@@ -2745,17 +2769,22 @@ function cbEditor() {
     receive(msg) {
       if (msg.type === "state") {
         const first = this.status !== "online";
-        // files we just saved or deleted changed because of us; anything else changed on the proxy
-        const ours = new Set(this.justSaved);
-        const external = Object.keys({ ...this.scripts, ...msg.scripts }).some((f) => this.scripts[f] !== msg.scripts[f] && !ours.has(f));
+        // Only the exact acknowledged write is ours, not another edit to the same file.
+        const previous = latestScripts || this.scripts;
+        const external = Object.keys({ ...previous, ...msg.scripts }).some((f) => previous[f] !== msg.scripts[f] && (!applied.has(f) || applied.get(f) !== msg.scripts[f]));
         const hadChanges = this.changes() > 0;
-        this.scripts = msg.scripts;
+        if (!first && hadChanges && (external || this.externalChanges)) {
+          latestScripts = msg.scripts;
+          this.externalChanges = true;
+          if (staged || this.confirmCode) this.cancelStage();
+        } else this.scripts = msg.scripts;
         this.servers = msg.servers || {};
-        this.confirmCode = msg.pending || null;
+        this.confirmCode = !first && staged && CONFIRM_CODE.test(msg.pending || "") ? msg.pending : null;
+        // A reloaded page has not reviewed the pending set, even if it offers the stored draft.
+        if (first && msg.pending) this.cancelStage();
         if (first) { layout = msg.layout || layout; lastLayout = JSON.stringify(layout); }
         this.status = "online";
         if (first) {
-          this.loadedFiles = Object.keys(msg.scripts);
           this.rebuild();
           // keeps the session alive while the tab is open; the proxy closes it a few minutes after the tab is gone
           setInterval(() => this.send({ type: "ping" }), 60_000);
@@ -2764,36 +2793,42 @@ function cbEditor() {
           if (d?.files && (Object.keys(d.files).some((f) => d.files[f] !== msg.scripts[f]) || d.deletions?.length))
             this.results.push({ ok: true, warning: true, offer: d, text: `There are unsaved changes from ${new Date(d.at || Date.now()).toLocaleString()}. Review them before you save.` });
           lastDraft = JSON.stringify(this.changeSet());
-          if (this.confirmCode) staged = lastDraft;
         } else if (external && !hadChanges) {
-          this.loadedFiles = Object.keys(msg.scripts);
           this.rebuild();
         } else {
-          this.loadedFiles = [...new Set([...this.loadedFiles, ...Object.keys(msg.scripts)])].filter((f) => msg.scripts[f] !== undefined);
-          if (external) this.results.push({ ok: true, warning: true, text: "Scripts changed on the proxy. Revert to load them." });
+          if (!this.externalChanges) {
+            const savedFiles = [...applied.keys()].filter((f) => msg.scripts[f] !== undefined);
+            this.loadedFiles = [...new Set([...this.loadedFiles, ...savedFiles])].filter((f) => msg.scripts[f] !== undefined);
+          }
+          if (external) this.results.push({ ok: true, warning: true, text: "Scripts changed on the proxy. Copy your edits before using Revert to load them. Saving is blocked until then." });
           this.refresh();
         }
+        applied.clear();
       } else if (msg.type === "staged") {
         this.busy = false;
+        if (!staged || this.yamlDraft || this.externalChanges || JSON.stringify(this.changeSet()) !== staged) { this.cancelStage(); return; }
         const bad = Object.entries(msg.errors || {});
         if (bad.length) {
           staged = null;
           for (const [file, errs] of bad) this.results.push({ ok: false, text: `${file} can't be saved: ${errs.join("; ")}` });
         } else {
-          this.confirmCode = msg.code;
+          if (CONFIRM_CODE.test(msg.code || "")) this.confirmCode = msg.code;
+          else {
+            this.cancelStage();
+            this.results.push({ ok: false, text: "The proxy sent an invalid confirmation code. Save again or run /cb editor for a new link." });
+          }
         }
       } else if (msg.type === "applied") {
+        const set = staged && JSON.parse(staged);
         staged = null;
         this.confirmCode = null;
-        this.justSaved = Object.keys(msg.results);
-        setTimeout(() => { this.justSaved = []; }, 2000);
         for (const [file, errs] of Object.entries(msg.results)) {
           if (!errs.length) {
+            if (set) applied.set(file, set.files[file]);
             // a new script now has a file; remember it so it isn't treated as new again
             for (const [id, cmd] of owner) {
               if (id === cmd && !meta.get(id)?.file && this.fileOf(id) === file) meta.set(id, { ...meta.get(id), file, version: 4 });
             }
-            delete bases[file];
           }
           this.results.push({ ok: !errs.length, text: errs.length ? `${file}: not saved: ${errs.join("; ")}` : `${file}: ${this.deletions.includes(file) ? "deleted" : "saved"}` });
         }
@@ -2804,4 +2839,3 @@ function cbEditor() {
     },
   };
 }
-

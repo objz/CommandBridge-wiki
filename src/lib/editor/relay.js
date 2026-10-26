@@ -19,7 +19,7 @@ window.cbLink = () => {
   try { return sessionStorage.getItem(slot) || ""; } catch { return ""; }
 };
 
-// why a session ended, by close code; the relay's reason text isn't shown, the encryption doesn't cover it
+// Use fixed close messages because the relay's reason text is not authenticated.
 const CLOSED = {
   1000: "the proxy closed it",
   4001: "it was opened in another tab",
@@ -31,7 +31,12 @@ window.cbRelay = (hash) => {
   const [id, secret] = String(hash).replace(/^#/, "").split(":");
   if (!/^[0-9a-f]{32}$/.test(id || "") || !/^[A-Za-z0-9_-]{43}$/.test(secret || "")) return null;
   const base = location.hostname === "localhost" ? "ws://localhost:8787/api/editor/" : "wss://cb.objz.dev/api/editor/";
-  const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const b64url = (bytes) => {
+    const data = new Uint8Array(bytes);
+    let binary = "";
+    for (let i = 0; i < data.length; i += 32768) binary += String.fromCharCode(...data.subarray(i, i + 32768));
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
   const unb64url = (t) => Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
   const enc = (t) => new TextEncoder().encode(t);
   // replies are bound to this page load, so old proxy messages can't be replayed into it
@@ -62,19 +67,25 @@ window.cbRelay = (hash) => {
     connect() {
       ws = new WebSocket(base + id + "/ws?role=editor");
       ws.onopen = () => relay.onOpen();
-      ws.onmessage = (e) => enqueue(async () => {
-        let body;
-        try {
-          const { conn: c, seq, iv, box } = JSON.parse(e.data);
-          if (c !== conn || !Number.isSafeInteger(seq) || seq <= recvSeq || typeof iv !== "string" || typeof box !== "string") throw new Error("not for this page");
-          body = new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64url(iv), additionalData: aad("proxy", seq) }, await keyP, unb64url(box)));
-          recvSeq = seq;
-        } catch {
-          console.warn("Dropped a message that could not be opened or was already seen");
+      ws.onmessage = (e) => {
+        if (typeof e.data !== "string" || e.data.length > 4 * 1024 * 1024) {
+          ws.close(1009, "Message too large or not text");
           return;
         }
-        await relay.onMessage(JSON.parse(body));
-      });
+        enqueue(async () => {
+          let body;
+          try {
+            const { conn: c, seq, iv, box } = JSON.parse(e.data);
+            if (c !== conn || !Number.isSafeInteger(seq) || seq <= recvSeq || typeof iv !== "string" || typeof box !== "string") throw new Error("not for this page");
+            body = new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64url(iv), additionalData: aad("proxy", seq) }, await keyP, unb64url(box)));
+            recvSeq = seq;
+          } catch {
+            console.warn("Dropped a message that could not be opened or was already seen");
+            return;
+          }
+          await relay.onMessage(JSON.parse(body));
+        });
+      };
       ws.onclose = (e) => relay.onClose(CLOSED[e.code] || "the connection closed");
       return relay;
     },

@@ -1,5 +1,5 @@
-// CommandBridge network setup: one question per screen, then pairing and apply, live on the proxy through the relay.
-// Nothing here writes anything: the proxy keeps the plan and applies it after /cb setup confirm in its console.
+// Network setup over the relay. The proxy keeps the plan and applies it only after
+// /cb setup confirm in its console.
 
 const LOGOS = { PAPER: "paper.svg", FOLIA: "folia.svg", VELOCITY: "velocity.svg", FORGE: "forge.svg", SPIGOT: "spigot.svg", BUKKIT: "spigot.svg", FABRIC: "fabric.png" };
 const TLS = { TOFU: "first use", PLAIN: "off", STRICT: "strict" };
@@ -25,7 +25,6 @@ function hostProblem(host) {
   return HOSTNAME.test(h) ? "" : "That isn't a valid address. Use an IP like 203.0.113.7 or a name like play.example.net.";
 }
 
-// a server's host:port
 function serverAddressProblem(address) {
   const a = address.trim(), colon = a.lastIndexOf(":");
   if (colon < 0) return "Write the address as host:port, like 10.0.0.13:25565.";
@@ -46,8 +45,8 @@ function cbSetup() {
     dir: 1,         // 1 going forward, -1 going back; picks the direction a screen slides in from
     err: "",        // what's wrong with the answer on this screen
     problems: [],   // what the proxy said about the plan
-    codes: {},
-    paired: {},
+    codes: Object.create(null),
+    paired: Object.create(null),
     staged: null,
     applied: null,  // { restartNeeded, errors }
     copied: "",
@@ -83,7 +82,6 @@ function cbSetup() {
         { k: "pairing", t: "Pairing", s: `${this.pairedCount()} of ${this.picked().length} paired` },
       ].filter(Boolean);
     },
-    // "done" comes after every step
     index() { return this.step === "done" ? this.steps().length : this.steps().findIndex((s) => s.k === this.step); },
     isDone(k) { return this.steps().findIndex((s) => s.k === k) < this.index(); },
     canGo(k) { return this.isDone(k) && !this.applied; },
@@ -97,7 +95,6 @@ function cbSetup() {
       this.focus();
     },
 
-    // the class that slides a screen in when it shows
     enter(k) { return this.step === k ? (this.dir < 0 ? "in-back" : "in-fwd") : ""; },
 
     back() {
@@ -266,8 +263,8 @@ function cbSetup() {
         this.current = msg.current;
         this.known = msg.servers || [];
         // codes end up in a console, so anything that isn't exactly a code is left out
-        this.codes = Object.fromEntries(Object.entries(msg.codes || {}).filter(([, c]) => PAIR_CODE.test(c)));
-        this.paired = msg.paired || {};
+        this.codes = Object.assign(Object.create(null), Object.fromEntries(Object.entries(msg.codes || {}).filter(([, c]) => PAIR_CODE.test(c))));
+        this.paired = Object.assign(Object.create(null), msg.paired || {});
         this.staged = CONFIRM_CODE.test(msg.staged || "") ? msg.staged : null;
         if (first) {
           this.a = this.answersFrom(msg);
@@ -289,7 +286,7 @@ function cbSetup() {
         if (this.step === "apply") this.step = "servers";
         this.problems = msg.problems || [];
       } else if (msg.type === "paired") {
-        this.paired = { ...this.paired, [msg.id]: { platform: msg.platform, version: msg.version } };
+        this.paired = Object.assign(Object.create(null), this.paired, { [msg.id]: { platform: msg.platform, version: msg.version } });
         delete this.codes[msg.id];
       } else if (msg.type === "editor") {
         // only ever to this site's editor, whatever the message says
@@ -303,8 +300,16 @@ function cbSetup() {
       } else if (msg.type === "staged") {
         this.staged = CONFIRM_CODE.test(msg.code || "") ? msg.code : null;
       } else if (msg.type === "applied") {
+        const errors = (msg.errors || []).map(String);
+        if (errors.length) {
+          this.applied = null;
+          this.step = "apply";
+          this.err = errors.join("\n");
+          return;
+        }
+        this.err = "";
         this.staged = null;
-        this.applied = { restartNeeded: !!msg.restartNeeded, errors: (msg.errors || []).map(String) };
+        this.applied = { restartNeeded: !!msg.restartNeeded, errors };
         this.dir = 1;
         this.step = "pairing";
       }
