@@ -299,7 +299,7 @@ function cbEditor() {
     dragId: 0,
 
     async init() {
-      const relay = window.cbRelay(location.hash);
+      const relay = window.cbRelay(window.cbLink());
       if (!relay) { this.status = "nolink"; return; }
       [YAML, conv] = await Promise.all([import("/js/yaml/index.js"), import("/lib/editor/script-yaml.js")]);
       window.cbArgTypes = conv.ARG_TYPES;

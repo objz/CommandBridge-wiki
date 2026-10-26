@@ -5,7 +5,26 @@ permalink: /setup/
 description: "Set up your CommandBridge network from the browser."
 hideFooter: true
 eleventyExcludeFromCollections: true
+appPage: true
 ---
+
+{% macro pairRows(list) %}
+<ul class="list">
+  <template x-for="s in {{ list }}" :key="s.id">
+    <li class="pair-row" :data-id="s.id">
+      <div class="pair-head">
+        <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
+        <span class="srow-id" x-text="s.id"></span>
+        <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
+      </div>
+      <template x-if="codes[s.id] && !paired[s.id]">
+        <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
+          <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
+      </template>
+    </li>
+  </template>
+</ul>
+{% endmacro %}
 
 <link rel="stylesheet" href="/lib/setup/setup.css"/>
 <script src="/lib/editor/relay.js"></script>
@@ -39,7 +58,7 @@ eleventyExcludeFromCollections: true
                           :title="s.t + (isDone(s.k) && s.s ? ': ' + s.s : '')" :aria-label="s.t" :aria-current="step === s.k ? 'step' : null"></button></li>
             </template>
           </ol>
-          <p x-text="`Step ${index() + 1} of ${steps().length}`"></p>
+          <p x-text="step === 'done' ? 'Done' : `Step ${index() + 1} of ${steps().length}`"></p>
         </nav>
 
         <!-- name -->
@@ -153,88 +172,54 @@ eleventyExcludeFromCollections: true
           <p class="hint" x-show="connectionChanged() && known.some((s) => s.connected)">The connection changes, so every server pairs again, the connected ones too.</p>
         </section>
 
-        <!-- pairing -->
-        <section class="q" data-step="pairing" x-show="step === 'pairing'" :class="enter('pairing')">
-          <h1 class="ask">Pair your servers</h1>
-          <p class="why">Run each command in that server's console. A code works once and expires after 30 minutes.</p>
-          <ul class="list">
-            <template x-for="s in picked()" :key="s.id">
-              <li class="pair-row" :data-id="s.id">
-                <div class="pair-head">
-                  <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
-                  <span class="srow-id" x-text="s.id"></span>
-                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
-                </div>
-                <template x-if="codes[s.id] && !paired[s.id]">
-                  <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
-                    <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
-                </template>
-              </li>
-            </template>
-          </ul>
-        </section>
-
         <!-- apply -->
         <section class="q" data-step="apply" x-show="step === 'apply'" :class="enter('apply')">
-          <h1 class="ask" x-text="applied ? 'Applied' : 'Ready to apply'"></h1>
-          <p class="why" x-show="!applied">Nothing changes until you confirm in the proxy console.</p>
-          <p class="why" x-show="applied && !applied.errors.length" x-text="added().length ? 'The proxy saved its config and added ' + added().map((s) => s.id).join(', ') + ' to velocity.toml.' : 'The proxy saved its config.'"></p>
+          <h1 class="ask">Ready to apply</h1>
+          <p class="why">Nothing changes until you confirm in the proxy console. Your servers get their pairing codes after that.</p>
           <dl class="sum">
             <dt>Proxy</dt><dd x-text="a.serverId"></dd>
             <dt>Connection</dt><dd x-text="a.endpointType === 'WEBSOCKET' ? `WebSocket at ${a.address}:${a.port}` : `Redis at ${a.redis.host}:${a.redis.port}`"></dd>
             <dt>Encryption</dt><dd x-text="{ TOFU: 'on first use', PLAIN: 'off', STRICT: 'strict' }[a.tlsMode]"></dd>
-            <dt>Servers</dt><dd x-text="`${pairedCount()} of ${picked().length} paired`"></dd>
+            <dt>Servers</dt><dd x-text="picked().map((s) => s.id).join(', ') || 'none'"></dd>
             <dt>velocity.toml</dt><dd x-text="added().length ? 'adds ' + added().map((s) => s.id).join(', ') : 'unchanged'"></dd>
           </dl>
-          <template x-if="!applied">
-            <div class="confirm setup-confirm">
-              <p>Run this in the proxy console:</p>
-              <div class="cmd" x-show="staged"><code x-text="staged ? '/cb setup confirm ' + staged : ''"></code>
-                <button class="button-outline" @click="copy('cb setup confirm ' + staged)" x-text="copied === 'cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
-              <p class="hint" x-show="!staged">Getting a code from the proxy…</p>
-            </div>
+          <div class="confirm setup-confirm">
+            <p>Run this in the proxy console:</p>
+            <div class="cmd" x-show="staged"><code x-text="staged ? '/cb setup confirm ' + staged : ''"></code>
+              <button class="button-outline" @click="copy('cb setup confirm ' + staged)" x-text="copied === 'cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
+            <p class="hint" x-show="!staged">Getting a code from the proxy…</p>
+          </div>
+        </section>
+
+        <!-- pairing, once the proxy is set up -->
+        <section class="q" data-step="pairing" x-show="step === 'pairing'" :class="enter('pairing')">
+          <h1 class="ask">Pair your servers</h1>
+          <p class="why">The proxy is set up. Run each command in that server's console. A code works once and expires after 30 minutes.</p>
+          <template x-for="e in applied?.errors || []"><p class="setup-err" x-text="e"></p></template>
+          <p class="hint setup-restart" x-show="applied?.restartNeeded">CommandBridge restarted with the new settings. Servers that were connected reconnect on their own.</p>
+          {{ pairRows("picked()") }}
+        </section>
+
+        <!-- done -->
+        <section class="q" data-step="done" x-show="step === 'done'" :class="enter('done')">
+          <h1 class="ask">Your network is set up</h1>
+          <p class="why" x-text="pairedCount() === picked().length ? 'Every server is paired and connected.' : `${pairedCount()} of ${picked().length} servers are paired. The others can still pair with their codes until they expire.`"></p>
+          <template x-if="unpaired().length">
+            {{ pairRows("unpaired()") }}
           </template>
-          <template x-if="applied">
-            <div class="setup-result" role="status">
-              <template x-for="e in applied.errors"><p class="setup-err" x-text="e"></p></template>
-              <p class="setup-restart" x-show="applied.restartNeeded">CommandBridge restarted with the new settings. Your servers reconnect on their own.</p>
-              <template x-if="Object.keys(applied.configs).length">
-                <div class="setup-unpaired">
-                  <p x-text="Object.keys(applied.configs).length === 1 ? 'One server hasn\'t paired yet. Its code still works:' : 'These servers haven\'t paired yet. Their codes still work:'"></p>
-                  <ul class="list">
-            <template x-for="s in picked().filter((s) => applied.configs[s.id])" :key="s.id">
-              <li class="pair-row" :data-id="s.id">
-                <div class="pair-head">
-                  <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
-                  <span class="srow-id" x-text="s.id"></span>
-                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
-                </div>
-                <template x-if="codes[s.id] && !paired[s.id]">
-                  <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
-                    <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
-                </template>
-              </li>
-            </template>
-          </ul>
-                  <p class="hint">Or <button class="link setup-download" @click="download()">download their configs</button> and put each one in that server's plugins/commandbridge folder.</p>
-                </div>
-              </template>
-            </div>
-          </template>
+          <div class="actions">
+            <button class="button setup-editor" @click="openEditor()" :disabled="editorBusy" x-text="editorBusy ? 'Opening the editor…' : 'Open the script editor'"></button>
+            <a class="button-outline" href="/docs/">Read the docs</a>
+          </div>
+          <p class="setup-err" x-show="editorError" x-text="editorError"></p>
         </section>
 
         <p class="setup-err" x-show="err" x-text="err" role="alert"></p>
 
-        <div class="actions" x-show="applied">
-          <button class="button setup-editor" @click="openEditor()" :disabled="editorBusy" x-text="editorBusy ? 'Opening the editor…' : 'Open the script editor'"></button>
-          <a class="button-outline" href="/docs/">Read the docs</a>
-        </div>
-        <p class="setup-err" x-show="editorError" x-text="editorError"></p>
-
-        <div class="actions" x-show="!applied">
+        <div class="actions" x-show="step !== 'done'">
           <button class="button btn-next" @click="next()" :disabled="nextDisabled()" x-show="step !== 'apply'" x-text="nextLabel()"></button>
-          <button class="button-outline setup-later" x-show="step === 'pairing' && pairedCount() < picked().length" @click="later()">Pair the rest later</button>
-          <button class="button-outline setup-back" x-show="index() > 0" @click="back()">Back</button>
+          <button class="button-outline setup-later" x-show="step === 'pairing' && pairedCount() < picked().length" @click="finish()">Pair the rest later</button>
+          <button class="button-outline setup-back" x-show="index() > 0 && step !== 'pairing'" @click="back()">Back</button>
         </div>
       </div>
 

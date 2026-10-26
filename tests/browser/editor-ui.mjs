@@ -1,18 +1,14 @@
 // Drives the editor in Chromium against a fake proxy. Needs the wiki dev server (8080) and the relay (wrangler dev, 8787).
 // Run: node tests/browser/editor-ui.mjs [screenshot dir]
 import { chromium } from "/usr/lib/node_modules/omniroute/node_modules/playwright-core/index.mjs";
-import crypto from "node:crypto";
+import { fakeProxy } from "./fake-proxy.mjs";
 import { readFileSync } from "node:fs";
 
 const SHOTS = process.argv[2];
 const D = new URL("../fixtures/", import.meta.url);
 const scripts = Object.fromEntries(["docs-examples-0.yml", "docs-examples-1.yml", "docs-examples-2.yml", "docs-examples-4.yml"].map((f) => [f, readFileSync(new URL(f, D), "utf8")]));
 scripts["docs-examples-2.yml"] = scripts["docs-examples-2.yml"].replace("aliases: [eco]", "aliases: [eco, money]");
-const id = crypto.randomBytes(16).toString("hex"), secret = crypto.randomBytes(32);
-const sign = (r, c, s, b) => crypto.createHmac("sha256", secret).update(`${r}\n${c}\n${s}\n${b}`).digest("base64url");
-const proxy = new WebSocket(`ws://localhost:8787/api/editor/${id}/ws?role=proxy`, { headers: { Authorization: "Bearer cb-dump-upload-v1" } });
-let seq = 0, conn = "";
-const sendP = (m) => { const b = JSON.stringify(m); seq++; proxy.send(JSON.stringify({ conn, seq, body: b, mac: sign("proxy", conn, seq, b) })); };
+const sendP = (m) => proxy.send(m);
 // a stand-in for the proxy: it keeps the draft, holds staged changes until confirm() is called, and counts pings
 const servers = { "proxy-1": { location: "VELOCITY", platform: "VELOCITY" }, lobby: { location: "BACKEND", platform: "PAPER" } };
 let draft = {}, staged = null, pings = 0;
@@ -25,15 +21,13 @@ const confirm = () => {
   sendP({ type: "applied", results, warning: null });
   state();
 };
-proxy.onmessage = (e) => {
-  const env = JSON.parse(e.data); conn = env.conn; const m = JSON.parse(env.body);
+const proxy = await fakeProxy((m) => {
   if (m.type === "hello") state();
   if (m.type === "draft") draft = m.draft;
   if (m.type === "ping") pings++;
   if (m.type === "stage") { staged = { code: "k3m9x2", files: m.files, deletions: m.deletions }; sendP({ type: "staged", errors: {}, code: staged.code }); }
   if (m.type === "unstage") { staged = null; state(); }
-};
-await new Promise((r) => (proxy.onopen = r));
+});
 
 let fails = 0;
 const check = (n, c, x = "") => { console.log((c ? "PASS " : "FAIL ") + n + (c ? "" : "  " + x)); if (!c) fails++; };
@@ -42,7 +36,7 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("console", (m) => { if (process.env.DEBUG && /error|warn/i.test(m.type())) console.log("CONSOLE", m.text()); });
-await page.goto(`http://localhost:8080/editor/#${id}:${secret.toString("base64url")}`);
+await page.goto(`http://localhost:8080/editor/#${proxy.link}`);
 await page.waitForFunction(() => document.querySelectorAll(".drawflow-node").length > 5, null, { timeout: 15000 });
 await page.waitForTimeout(500);
 const app = () => page.evaluate(() => { const a = Alpine.$data(document.querySelector(".ed")); return { changes: a.changes(), out: a.out, scripts: a.scripts, blocking: a.blocking().map((p) => ({ script: p.script, text: p.text })) }; });

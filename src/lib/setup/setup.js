@@ -7,6 +7,9 @@ const TLS = { TOFU: "first use", PLAIN: "off", STRICT: "strict" };
 const WHITE = new Set(["paper.svg", "velocity.svg"]);
 const PLATFORM = { PAPER: "Paper", FOLIA: "Folia", BUKKIT: "Bukkit", SPIGOT: "Spigot", FORGE: "Forge", FABRIC: "Fabric", VELOCITY: "Velocity" };
 
+// what the proxy's codes look like (PairCrypto.java, SetupSession.java)
+const PAIR_CODE = /^[2-9A-HJKMNP-Z]{4}-[2-9A-HJKMNP-Z]{4}-[2-9A-HJKMNP-Z]{2}$/;
+const CONFIRM_CODE = /^[a-hj-np-z2-9]{6}$/;
 const IPV4 = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 const HOSTNAME = /^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
 
@@ -46,7 +49,7 @@ function cbSetup() {
     codes: {},
     paired: {},
     staged: null,
-    applied: null,  // { restartNeeded, errors, configs }
+    applied: null,  // { restartNeeded, errors }
     copied: "",
     newRow: null,   // { id, address } while adding a server
     waiting: false, // a plan was sent, the codes aren't back yet
@@ -54,7 +57,7 @@ function cbSetup() {
     editorError: "",
 
     init() {
-      const relay = window.cbRelay(location.hash);
+      const relay = window.cbRelay(window.cbLink());
       if (!relay) { this.status = "nolink"; return; }
       relay.onOpen = () => relay.send({ type: "hello" });
       relay.onMessage = (msg) => this.receive(msg);
@@ -76,11 +79,12 @@ function cbSetup() {
         { k: "tls", t: "Encryption", s: TLS[this.a.tlsMode] },
         this.a.tlsMode === "STRICT" && { k: "keystore", t: "Keystore", s: this.a.keystore.path },
         { k: "servers", t: "Servers", s: this.picked().map((s) => s.id).join(", ") || "none" },
-        { k: "pairing", t: "Pairing", s: `${this.pairedCount()} of ${this.picked().length} paired` },
         { k: "apply", t: "Apply", s: this.applied ? "applied" : "" },
+        { k: "pairing", t: "Pairing", s: `${this.pairedCount()} of ${this.picked().length} paired` },
       ].filter(Boolean);
     },
-    index() { return this.steps().findIndex((s) => s.k === this.step); },
+    // "done" comes after every step
+    index() { return this.step === "done" ? this.steps().length : this.steps().findIndex((s) => s.k === this.step); },
     isDone(k) { return this.steps().findIndex((s) => s.k === k) < this.index(); },
     canGo(k) { return this.isDone(k) && !this.applied; },
 
@@ -111,6 +115,7 @@ function cbSetup() {
       this.err = this.check();
       if (this.err) return;
       if (this.step === "servers") { this.sendPlan(); return; }
+      if (this.step === "pairing") { this.finish(); return; }
       const st = this.steps(), i = this.index();
       this.dir = 1;
       this.step = st[i + 1].k;
@@ -128,7 +133,7 @@ function cbSetup() {
       if (this.step === "servers") return this.waiting ? "Making codes…" : `Continue with ${this.picked().length} ${this.picked().length === 1 ? "server" : "servers"}`;
       if (this.step === "pairing") {
         const left = this.picked().length - this.pairedCount();
-        return left ? `Waiting for ${left} ${left === 1 ? "server" : "servers"}` : "Continue";
+        return left ? `Waiting for ${left} ${left === 1 ? "server" : "servers"}` : "Finish";
       }
       return "Continue";
     },
@@ -231,10 +236,13 @@ function cbSetup() {
       this.relay.send({ type: "plan", plan: this.planJson() });
     },
 
-    later() {
+    unpaired() { return this.picked().filter((s) => !this.paired[s.id]); },
+
+    // the setup is over; the proxy closes it for any page that comes back to this link
+    finish() {
       this.dir = 1;
-      this.step = "apply";
-      this.relay.send({ type: "stage" });
+      this.step = "done";
+      this.relay.send({ type: "finish" });
     },
 
     // the proxy opens an editor session and sends back its link
@@ -250,16 +258,6 @@ function cbSetup() {
       setTimeout(() => { if (this.copied === text) this.copied = ""; }, 1500);
     },
 
-    download() {
-      for (const [id, yml] of Object.entries(this.applied?.configs || {})) {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([yml], { type: "text/yaml" }));
-        link.download = `${id}-config.yml`;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-      }
-    },
-
     /* ================= connection ================= */
 
     receive(msg) {
@@ -267,18 +265,22 @@ function cbSetup() {
         const first = !this.a;
         this.current = msg.current;
         this.known = msg.servers || [];
-        this.codes = msg.codes || {};
+        // codes end up in a console, so anything that isn't exactly a code is left out
+        this.codes = Object.fromEntries(Object.entries(msg.codes || {}).filter(([, c]) => PAIR_CODE.test(c)));
         this.paired = msg.paired || {};
-        this.staged = msg.staged || null;
+        this.staged = CONFIRM_CODE.test(msg.staged || "") ? msg.staged : null;
         if (first) {
           this.a = this.answersFrom(msg);
           // a reload in the middle of the setup lands where it was
-          this.step = msg.plan ? (msg.staged ? "apply" : "pairing") : "name";
+          if (msg.applied) this.applied = this.applied || { restartNeeded: false, errors: [] };
+          this.step = msg.applied ? "pairing" : msg.plan ? "apply" : "name";
+          if (this.step === "apply" && !this.staged) this.relay.send({ type: "stage" });
           setInterval(() => this.relay.send({ type: "ping" }), 60_000);
         } else if (this.waiting) {
           this.waiting = false;
           this.dir = 1;
-          this.step = "pairing";
+          this.step = "apply";
+          this.relay.send({ type: "stage" });
         }
         this.status = "online";
         this.focus();
@@ -290,15 +292,21 @@ function cbSetup() {
         this.paired = { ...this.paired, [msg.id]: { platform: msg.platform, version: msg.version } };
         delete this.codes[msg.id];
       } else if (msg.type === "editor") {
-        location.href = msg.url;
+        // only ever to this site's editor, whatever the message says
+        let url;
+        try { url = new URL(msg.url, location.href); } catch { url = null; }
+        if (url && url.origin === location.origin && url.pathname === "/editor/" && /^#[0-9a-f]{32}:[A-Za-z0-9_-]{43}$/.test(url.hash)) location.href = url.href;
+        else { this.editorBusy = false; this.editorError = "The proxy sent a link that isn't the editor's. Run /cb editor instead."; }
       } else if (msg.type === "editor-error") {
         this.editorBusy = false;
         this.editorError = `The proxy couldn't open the editor: ${msg.error}. Run /cb editor instead.`;
       } else if (msg.type === "staged") {
-        this.staged = msg.code;
+        this.staged = CONFIRM_CODE.test(msg.code || "") ? msg.code : null;
       } else if (msg.type === "applied") {
         this.staged = null;
-        this.applied = { restartNeeded: !!msg.restartNeeded, errors: msg.errors || [], configs: msg.configs || {} };
+        this.applied = { restartNeeded: !!msg.restartNeeded, errors: (msg.errors || []).map(String) };
+        this.dir = 1;
+        this.step = "pairing";
       }
     },
 

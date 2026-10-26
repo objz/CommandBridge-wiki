@@ -1,6 +1,6 @@
 // The editor in the installed Firefox, driven over WebDriver BiDi (no extra dependencies). Same setup as editor-ui.mjs.
 // Run: node tests/browser/editor-firefox.mjs
-import crypto from "node:crypto";
+import { fakeProxy } from "./fake-proxy.mjs";
 import { spawn } from "node:child_process";
 import { readFileSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -8,13 +8,7 @@ import { join } from "node:path";
 
 const D = new URL("../fixtures/", import.meta.url);
 const scripts = Object.fromEntries(["docs-examples-0.yml", "docs-examples-2.yml"].map((f) => [f, readFileSync(new URL(f, D), "utf8")]));
-const id = crypto.randomBytes(16).toString("hex"), secret = crypto.randomBytes(32);
-const sign = (r, c, s, b) => crypto.createHmac("sha256", secret).update(`${r}\n${c}\n${s}\n${b}`).digest("base64url");
-const proxy = new WebSocket(`ws://localhost:8787/api/editor/${id}/ws?role=proxy`, { headers: { Authorization: "Bearer cb-dump-upload-v1" } });
-let seq = 0, conn = "";
-const sendP = (m) => { const b = JSON.stringify(m); seq++; proxy.send(JSON.stringify({ conn, seq, body: b, mac: sign("proxy", conn, seq, b) })); };
-proxy.onmessage = (e) => { const env = JSON.parse(e.data); conn = env.conn; if (JSON.parse(env.body).type === "hello") sendP({ type: "state", scripts, servers: { "proxy-1": { location: "VELOCITY", platform: "VELOCITY" }, lobby: { location: "BACKEND", platform: "PAPER" } } }); };
-await new Promise((r) => (proxy.onopen = r));
+const proxy = await fakeProxy((m) => { if (m.type === "hello") proxy.send({ type: "state", scripts, servers: { "proxy-1": { location: "VELOCITY", platform: "VELOCITY" }, lobby: { location: "BACKEND", platform: "PAPER" } } }); });
 
 const profile = mkdtempSync(join(tmpdir(), "cb-ff-"));
 const port = 9300 + Math.floor(Math.random() * 500);
@@ -45,7 +39,7 @@ const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 let fails = 0;
 const check = (n, c, x = "") => { console.log((c ? "PASS " : "FAIL ") + n + (c ? "" : "  " + x)); if (!c) fails++; };
 try {
-  await cmd("browsingContext.navigate", { context: ctx, url: `http://localhost:8080/editor/#${id}:${secret.toString("base64url")}`, wait: "complete" });
+  await cmd("browsingContext.navigate", { context: ctx, url: `http://localhost:8080/editor/#${proxy.link}`, wait: "complete" });
   for (let i = 0; i < 40 && !(await js(`document.querySelectorAll(".drawflow-node").length > 5`)); i++) await pause(250);
   await js(`(document.querySelector("[x-data*=cookie], .cookie, #cookie-banner")?.remove(), 1)`);
   const A = `Alpine.$data(document.querySelector(".ed"))`;
