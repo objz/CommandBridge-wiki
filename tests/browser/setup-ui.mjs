@@ -81,7 +81,8 @@ try {
   check("asks for the servers", (await ask()) === "Which servers run CommandBridge?", await ask());
   one &&= (await nodes()) === 1;
   check("asks one question per screen", one);
-  check("finished steps show in the drawing", (await page.locator(".su-net").textContent()).includes("play.example.net:8765"), await page.locator(".su-net").textContent());
+  check("finished steps show their answer", (await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title))).includes("Address: play.example.net"),
+    await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title)));
 
   // add a server Velocity doesn't have yet
   await page.locator(".srow-add").click();
@@ -97,7 +98,7 @@ try {
   const cmds = await page.locator(".pair-row code").allTextContents();
   check("pairing shows a code per server", cmds.some((c) => c.startsWith("/cbc pair ") && c.includes("7KQM-4XR2-")) &&
     (await page.locator('.pair-row[data-id="survival"] code').count()) === 1 && (await page.locator('.pair-row[data-id="lobby"] code').count()) === 0, JSON.stringify(cmds));
-  check("a waiting wire is dashed", await page.locator('.su-net .wire[data-id="survival"].dashed').count() === 1);
+  check("a waiting server says so", (await page.locator('.pair-row[data-id="survival"] .pair-state').textContent()).trim() === "waiting");
   await shot("3-pairing");
   if (SHOTS) {
     await page.evaluate(() => document.documentElement.classList.remove("dark"));
@@ -109,8 +110,7 @@ try {
   sendP({ type: "paired", id: "survival", platform: "PAPER", version: "1.21.4" });
   paired.survival = { platform: "PAPER", version: "1.21.4" }; delete codes.survival;
   await page.waitForTimeout(400);
-  check("paired switches the server", await page.locator('.pair-row[data-id="survival"] .pair-state.ok').count() === 1 &&
-    await page.locator('.su-net .wire[data-id="survival"].dashed').count() === 0);
+  check("paired switches the server", await page.locator('.pair-row[data-id="survival"] .pair-state.ok').count() === 1);
   check("paired shows the software", (await page.locator('.pair-row[data-id="survival"]').textContent()).includes("Paper 1.21.4"));
 
   await page.reload();

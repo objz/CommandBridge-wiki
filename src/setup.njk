@@ -38,7 +38,15 @@ eleventyExcludeFromCollections: true
     <div class="su-wrap">
       <div class="su-main">
 
-        <p class="su-n" x-text="String(index() + 1).padStart(2, '0') + ' / ' + String(steps().length).padStart(2, '0')"></p>
+        <nav class="su-progress" aria-label="Steps">
+          <ol>
+            <template x-for="s in steps()" :key="s.k">
+              <li><button :class="[isDone(s.k) && 'done', step === s.k && 'on']" @click="go(s.k)" :disabled="!canGo(s.k)"
+                          :title="s.t + (isDone(s.k) && s.s ? ': ' + s.s : '')" :aria-label="s.t" :aria-current="step === s.k ? 'step' : null"></button></li>
+            </template>
+          </ol>
+          <p x-text="`Step ${index() + 1} of ${steps().length}`"></p>
+        </nav>
 
         <!-- name -->
         <section class="q" data-step="name" x-show="step === 'name'">
@@ -203,7 +211,6 @@ eleventyExcludeFromCollections: true
         </div>
       </div>
 
-      <figure class="su-net" x-html="diagram()" aria-hidden="true"></figure>
     </div>
   </template>
 </div>

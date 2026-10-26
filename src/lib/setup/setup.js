@@ -6,8 +6,6 @@ const TLS = { TOFU: "first use", PLAIN: "off", STRICT: "strict" };
 // these logos are drawn in white, so light mode turns them dark
 const WHITE = new Set(["paper.svg", "velocity.svg"]);
 const PLATFORM = { PAPER: "Paper", FOLIA: "Folia", BUKKIT: "Bukkit", SPIGOT: "Spigot", FORGE: "Forge", FABRIC: "Fabric", VELOCITY: "Velocity" };
-const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const clip = (v, n) => (String(v).length > n ? String(v).slice(0, n - 1) + "…" : String(v));
 
 function cbSetup() {
   return {
@@ -263,52 +261,6 @@ function cbSetup() {
         keystore: { path: p?.keystore?.path ?? c.keystore.path, type: p?.keystore?.type ?? (c.keystore.type || "PKCS12"), password: "" },
         servers,
       };
-    },
-
-    /* ================= the network drawing ================= */
-
-    // drawn like the homepage globe: the proxy on top, servers below, thin lines between them.
-    // A label turns to full color when the current question is about it.
-    diagram() {
-      const a = this.a;
-      if (!a) return "";
-      const W = 520, step = this.step, past = (k) => this.index() > this.steps().findIndex((s) => s.k === k);
-      const on = (yes) => (yes ? " on" : "");
-      const marker = (x, y) => `<rect class="marker" x="${x - 8}" y="${y - 5}" width="16" height="10" rx="2.5"/><line class="marker-dash" x1="${x - 3.5}" y1="${y}" x2="${x + 3.5}" y2="${y}"/>`;
-      const ws = a.endpointType === "WEBSOCKET";
-      const where = ws ? (a.address.trim() ? `${a.address.trim()}:${a.port}` : `port ${a.port}`) : `Redis at ${a.redis.host}:${a.redis.port}`;
-      const tls = { TOFU: "encrypted on first use", PLAIN: "not encrypted", STRICT: "strict encryption" }[a.tlsMode];
-      const P = { x: W / 2, y: 112 };
-
-      // servers on one row, two when there are more than five
-      const all = a.servers.slice(0, 10), rows = all.length > 5 ? 2 : 1;
-      const placed = all.map((s, i) => {
-        const row = rows === 2 && i >= Math.ceil(all.length / 2) ? 1 : 0;
-        const inRow = rows === 2 ? (row ? all.length - Math.ceil(all.length / 2) : Math.ceil(all.length / 2)) : all.length;
-        const col = row ? i - Math.ceil(all.length / 2) : i;
-        const span = Math.min(W - 80, inRow * 110);
-        return { s, x: W / 2 - span / 2 + (inRow === 1 ? span / 2 : (span / (inRow - 1)) * col), y: 300 + row * 96 };
-      });
-      const H = 300 + (rows - 1) * 96 + 60;
-      let out = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Your network">`;
-
-      for (const { s, x, y } of placed) {
-        if (!s.on) continue;
-        const solid = this.paired[s.id] || (s.connected && !past("servers"));
-        out += `<path class="wire${solid ? "" : " dashed"}${on(step === "pairing" && this.paired[s.id])}" data-id="${esc(s.id)}" d="M ${P.x} ${P.y} Q ${(P.x + x) / 2} ${y - 40}, ${x} ${y}"/>`;
-      }
-      out += marker(P.x, P.y) +
-        `<text class="name" x="${P.x}" y="${P.y - 66}" text-anchor="middle">${esc(clip(a.serverId || "proxy", 28))}</text>` +
-        `<text class="${on(["type", "port", "address"].includes(step)).trim()}" x="${P.x}" y="${P.y - 44}" text-anchor="middle">${esc(clip(where, 34))}</text>` +
-        `<text class="${on(step === "tls" || step === "keystore").trim()}" x="${P.x}" y="${P.y - 24}" text-anchor="middle">${tls}</text>`;
-      for (const { s, x, y } of placed) {
-        const state = this.paired[s.id] ? (this.software(s) || "paired") : past("servers") ? (this.codes[s.id] ? "waiting" : "not paired") : s.connected ? "connected" : "";
-        out += `<g class="srv${s.on ? "" : " off"}" data-id="${esc(s.id)}">${marker(x, y)}` +
-          `<text class="${on(s.on && (step === "servers" || this.paired[s.id])).trim()}" x="${x}" y="${y + 26}" text-anchor="middle">${esc(clip(s.id, 14))}</text>` +
-          (state ? `<text x="${x}" y="${y + 44}" text-anchor="middle" style="font-size:12px">${esc(state)}</text>` : "") + `</g>`;
-      }
-      if (a.servers.length > all.length) out += `<text x="${W / 2}" y="${H - 4}" text-anchor="middle">and ${a.servers.length - all.length} more</text>`;
-      return out + "</svg>";
     },
   };
 }

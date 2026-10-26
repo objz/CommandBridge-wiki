@@ -1,5 +1,5 @@
-/* Network setup, laid out like the homepage: the question on the left, the network drawn on the right
-   the way the globe is drawn. Monochrome, site tokens only; red is kept for errors. */
+/* Network setup: one question at a time in a centered column, in the homepage's type.
+   Monochrome, site tokens only; red is kept for errors. */
 
 .su { --su-header: 45px; --bad: #ef4444; font-size: 1rem; color: hsl(var(--foreground)); }
 @media (min-width: 640px) { .su { --su-header: 49px; } }
@@ -13,12 +13,21 @@
 .su-note p { color: hsl(var(--muted-foreground)); line-height: 1.5; }
 .su-note .su-note-t { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; color: hsl(var(--foreground)); margin-bottom: 0.5rem; }
 
-.su-wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 2rem; width: min(100% - 2rem, 72rem); margin-inline: auto;
-  min-height: calc(100vh - var(--su-header)); }
-.su-main { display: flex; flex-direction: column; justify-content: center; padding: 3rem 0; max-width: 30rem; }
+.su-wrap { display: flex; justify-content: center; width: min(100% - 2rem, 72rem); margin-inline: auto; min-height: calc(100vh - var(--su-header)); }
+.su-main { display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 32rem; padding: 3rem 0; }
+
+/* progress: one bar per step; a finished one goes back to that step */
+.su-progress { margin-bottom: 2rem; }
+.su-progress ol { display: flex; gap: 4px; }
+.su-progress li { flex: 1; }
+.su-progress button { display: block; width: 100%; height: 4px; padding: 0; border: none; border-radius: 2px; background: hsl(var(--border)); }
+.su-progress button.done { background: hsl(var(--foreground) / 0.55); cursor: pointer; }
+.su-progress button.done:hover, .su-progress button.on { background: hsl(var(--foreground)); }
+.su-progress button:disabled { cursor: default; }
+.su-progress button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.su-progress p { margin-top: 0.625rem; font-size: 0.875rem; color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums; }
 
 /* the question */
-.su-n { font: 0.875rem ui-monospace, monospace; color: hsl(var(--muted-foreground)); margin-bottom: 0.875rem; }
 .ask { font-size: clamp(1.875rem, 3.2vw, 2.5rem); line-height: 1.08; letter-spacing: -0.04em; font-weight: 600; text-wrap: balance; margin-bottom: 0.75rem; }
 .why { color: hsl(var(--muted-foreground)); font-size: 1.0625rem; line-height: 1.5; margin-bottom: 1.75rem; }
 .q > .ask + .opts { margin-top: 1.5rem; }
@@ -85,25 +94,4 @@ html:not(.dark) .su .white.unknown { filter: invert(1) grayscale(1); }
 .link:hover { text-decoration-color: currentColor; }
 .srow-add { margin-top: 1rem; font-size: 0.9375rem; }
 
-/* the network, drawn like the homepage globe: thin lines, white markers, labels that light up when they're asked about */
-.su-net { position: sticky; top: var(--su-header); height: calc(100vh - var(--su-header)); display: flex; align-items: center; margin: 0; }
-.su-net svg { display: block; width: 100%; height: auto; max-height: 80%; overflow: visible; }
-.su-net text { font-family: inherit; font-size: 14px; font-weight: 500; fill: hsl(var(--muted-foreground)); transition: fill 200ms;
-  paint-order: stroke; stroke: hsl(var(--background)); stroke-width: 4px; stroke-linejoin: round; }
-.su-net .name { font-size: 15px; fill: hsl(var(--foreground)); }
-.su-net .on { fill: hsl(var(--foreground)); }
-.su-net .wire { fill: none; stroke: hsl(var(--foreground) / 0.55); stroke-width: 1; }
-.su-net .wire.dashed { stroke: hsl(var(--foreground) / 0.3); stroke-dasharray: 3 4; }
-.su-net .wire.on { stroke: hsl(var(--foreground)); }
-.su-net .marker { fill: hsl(var(--foreground)); }
-.su-net .marker-dash { stroke: hsl(var(--background)); stroke-width: 1.5; }
-.su-net .off .marker { fill: hsl(var(--muted-foreground) / 0.5); }
-.su-net .off text { fill: hsl(var(--muted-foreground) / 0.6); }
-
-@media (max-width: 1023px) {
-  .su-wrap { display: block; }
-  .su-net { position: static; height: auto; padding-top: 1.5rem; }
-  .su-net svg { max-height: 32vh; margin-inline: auto; }
-  .su-main { padding: 1.5rem 0 3rem; max-width: none; }
-}
-@media (prefers-reduced-motion: reduce) { .su-net text { transition: none; } }
+@media (max-width: 639px) { .su-main { justify-content: flex-start; padding: 1.5rem 0 3rem; } }
