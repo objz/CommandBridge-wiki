@@ -118,6 +118,9 @@ try {
   check("pairing shows a code per server", cmds.some((c) => c.startsWith("/cbc pair ") && c.includes("7KQM-4XR2-")) &&
     (await page.locator('.pair-row[data-id="survival"] code').count()) === 1 && (await page.locator('.pair-row[data-id="lobby"] code').count()) === 0, JSON.stringify(cmds));
   check("a waiting server says so", (await page.locator('.pair-row[data-id="survival"] .pair-state').textContent()).trim() === "waiting");
+  await page.locator('.pair-row[data-id="survival"] .cmd button').click();
+  check("copy leaves out the slash", (await page.evaluate(() => Alpine.$data(document.querySelector(".su")).copied)).startsWith("cbc pair "));
+  check("a connected server gets a checkmark", await page.locator('.pair-row[data-id="lobby"] .pair-check:visible').count() === 1);
   await shot("3-pairing");
   if (SHOTS) {
     await page.evaluate(() => document.documentElement.classList.remove("dark"));
@@ -167,7 +170,7 @@ try {
 
   // a new link pasted into the same tab only changes the #fragment; the page has to follow it
   await page.goto(`http://localhost:8080/setup/#${"0".repeat(32)}:${crypto.randomBytes(32).toString("base64url")}`);
-  const ended = await page.waitForFunction(() => document.querySelector(".su-note-t")?.offsetParent && document.querySelector(".su-note-t").textContent === "This setup has ended", null, { timeout: 8000 }).then(() => true, () => false);
+  const ended = await page.waitForFunction(() => document.querySelector(".su-note-t")?.offsetParent && document.querySelector(".su-note-t").textContent === "Set up your network", null, { timeout: 8000 }).then(() => true, () => false);
   check("a new link in the same tab is followed", ended, await page.locator(".su-note").innerText().catch(() => ""));
 
   // without a link the page says where to get one

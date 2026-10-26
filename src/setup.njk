@@ -20,13 +20,7 @@ eleventyExcludeFromCollections: true
         <p x-show="slow">This is taking longer than it should. Check that the proxy is still running. If it restarted, run <code>/cb setup</code> for a new link.</p>
       </div>
     </template>
-    <template x-if="status === 'closed'">
-      <div>
-        <p class="su-note-t">This setup has ended</p>
-        <p x-text="closedText()"></p>
-      </div>
-    </template>
-    <template x-if="status === 'nolink'">
+    <template x-if="status === 'closed' || status === 'nolink'">
       <div class="setup-nolink">
         <p class="su-note-t">Set up your network</p>
         <p>Run <code>/cb setup</code> on your proxy and open the link it gives you.</p>
@@ -169,11 +163,11 @@ eleventyExcludeFromCollections: true
                 <div class="pair-head">
                   <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
                   <span class="srow-id" x-text="s.id"></span>
-                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'" x-text="paired[s.id] ? (software(s) || 'paired') : codes[s.id] ? 'waiting' : 'no code'"></span>
+                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
                 </div>
                 <template x-if="codes[s.id] && !paired[s.id]">
                   <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
-                    <button class="button-outline" @click="copy('/cbc pair ' + codes[s.id])" x-text="copied === '/cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
+                    <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
                 </template>
               </li>
             </template>
@@ -196,7 +190,7 @@ eleventyExcludeFromCollections: true
             <div class="confirm setup-confirm">
               <p>Run this in the proxy console:</p>
               <div class="cmd" x-show="staged"><code x-text="staged ? '/cb setup confirm ' + staged : ''"></code>
-                <button class="button-outline" @click="copy('/cb setup confirm ' + staged)" x-text="copied === '/cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
+                <button class="button-outline" @click="copy('cb setup confirm ' + staged)" x-text="copied === 'cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
               <p class="hint" x-show="!staged">Getting a code from the proxy…</p>
             </div>
           </template>
@@ -213,11 +207,11 @@ eleventyExcludeFromCollections: true
                 <div class="pair-head">
                   <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
                   <span class="srow-id" x-text="s.id"></span>
-                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'" x-text="paired[s.id] ? (software(s) || 'paired') : codes[s.id] ? 'waiting' : 'no code'"></span>
+                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
                 </div>
                 <template x-if="codes[s.id] && !paired[s.id]">
                   <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
-                    <button class="button-outline" @click="copy('/cbc pair ' + codes[s.id])" x-text="copied === '/cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
+                    <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
                 </template>
               </li>
             </template>

@@ -88,7 +88,12 @@ html:not(.dark) .su .white.unknown { filter: invert(1) grayscale(1); }
 .pair-head { display: flex; align-items: center; gap: 0.75rem; }
 .pair-state { margin-left: auto; font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
 .pair-state.ok { color: hsl(var(--foreground)); }
+.pair-state { display: inline-flex; align-items: center; gap: 0.375rem; }
+.pair-check { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 24; animation: su-draw 400ms cubic-bezier(.2, .8, .2, 1) 100ms backwards; }
+@keyframes su-draw { from { stroke-dashoffset: 24; } }
 .cmd { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.625rem; }
+.cmd .button-outline { min-width: 5.5rem; }
 .cmd code { flex: 1; min-width: 0; padding: 0.5rem 0.75rem; border-radius: calc(var(--radius) - 4px); border: 1px solid hsl(var(--border)); user-select: all; overflow-wrap: anywhere; }
 
 /* apply */

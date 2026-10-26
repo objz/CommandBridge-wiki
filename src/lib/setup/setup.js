@@ -35,7 +35,6 @@ function cbSetup() {
   return {
     status: "connecting", // connecting | online | closed | nolink
     slow: false,    // still connecting after a while
-    closeReason: "",
     relay: null,
     current: null,
     known: [],      // servers from velocity.toml: { id, address, connected, platform }
@@ -59,14 +58,9 @@ function cbSetup() {
       if (!relay) { this.status = "nolink"; return; }
       relay.onOpen = () => relay.send({ type: "hello" });
       relay.onMessage = (msg) => this.receive(msg);
-      relay.onClose = (reason) => { this.status = "closed"; this.closeReason = reason; };
+      relay.onClose = () => { this.status = "closed"; };
       this.relay = relay.connect();
       setTimeout(() => { this.slow = this.status === "connecting"; }, 8000);
-    },
-
-    closedText() {
-      const r = this.closeReason.trim();
-      return /new (one|link)/i.test(r) ? r : `${r ? r.replace(/\.?$/, ".") + " " : ""}Run /cb setup on your proxy for a new link.`;
     },
 
     /* ================= steps ================= */
@@ -250,8 +244,8 @@ function cbSetup() {
       this.relay.send({ type: "editor" });
     },
 
-    async copy(text) {
-      await navigator.clipboard?.writeText(text).catch(() => {});
+    copy(text) {
+      navigator.clipboard?.writeText(text).catch((e) => console.warn("Copy failed:", e.message));
       this.copied = text;
       setTimeout(() => { if (this.copied === text) this.copied = ""; }, 1500);
     },
