@@ -2721,7 +2721,14 @@ function cbEditor() {
       history.past = []; history.future = []; history.last = this.serialize();
       this.canUndo = this.canRedo = false;
       this.fit();
-      this.results.push({ ok: true, warning: true, restored: true, text: `Restored your unsaved changes from ${new Date(d.at || Date.now()).toLocaleString()}.` });
+      this.results = [{ ok: true, warning: true, restored: true, text: `Restored the unsaved changes from ${new Date(d.at || Date.now()).toLocaleString()}.` }];
+    },
+
+    // drops an offered draft without looking at it, here and on the proxy
+    dropDraft() {
+      this.results = this.results.filter((r) => !r.offer);
+      lastDraft = "{}";
+      this.send({ type: "draft", draft: {} });
     },
 
     discardDraft() {
@@ -2753,7 +2760,9 @@ function cbEditor() {
           // keeps the session alive while the tab is open; the proxy closes it a few minutes after the tab is gone
           setInterval(() => this.send({ type: "ping" }), 60_000);
           const d = msg.draft;
-          if (d?.files && (Object.keys(d.files).some((f) => d.files[f] !== msg.scripts[f]) || d.deletions?.length)) this.restoreDraft(d);
+          // a draft is offered, not applied: it could have been left by anyone who had an editor link
+          if (d?.files && (Object.keys(d.files).some((f) => d.files[f] !== msg.scripts[f]) || d.deletions?.length))
+            this.results.push({ ok: true, warning: true, offer: d, text: `There are unsaved changes from ${new Date(d.at || Date.now()).toLocaleString()}. Review them before you save.` });
           lastDraft = JSON.stringify(this.changeSet());
           if (this.confirmCode) staged = lastDraft;
         } else if (external && !hadChanges) {

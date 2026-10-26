@@ -113,8 +113,11 @@ await page.reload();
 await page.waitForFunction(() => document.querySelectorAll(".drawflow-node").length > 5, null, { timeout: 15000 });
 await page.waitForTimeout(500);
 await page.evaluate(() => document.querySelector("[x-data*=cookie], .cookie, #cookie-banner")?.remove());
-check("reopening the editor restores them", await page.locator('.cb-command [data-f="description"]').evaluateAll((e) => e.some((x) => x.value === "Draft text, changed after Save")) && (await app()).changes === 1);
-await page.locator(".ed-notes button", { hasText: "Discard" }).click();
+// a draft could have been left through a leaked link, so it's offered, not laid over the scripts on its own
+check("reopening the editor offers them without applying", (await app()).changes === 0 && await page.locator(".ed-notes button", { hasText: "Review them" }).count() === 1);
+await page.locator(".ed-notes button", { hasText: "Review them" }).click();
+check("reviewing restores them", await page.locator('.cb-command [data-f="description"]').evaluateAll((e) => e.some((x) => x.value === "Draft text, changed after Save")) && (await app()).changes === 1);
+await page.locator(".ed-notes button:visible", { hasText: "Discard" }).click();
 check("Discard drops them", (await app()).changes === 0);
 
 

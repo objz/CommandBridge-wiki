@@ -106,7 +106,9 @@ appPage: true
 
     <div class="ed-notes" x-show="results.length || problems.some((p) => !p.pinned)" x-cloak role="status">
       <template x-for="r in results"><p :class="r.ok ? (r.warning ? 'ed-warn' : 'ed-ok') : 'ed-err'"><span x-text="r.text"></span>
-        <button class="ed-more" x-show="r.restored" @click="discardDraft()">Discard them</button></p></template>
+        <button class="ed-more" x-show="r.restored" @click="discardDraft()">Discard them</button>
+        <button class="ed-more" x-show="r.offer" @click="restoreDraft(r.offer)">Review them</button>
+        <button class="ed-more" x-show="r.offer" @click="dropDraft()">Discard them</button></p></template>
       <template x-for="p in problems.filter((p) => p.blocking && !p.pinned)"><p class="ed-err" x-text="p.text"></p></template>
       <button class="ed-more" x-show="problems.some((p) => !p.blocking && !p.pinned)" @click="showWarnings = !showWarnings"
               x-text="`${problems.filter((p) => !p.blocking && !p.pinned).length} unchanged scripts can't be read`"></button>
