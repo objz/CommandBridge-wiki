@@ -1,0 +1,504 @@
+/* CommandBridge script editor. The app chrome follows the site; the graph itself is colorful on purpose. */
+
+.ed, .ph-ghost {
+  --pop-bg: rgb(24 24 27 / .97); --hover: rgb(255 255 255 / .07); --line-soft: rgb(255 255 255 / .09);
+  --piece-fg: #7dd3fc; --call-fg: #c4b5fd; --code-bg: #111113; --code-side: #0c0c0e; --code-fg: #d4d4d8; --switch-off: #52525b;
+  --y-str: #86efac; --y-num: #fcd34d; --y-bool: #f9a8d4; --y-punct: #52525b; --y-com: #71717a;
+}
+.ed {
+  --c-flow: #e5e7eb; --c-arg: #38bdf8; --c-srv: #f59e0b; --c-call: #a78bfa; --c-ok: #22c55e; --c-bad: #f87171; --c-focus: #60a5fa;
+  --h-command: #6d28d9; --h-run: #15803d; --h-wait: #475569; --h-arg: #0369a1; --h-server: #b45309;
+  --h-alias: #be185d; --h-defaults: #0f766e; --h-runas: #a16207; --h-cooldown: #475569; --h-rules: #c2410c;
+  --c-alias: #f472b6; --c-def: #2dd4bf; --c-runas: #facc15; --c-cool: #cbd5e1; --c-rules: #fb923c;
+  --node-bg: #18181b; --node-fg: #f4f4f5; --node-muted: #a1a1aa; --node-line: #3f3f46; --field-bg: #09090b;
+  display: flex; flex-direction: column; height: calc(100vh - 64px);
+  user-select: none; /* drags would otherwise select page text, which flickers in light mode */
+}
+
+/* ---------------- toolbar ---------------- */
+.ed-bar { display: flex; align-items: center; gap: 10px; padding: 0 12px; height: 52px; border-bottom: 1px solid hsl(var(--border)); font-size: 14px; }
+.ed-seg { display: flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border)); border-radius: 8px; }
+.ed-tool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; height: 30px; padding: 0 8px; border: none; border-radius: 6px;
+  background: none; color: hsl(var(--muted-foreground)); cursor: pointer; }
+.ed-tool:hover:not(:disabled) { color: hsl(var(--foreground)); background: hsl(var(--accent) / .6); }
+/* switched on: filled and ringed, so it reads differently from a hover */
+.ed-tool[aria-pressed="true"] { color: hsl(var(--background)); background: hsl(var(--foreground)); }
+.ed-tool[aria-pressed="true"]:hover { color: hsl(var(--background)); background: hsl(var(--foreground) / .85); }
+.ed-tool:disabled { opacity: .35; cursor: default; }
+.ed-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--background)); color: hsl(var(--foreground)); cursor: pointer; }
+.ed-btn:hover:not(:disabled) { background: hsl(var(--accent)); }
+.ed-btn:disabled { opacity: .4; cursor: default; }
+.ed-spacer { flex: 1; }
+.ed-status { color: hsl(var(--muted-foreground)); }
+.ed-status-err { color: #ef4444; }
+.ed-save { height: 34px; padding: 0 16px; border-radius: 8px; font-weight: 600; font-size: 13px; border: 1px solid transparent;
+  background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); cursor: pointer; }
+.ed-save:disabled { background: none; border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); cursor: default; }
+
+/* ---------------- work area ---------------- */
+.ed-work { position: relative; flex: 1; display: flex; min-height: 0; }
+.ed-landing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: hsl(var(--muted-foreground)); background: hsl(var(--background)); }
+.ed-stage { position: relative; flex: 1; display: flex; min-width: 0; }
+.ed-keys { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; resize: none; pointer-events: none; }
+/* the YAML panel: files on the left with what saving does to each, the chosen file on the right */
+.ed-yaml { position: relative; display: flex; width: var(--yaml-w, 46%); min-width: 320px; max-width: 80%; border-left: 1px solid hsl(var(--border)); background: var(--code-bg); color: var(--node-fg); font-size: 13px; }
+/* the panel's left edge is dragged to resize it */
+.ed-yaml-grip { position: absolute; left: -4px; top: 0; bottom: 0; z-index: 6; width: 8px; cursor: ew-resize; }
+.ed-yaml-grip:hover, .ed-yaml-grip.on { background: linear-gradient(90deg, transparent 3px, var(--c-focus) 3px, var(--c-focus) 5px, transparent 5px); }
+.ed-files { width: 180px; flex-shrink: 0; overflow: auto; padding: 8px 6px; border-right: 1px solid var(--hover); background: var(--code-side); }
+.ed-files-h { display: flex; align-items: center; gap: 6px; padding: 4px 8px 8px; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #71717a; }
+.ed-file { display: flex; align-items: center; gap: 7px; width: 100%; height: 28px; padding: 0 8px; border: none; border-radius: 6px; background: none; color: #a1a1aa; text-align: left; cursor: pointer; }
+.ed-file:hover { background: var(--hover); color: var(--node-fg); }
+.ed-file.on { background: var(--line-soft); color: var(--node-fg); }
+.ed-file-i { display: flex; flex-shrink: 0; }
+.ed-file-n { flex: 1; min-width: 0; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-file small { font-size: 10.5px; }
+.ed-file-s { width: 14px; text-align: center; font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ed-file.new { color: #86efac; } .ed-file.new .ed-file-s { color: #4ade80; }
+.ed-file.changed { color: #fde68a; } .ed-file.changed .ed-file-s { color: #fbbf24; }
+.ed-file.deleted { color: #fca5a5; } .ed-file.deleted .ed-file-s { color: #f87171; } .ed-file.deleted .ed-file-n { text-decoration: line-through; }
+.ed-yaml-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ed-yaml-main header { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 40px; padding: 0 14px; border-bottom: 1px solid var(--hover);
+  font: 600 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ed-yaml-main header small { font: 500 11.5px system-ui, sans-serif; color: #71717a; }
+.ed-yaml-body { flex: 1; display: flex; overflow: auto; font: 12.5px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.ed-yaml-n { margin: 0; padding: 12px 0; min-width: 46px; text-align: right; color: var(--node-line); user-select: none; position: sticky; left: 0; background: var(--code-bg); }
+.ed-yaml-n span { display: inline-block; width: 100%; padding-right: 10px; border-right: 2px solid transparent; }
+.ed-yaml-n span.chg { color: #fbbf24; border-right-color: #fbbf24; }
+.ed-yaml-n span.add { color: #4ade80; border-right-color: #4ade80; }
+.ed-yaml-n span.del { color: #f87171; border-right-color: #f87171; }
+/* the YAML is typed into a see-through field over its own highlighting */
+.ed-yaml-edit { position: relative; flex: 1; min-width: max-content; }
+.ed-yaml-code, .ed-yaml-ta { margin: 0; padding: 12px 16px; font: inherit; line-height: inherit; white-space: pre; tab-size: 2; }
+.ed-yaml-code { color: var(--code-fg); }
+/* problems underlined like in an editor: red for errors, yellow for keys the proxy doesn't know */
+.ed-yaml-lint { position: absolute; inset: 0; margin: 0; padding: 12px 16px; font: inherit; line-height: inherit; white-space: pre; color: transparent; pointer-events: none; }
+.lint-e, .lint-w { text-decoration: underline wavy #f87171; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-skip-ink: none; }
+.lint-w { text-decoration-color: #fbbf24; }
+.ed-yaml-n span.le { color: #f87171; cursor: help; } .ed-yaml-n span.lw { color: #fbbf24; cursor: help; }
+/* the completion list at the caret */
+.ed-ycmp { position: absolute; z-index: 5; min-width: 200px; max-height: 240px; overflow: auto; padding: 4px; border-radius: 8px; border: 1px solid var(--line-soft);
+  background: var(--pop-bg); box-shadow: 0 12px 30px rgb(0 0 0 / .4); animation: ed-pop-in .12s cubic-bezier(.2, .9, .3, 1.1); transform-origin: 0 0; }
+.ed-ycmp button { display: flex; justify-content: space-between; gap: 18px; width: 100%; padding: 3px 8px; border: none; border-radius: 5px; background: none; color: var(--node-fg); font: inherit; text-align: left; cursor: pointer; }
+.ed-ycmp button.on, .ed-ycmp button:hover { background: rgb(96 165 250 / .2); }
+.ed-ycmp small { font: 11px system-ui, sans-serif; color: var(--node-muted); }
+.ed-yaml-ta { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; border: none; outline: none; background: none;
+  color: transparent; caret-color: var(--node-fg); user-select: text; -moz-user-select: text; }
+.ed-yaml-ta::selection { background: rgb(96 165 250 / .35); color: transparent; }
+.ed-yaml-ta[readonly] { caret-color: transparent; }
+.ed-yaml-err { margin: 0; padding: 7px 14px; font-size: 12px; color: #fca5a5; background: rgb(248 113 113 / .1); border-bottom: 1px solid rgb(248 113 113 / .25); }
+.y-key { color: var(--call-fg); } .y-punct { color: var(--y-punct); } .y-str { color: var(--y-str); } .y-num { color: var(--y-num); } .y-bool { color: var(--y-bool); } .y-enum { color: var(--piece-fg); }
+.y-com { color: var(--y-com); font-style: italic; }
+.y-arg { color: var(--piece-fg); }
+
+.ed-corner { position: absolute; right: 16px; bottom: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 5; }
+#ed-minimap { width: 240px; height: 150px; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--background) / .85); color: hsl(var(--foreground)); cursor: pointer; }
+.ed-zoom { display: flex; align-items: center; gap: 2px; padding: 2px; font-size: 12px; border: 1px solid hsl(var(--border)); border-radius: 8px;
+  background: hsl(var(--background)); color: hsl(var(--muted-foreground)); }
+.ed-zoom button { display: inline-flex; align-items: center; padding: 4px 9px; border: none; background: none; color: inherit; cursor: pointer; border-radius: 6px; }
+.ed-zoom button:hover { color: hsl(var(--foreground)); background: hsl(var(--accent)); }
+.ed-zoom span { min-width: 40px; text-align: center; }
+.ed-notes { position: absolute; left: 16px; bottom: 16px; z-index: 5; max-width: min(600px, calc(100% - 320px)); max-height: 30%; overflow: auto; padding: 10px 12px;
+  font-size: 13px; line-height: 1.6; border: 1px solid hsl(var(--border)); border-radius: 8px; background: hsl(var(--background)); }
+.ed-more { padding: 0; border: none; background: none; font: inherit; color: hsl(var(--muted-foreground)); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.ed-ok { color: var(--c-ok); } .ed-err { color: #ef4444; } .ed-warn { color: var(--c-srv); } .ed-muted { color: hsl(var(--muted-foreground)); }
+
+/* port and context menus */
+.ed-pop { position: absolute; z-index: 20; width: 220px; padding: 5px; font-size: 13px;
+  border: 1px solid var(--line-soft); border-radius: 12px; background: var(--pop-bg); color: var(--node-fg);
+  box-shadow: 0 1px 0 var(--hover) inset, 0 18px 40px rgb(0 0 0 / .55), 0 2px 6px rgb(0 0 0 / .3); backdrop-filter: blur(12px); }
+.ed-pop-t { padding: 6px 10px 7px; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: var(--node-fg); border-bottom: 1px solid var(--hover);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-pop-s { padding: 8px 10px 4px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--node-muted); }
+.ed-pop hr { margin: 4px 6px; border: none; border-top: 1px solid var(--hover); }
+.ed-mw { position: relative; }
+.ed-mi { display: flex; width: 100%; align-items: center; gap: 10px; height: 32px; padding: 0 8px; text-align: left;
+  border: none; border-radius: 7px; background: none; color: inherit; cursor: pointer; }
+/* the top level highlights the item aim() opened, not every item the pointer crosses on its way to a submenu */
+.ed-sub .ed-mi:hover:not(:disabled), .ed-pop > .ed-mw.open > .ed-mi:not(:disabled) { background: var(--hover); }
+.ed-pop.scroll { max-height: min(460px, calc(100% - 24px)); overflow: auto; }
+.ed-mi-h { max-width: 45%; font-size: 12px; color: var(--node-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-mi-ok { display: flex; color: var(--c-focus); }
+.ed-mi.checked:disabled { opacity: 1; }
+.ed-mi:disabled { opacity: .45; cursor: default; }
+.logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+.ed-mi.muted .logo { filter: grayscale(1); opacity: .6; }
+.ed-mi-i { display: flex; flex-shrink: 0; width: 16px; color: var(--c, var(--node-muted)); }
+.ed-mi-i:empty { display: none; }
+.ed-mi-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-mi.muted .ed-mi-l { color: var(--node-muted); }
+.ed-mi.muted .ed-mi-i { color: var(--node-muted); opacity: .6; }
+.ed-mi kbd { font: 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--node-muted); }
+.ed-mi-more { color: var(--node-muted); display: flex; }
+.ed-mi.danger { color: #fca5a5; }
+.ed-mi.danger:hover:not(:disabled) { background: rgb(220 38 38 / .18); }
+.ed-mi.danger .ed-mi-i { color: #f87171; }
+/* submenus fly out to the side; which one is open is decided by the safe triangle in aim() */
+.ed-sub { display: none; position: absolute; top: -6px; left: calc(100% + 4px); width: 220px; max-height: 60vh; overflow: auto; padding: 5px;
+  border: 1px solid var(--line-soft); border-radius: 12px; background: var(--pop-bg); box-shadow: 0 18px 40px rgb(0 0 0 / .55); }
+.ed-mw.open > .ed-sub { display: block; }
+.ed-pop.flip .ed-sub { left: auto; right: calc(100% + 4px); }
+/* a server id that isn't listed: type it, then add it as a backend or a proxy */
+.ed-custom { display: flex; gap: 4px; padding: 3px; }
+.ed-custom input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; font-size: 13px; border-radius: 6px; border: 1px solid var(--line-soft); background: rgb(0 0 0 / .3); color: var(--node-fg); }
+.ed-custom input:focus { outline: none; border-color: var(--c-focus); }
+.ed-custom input.bad { border-color: var(--c-bad); }
+.ed-custom button { display: grid; place-items: center; width: 28px; height: 28px; border: none; border-radius: 6px; background: none; color: var(--c); cursor: pointer; }
+.ed-custom button:hover { background: var(--hover); }
+
+/* hover reasons for marked fields, and for the save button */
+.ed { position: relative; }
+.ed-tip { position: absolute; z-index: 40; max-width: 340px; padding: 7px 10px; font-size: 12.5px; line-height: 1.5; white-space: pre-line; pointer-events: none;
+  border-radius: 8px; border: 1px solid var(--line-soft); background: var(--pop-bg); color: var(--node-fg); box-shadow: 0 10px 28px rgb(0 0 0 / .5); }
+.ed-tip.err { border-color: rgb(248 113 113 / .5); }
+.ed-savewrap { display: inline-flex; }
+.ed-save:disabled { pointer-events: none; }
+.ed-save.blocked { border-color: rgb(248 113 113 / .6); color: #fca5a5; }
+.ed-savewrap:has(.blocked) { cursor: pointer; }
+.ed-wire-x { position: absolute; z-index: 20; display: grid; place-items: center; width: 30px; height: 30px; transform: translate(-50%, -50%); border-radius: 999px;
+  border: 1px solid var(--node-line); background: #dc2626; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgb(0 0 0 / .4); }
+.ed-wire-x:hover { background: #b91c1c; }
+
+/* ---------------- canvas and cursors ---------------- */
+#ed-canvas { flex: 1; position: relative; overflow: hidden; cursor: default;
+  background-color: hsl(var(--background));
+  background-image: radial-gradient(hsl(var(--border)) 1px, transparent 1px); background-size: 24px 24px; }
+#ed-canvas.ed-space, #ed-canvas.ed-grab { cursor: grab; }
+#ed-canvas.ed-panning, #ed-canvas.ed-panning * { cursor: grabbing !important; }
+#ed-canvas.ed-moving, #ed-canvas.ed-moving * { cursor: grabbing !important; }
+#ed-canvas.ed-selecting, #ed-canvas.ed-wiring, #ed-canvas.ed-wiring * { cursor: crosshair !important; }
+#ed-canvas.ed-resizing, #ed-canvas.ed-resizing * { cursor: nwse-resize !important; }
+.ed-marquee { position: absolute; z-index: 10; pointer-events: none; border: 1px solid var(--c-focus); background: rgb(96 165 250 / .12); border-radius: 2px; }
+
+/* ---------------- nodes ---------------- */
+#ed-canvas .drawflow-node {
+  width: 380px; padding: 0; align-items: flex-start; font-size: 13px; cursor: default;
+  border-radius: 10px; border: 1px solid var(--node-line); background: var(--node-bg); color: var(--node-fg);
+  box-shadow: 0 6px 18px rgb(0 0 0 / .35);
+}
+#ed-canvas .drawflow-node.selected { border-color: var(--node-line); background: var(--node-bg); }
+/* the node being worked on is drawn on top, so a section opening up is never hidden behind a neighbour */
+#ed-canvas .drawflow-node.is-sel { z-index: 4; border-color: var(--c-focus); box-shadow: 0 0 0 2px rgb(96 165 250 / .45), 0 6px 18px rgb(0 0 0 / .35); }
+#ed-canvas .drawflow-node .drawflow_content_node { width: 100%; }
+/* fixed widths like in Unreal: content wraps downwards instead of pushing into neighbours */
+#ed-canvas .cb-command { width: 420px; } #ed-canvas .cb-run { width: 440px; } #ed-canvas .cb-wait { width: 240px; }
+#ed-canvas .cb-arg { width: 380px; } #ed-canvas .cb-server { width: 240px; }
+#ed-canvas .cb-alias, #ed-canvas .cb-cooldown { width: 280px; } #ed-canvas .cb-defaults, #ed-canvas .cb-rules { width: 380px; } #ed-canvas .cb-runas { width: 330px; }
+
+/* the script's enabled switch sits in the title bar; a disabled script fades with everything only it uses */
+#ed-canvas .nh-on { margin-left: auto; display: flex; cursor: default; }
+#ed-canvas .nh-on .sw input:checked + span { background: rgb(255 255 255 / .35); }
+#ed-canvas .drawflow-node.muted { opacity: .38; filter: saturate(.25); }
+#ed-canvas .connection.muted .main-path { opacity: .2; }
+#ed-canvas .req { margin-left: 2px; font-style: normal; color: var(--c-bad); }
+#ed-canvas .pr .missing { color: var(--c-bad); }
+
+/* run as: a segmented switch */
+#ed-canvas .seg { display: flex; width: 100%; padding: 3px; gap: 3px; border-radius: 8px; background: var(--field-bg); border: 1px solid var(--node-line); }
+#ed-canvas .seg label { flex: 1; position: relative; cursor: pointer; }
+#ed-canvas .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+#ed-canvas .seg span { display: block; padding: 5px 0; text-align: center; font-size: 12px; font-weight: 600; border-radius: 6px; color: var(--node-muted); }
+/* the chosen option's pill slides over, like iOS segmented controls */
+#ed-canvas .seg { position: relative; }
+#ed-canvas .seg-thumb { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px - (var(--n) - 1) * 3px) / var(--n)); border-radius: 6px;
+  background: var(--seg, var(--h-runas)); box-shadow: 0 1px 3px rgb(0 0 0 / .3); transition: transform .32s cubic-bezier(.3, 1.25, .4, 1); }
+#ed-canvas .seg:has(label:nth-of-type(2) input:checked) .seg-thumb { transform: translateX(calc(100% + 3px)); }
+#ed-canvas .seg:has(label:nth-of-type(3) input:checked) .seg-thumb { transform: translateX(calc(200% + 6px)); }
+#ed-canvas .seg span { position: relative; transition: color .2s; }
+#ed-canvas .seg input:checked + span { color: #fff; }
+#ed-canvas .cb-defaults .seg { --seg: var(--h-defaults); }
+
+/* server: the id is the title; a proxy is blue, like in the menus */
+#ed-canvas .srv { display: none; }
+#ed-canvas .cb-server.proxy .nh { background: #1d4ed8; }
+#ed-canvas .srv-k { font-size: 12px; color: var(--node-muted); }
+
+/* aliases: one row per alias, then a field to add one */
+/* aliases: a grouped list, each row editable in place, the last row adds one */
+#ed-canvas .al-list { border-radius: 8px; border: 1px solid var(--node-line); background: var(--field-bg); overflow: hidden; }
+#ed-canvas .tag, #ed-canvas .al-new { display: flex; align-items: center; height: 34px; padding: 0 4px 0 10px; border-bottom: 1px solid var(--node-line); }
+#ed-canvas .al-new { border-bottom: none; }
+#ed-canvas .tag i, #ed-canvas .al-new i { width: 12px; font-style: normal; color: var(--node-muted); }
+#ed-canvas .tag input, #ed-canvas .al-new input { flex: 1; min-width: 0; height: 100%; padding: 0 4px; font-size: 13.5px; border: none; background: none; color: var(--node-fg); }
+#ed-canvas .tag input { font-weight: 600; }
+#ed-canvas .tag input:focus, #ed-canvas .al-new input:focus { outline: none; }
+#ed-canvas .tag:focus-within, #ed-canvas .al-new:focus-within { box-shadow: inset 0 0 0 1px var(--c-focus); }
+#ed-canvas .al-new:focus-within { border-radius: 0 0 7px 7px; }
+#ed-canvas .als .tag:first-child { border-radius: 7px 7px 0 0; }
+#ed-canvas .als:empty + .al-new:focus-within { border-radius: 7px; }
+#ed-canvas .tag-x { display: grid; place-items: center; width: 26px; height: 26px; border: none; border-radius: 6px; background: none; color: var(--node-muted); cursor: pointer; opacity: 0; transition: opacity .12s; }
+#ed-canvas .tag-x svg { position: static; }
+#ed-canvas .tag:hover .tag-x, #ed-canvas .tag-x:focus-visible { opacity: 1; }
+#ed-canvas .tag-x:hover { color: #fca5a5; background: rgb(248 113 113 / .12); }
+#ed-canvas .tag.bad { box-shadow: inset 0 0 0 1px var(--c-bad); }
+#ed-canvas .tag input.bad { color: #fca5a5; box-shadow: none !important; }
+
+/* dropdowns in the menu style */
+#ed-canvas .pick { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 32px; padding: 0 8px 0 10px; font-size: 13px; text-align: left;
+  border-radius: 7px; border: 1px solid var(--node-line); background: var(--field-bg); color: var(--node-fg); cursor: pointer; }
+#ed-canvas .pick:hover { border-color: #52525b; }
+#ed-canvas .pick svg { position: static; flex-shrink: 0; color: var(--node-muted); }
+#ed-canvas .pick .pi { display: flex; color: var(--node-muted); }
+#ed-canvas .pick span { flex: 1; }
+#ed-canvas .pick.bad { border-color: var(--c-bad); }
+#ed-canvas .fr.idle { opacity: .4; }
+#ed-canvas .fr.idle .pick { pointer-events: none; }
+#ed-canvas .fl [data-tip] { text-decoration: underline dotted rgb(255 255 255 / .3); text-underline-offset: 3px; cursor: help; }
+
+/* an unwired step setting shows what it gets from the Defaults */
+#ed-canvas .pr .inh { margin-left: 8px; font-style: normal; font-size: 11.5px; color: #71717a; }
+#ed-canvas .nk em { margin-left: 8px; font-style: normal; font-weight: 500; opacity: .75; }
+
+/* the step's command: text with argument pieces, wrapping downwards */
+#ed-canvas .cmd { min-height: 34px; padding: 5px 9px; font: 13px/24px ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-word;
+  border-radius: 7px; border: 1px solid var(--node-line); background: var(--field-bg); color: var(--node-fg); cursor: text; }
+#ed-canvas .cmd:focus { outline: none; border-color: var(--c-focus); }
+#ed-canvas .cmd:empty::before { content: attr(data-placeholder); color: var(--node-muted); }
+#ed-canvas .ph { display: inline-block; vertical-align: top; height: 22px; margin: 1px 1px; line-height: 22px; padding: 0 2px 0 7px; border-radius: 5px; font-family: inherit; cursor: default;
+  background: rgb(56 189 248 / .18); color: var(--piece-fg); box-shadow: 0 0 0 1px rgb(56 189 248 / .35) inset; user-select: none; }
+#ed-canvas .ph.bad { background: rgb(248 113 113 / .18); color: #fca5a5; box-shadow: 0 0 0 1px var(--c-bad) inset; }
+#ed-canvas .args { display: flex; flex-wrap: wrap; gap: 5px; }
+#ed-canvas .args:empty { display: none; }
+#ed-canvas .pill { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 6px; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+  border-radius: 5px; background: rgb(56 189 248 / .1); color: var(--piece-fg); cursor: grab; }
+#ed-canvas .pill::before { content: ""; width: 6px; height: 12px; opacity: .6;
+  background: radial-gradient(currentColor 1px, transparent 1.2px) 0 0 / 3px 4px; }
+#ed-canvas .pill:active { cursor: grabbing; }
+#ed-canvas .ph { cursor: grab; padding-right: 7px; }
+#ed-canvas .ph:active { cursor: grabbing; }
+/* dragging: the text makes room where the piece will go, the piece pops in when dropped */
+#ed-canvas .cmd.drop-here { border-color: rgb(56 189 248 / .7); box-shadow: 0 0 0 3px rgb(56 189 248 / .15); }
+#ed-canvas .ph.preview { pointer-events: none; color: transparent; background: rgb(56 189 248 / .12); box-shadow: 0 0 0 1px rgb(56 189 248 / .6) inset;
+  animation: ph-room .16s cubic-bezier(.2, .8, .2, 1); }
+@keyframes ph-room { from { max-width: 0; padding: 0; margin: 0; opacity: 0; } to { max-width: 240px; opacity: 1; } }
+#ed-canvas .pill.lifted { opacity: .35; }
+/* the dragged piece: the same size and look as in the text, it only follows the pointer */
+.ph-ghost { position: fixed; z-index: 100; height: 22px; padding: 0 7px; line-height: 22px; border-radius: 5px; pointer-events: none; transform-origin: 0 0;
+  font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: #102c3b; color: var(--piece-fg); box-shadow: 0 0 0 1px rgb(56 189 248 / .35) inset, 0 8px 22px rgb(0 0 0 / .4);
+  transition: background .15s, color .15s, opacity .15s; }
+.ph-ghost.doomed { background: rgb(248 113 113 / .22); color: #fca5a5; box-shadow: 0 0 0 1px rgb(248 113 113 / .6) inset, 0 8px 22px rgb(0 0 0 / .4); }
+.ph-ghost.settle { transition: left .18s cubic-bezier(.2, .8, .2, 1), top .18s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 0 0 1px rgb(56 189 248 / .35) inset; }
+.ph-ghost.gone { opacity: 0; }
+/* the remove zone a piece is dragged into */
+.ed-trash { position: absolute; left: 50%; bottom: 20px; z-index: 30; display: flex; align-items: center; gap: 10px; padding: 12px 18px; font-size: 13px; border-radius: 14px;
+  border: 1px dashed rgb(248 113 113 / .5); background: var(--pop-bg); color: #fca5a5; backdrop-filter: blur(10px);
+  transform: translate(-50%, 24px); opacity: 0; transition: transform .2s cubic-bezier(.2, .8, .2, 1), opacity .2s, background .15s, border-color .15s; pointer-events: none; }
+.ed-trash.on { transform: translate(-50%, 0); opacity: 1; }
+.ed-trash.hot { transform: translate(-50%, 0) scale(1.08); border-style: solid; border-color: #f87171; background: rgb(127 29 29 / .9); color: #fff; }
+.ed-trash svg { transition: transform .2s; }
+.ed-trash.hot svg { transform: rotate(-12deg) scale(1.15); }
+/* a step that calls another script: the called name is fixed, the rest are its arguments */
+#ed-canvas .callw { display: inline-flex; vertical-align: top; align-items: center; gap: 4px; height: 22px; margin: 1px 1px 1px 0; padding: 0 7px 0 5px; border-radius: 5px; font-weight: 600; user-select: none;
+  background: rgb(167 139 250 / .16); color: var(--call-fg); box-shadow: 0 0 0 1px rgb(167 139 250 / .4) inset; }
+#ed-canvas .callw svg { position: static; }
+/* Drawflow turns text selection off for the whole canvas; Firefox then hides the caret in fields */
+#ed-canvas input, #ed-canvas textarea, #ed-canvas .cmd { user-select: text; -moz-user-select: text; }
+
+/* fields that wrap instead of scrolling sideways */
+#ed-canvas .fc > textarea { width: 100%; min-width: 0; min-height: 32px; padding: 6px 9px; font: inherit; font-size: 13px; line-height: 1.45; resize: none; overflow: hidden;
+  border-radius: 7px; border: 1px solid var(--node-line); background: var(--field-bg); color: var(--node-fg); }
+#ed-canvas textarea:focus { outline: none; border-color: var(--c-focus); }
+
+/* problems sit on what needs a change; the reason shows on hover */
+#ed-canvas .fr.bad .fl { color: var(--c-bad); }
+#ed-canvas .al-new.bad, #ed-canvas .cmd.bad { border-color: var(--c-bad) !important; box-shadow: 0 0 0 3px rgb(248 113 113 / .15); }
+#ed-canvas .pr .missing { color: var(--c-bad); cursor: help; }
+#ed-canvas .drawflow-node:has(> .drawflow_content_node > .nh.has-err) { border-color: var(--c-bad); box-shadow: 0 0 0 2px rgb(248 113 113 / .35), 0 6px 18px rgb(0 0 0 / .35); }
+#ed-canvas .nh.has-err { cursor: help; }
+
+#ed-canvas .nh { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px 0 6px; border-radius: 9px 9px 0 0; color: #fff; cursor: grab; user-select: none; }
+#ed-canvas .cb-command .nh { background: var(--h-command); }
+#ed-canvas .cb-run .nh { background: var(--h-run); }
+#ed-canvas .cb-wait .nh { background: var(--h-wait); }
+#ed-canvas .cb-arg .nh { background: var(--h-arg); }
+#ed-canvas .cb-server .nh { background: var(--h-server); }
+#ed-canvas .cb-alias .nh { background: var(--h-alias); }
+#ed-canvas .cb-defaults .nh { background: var(--h-defaults); }
+#ed-canvas .cb-runas .nh { background: var(--h-runas); }
+#ed-canvas .cb-cooldown .nh { background: var(--h-cooldown); }
+#ed-canvas .cb-rules .nh { background: var(--h-rules); }
+/* Drawflow positions every svg absolutely (for its wires); header icons flow with the title */
+#ed-canvas .nh svg { position: static; flex-shrink: 0; }
+#ed-canvas .grip { display: grid; place-items: center; width: 22px; height: 28px; border-radius: 5px; color: rgb(255 255 255 / .7); }
+#ed-canvas .nh:hover .grip { color: #fff; }
+#ed-canvas .nk { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ed-canvas .nk b { font-weight: 600; }
+#ed-canvas .offline .nh::after { content: "not connected"; margin-left: auto; padding: 2px 8px; font-size: 11px; border-radius: 999px; background: rgb(0 0 0 / .25); }
+
+/* port rows: header 38px, then rows of 26px from 6px below it; the port shapes line up with them */
+#ed-canvas .np { padding: 6px 0 4px; }
+#ed-canvas .pr { display: flex; justify-content: space-between; gap: 24px; height: 26px; line-height: 26px; padding: 0 16px; font-size: 12.5px; color: var(--node-muted); }
+#ed-canvas .drawflow-node .inputs, #ed-canvas .drawflow-node .outputs { position: absolute; top: 51px; width: 0; display: flex; flex-direction: column; gap: 10px; }
+#ed-canvas .drawflow-node .inputs { left: 0; }
+#ed-canvas .drawflow-node .outputs { right: 0; }
+#ed-canvas .drawflow-node .input, #ed-canvas .drawflow-node .output {
+  width: 16px; height: 16px; margin: 0; top: -1px; left: -8px; right: auto; border: none; border-radius: 0; background: var(--c-flow);
+  cursor: crosshair; transition: transform .1s, opacity .1s, filter .1s;
+}
+#ed-canvas .drawflow-node .input { cursor: pointer; }
+#ed-canvas .pt-flow { clip-path: polygon(10% 0, 100% 50%, 10% 100%); background: var(--c-flow) !important; color: var(--c-flow); }
+#ed-canvas .pt-arg { border-radius: 50% !important; background: var(--c-arg) !important; color: var(--c-arg); }
+#ed-canvas .pt-srv { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--c-srv) !important; color: var(--c-srv); }
+#ed-canvas .pt-call { border-radius: 3px !important; transform: scale(.85); background: var(--c-call) !important; color: var(--c-call); }
+#ed-canvas .pt-alias { border-radius: 50% !important; background: var(--c-alias) !important; color: var(--c-alias); }
+#ed-canvas .pt-def { border-radius: 3px !important; background: var(--c-def) !important; color: var(--c-def); }
+#ed-canvas .pt-runas { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--c-runas) !important; color: var(--c-runas); }
+#ed-canvas .pt-cool { border-radius: 50% !important; background: var(--c-cool) !important; color: var(--c-cool); }
+#ed-canvas .pt-rules { border-radius: 3px !important; background: var(--c-rules) !important; color: var(--c-rules); }
+#ed-canvas .drawflow-node .input:hover, #ed-canvas .drawflow-node .output:hover { transform: scale(1.4); }
+/* while wiring: the ports a wire can join grow and glow in their own color, the rest fades */
+#ed-canvas .drawflow-node .input.can { transform: scale(1.6); filter: drop-shadow(0 0 5px currentColor) drop-shadow(0 0 8px rgb(255 255 255 / .45)); }
+#ed-canvas .drawflow-node .input.cannot { opacity: .12; }
+#ed-canvas .drawflow-node.no-target { opacity: .4; }
+
+/* fields: always there, no "add setting" */
+#ed-canvas .sec { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--node-line); }
+#ed-canvas .fr { display: grid; grid-template-columns: 116px 1fr; align-items: center; gap: 10px; min-height: 30px; }
+#ed-canvas .fl { font-size: 12.5px; color: var(--node-muted); }
+#ed-canvas .fc { display: flex; align-items: center; min-width: 0; }
+#ed-canvas .fc > input[type=text], #ed-canvas .fc > select, #ed-canvas .slashed {
+  width: 100%; min-width: 0; height: 32px; padding: 0 9px; font-size: 13px; border-radius: 7px;
+  border: 1px solid var(--node-line); background: var(--field-bg); color: var(--node-fg); cursor: text;
+}
+#ed-canvas .fc > select { cursor: pointer; }
+#ed-canvas select option { background: var(--field-bg); color: var(--node-fg); }
+#ed-canvas .slashed { display: flex; align-items: center; padding: 0 0 0 9px; }
+#ed-canvas .slashed span { color: var(--node-muted); }
+#ed-canvas .slashed input { flex: 1; min-width: 0; height: 100%; padding: 0 9px 0 2px; border: none; background: none; color: inherit; font-weight: 600; }
+#ed-canvas input:focus, #ed-canvas select:focus, #ed-canvas .slashed:focus-within { outline: none; border-color: var(--c-focus); }
+#ed-canvas .slashed input:focus { border: none; }
+#ed-canvas .bad, #ed-canvas .slashed:has(.bad) { border-color: var(--c-bad) !important; box-shadow: 0 0 0 3px rgb(248 113 113 / .15); }
+
+/* iOS-style switches */
+#ed-canvas .sw { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; cursor: pointer; }
+#ed-canvas .sw input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+#ed-canvas .sw span { position: absolute; inset: 0; border-radius: 999px; background: var(--switch-off); transition: background .2s; pointer-events: none; }
+#ed-canvas .sw span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .4); transition: transform .15s; }
+#ed-canvas .sw input:checked + span { background: var(--c-ok); }
+#ed-canvas .sw input:checked + span::after { transform: translateX(16px); }
+#ed-canvas .sw input:focus-visible + span { box-shadow: 0 0 0 3px rgb(96 165 250 / .5); }
+
+/* ---------------- wires ---------------- */
+#ed-canvas .connection .main-path { stroke: var(--c-flow); stroke-width: 3px; opacity: .85; cursor: pointer; }
+#ed-canvas .connection.t-arg .main-path { stroke: var(--c-arg); }
+#ed-canvas .connection.t-srv .main-path { stroke: var(--c-srv); }
+#ed-canvas .connection.t-call .main-path { stroke: var(--c-call); stroke-dasharray: 8 6; }
+#ed-canvas .connection.t-alias .main-path { stroke: var(--c-alias); }
+#ed-canvas .connection.t-def .main-path { stroke: var(--c-def); }
+#ed-canvas .connection.t-runas .main-path { stroke: var(--c-runas); }
+#ed-canvas .connection.t-cool .main-path { stroke: var(--c-cool); }
+#ed-canvas .connection.t-rules .main-path { stroke: var(--c-rules); }
+#ed-canvas .connection .main-path { pointer-events: none; }
+#ed-canvas .connection .hit-path { fill: none; stroke: transparent; stroke-width: 16px; stroke-dasharray: none; pointer-events: stroke; cursor: pointer; }
+#ed-canvas .connection:hover .main-path { opacity: 1; stroke-width: 6px; }
+#ed-canvas .connection .main-path.selected { opacity: 1; stroke-width: 6px; stroke: #fca5a5 !important; }
+#ed-canvas.ed-wiring .connection .hit-path { pointer-events: none; }
+#ed-canvas[data-drag="arg"] svg.connection:last-of-type .main-path { stroke: var(--c-arg); }
+#ed-canvas[data-drag="srv"] svg.connection:last-of-type .main-path { stroke: var(--c-srv); }
+#ed-canvas[data-drag="call"] svg.connection:last-of-type .main-path { stroke: var(--c-call); stroke-dasharray: 8 6; }
+#ed-canvas[data-drag="alias"] svg.connection:last-of-type .main-path { stroke: var(--c-alias); }
+#ed-canvas[data-drag="def"] svg.connection:last-of-type .main-path { stroke: var(--c-def); }
+#ed-canvas[data-drag="runas"] svg.connection:last-of-type .main-path { stroke: var(--c-runas); }
+#ed-canvas[data-drag="cool"] svg.connection:last-of-type .main-path { stroke: var(--c-cool); }
+#ed-canvas[data-drag="rules"] svg.connection:last-of-type .main-path { stroke: var(--c-rules); }
+#ed-canvas .drawflow-delete { display: none; }
+
+/* ---------------- groups ---------------- */
+#ed-canvas .grp { position: absolute; z-index: 0; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--g) 70%, transparent); background: color-mix(in srgb, var(--g) 10%, transparent); }
+#ed-canvas .grp-h { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px 0 6px; border-radius: 11px 11px 0 0; background: color-mix(in srgb, var(--g) 35%, transparent); cursor: grab; }
+#ed-canvas .grp-h .grip svg { position: static; }
+#ed-canvas .grp-fill { flex: 1; align-self: stretch; }
+#ed-canvas .grp-n { font-size: 12px; color: rgb(255 255 255 / .65); white-space: nowrap; }
+#ed-canvas .grp-t { min-width: 0; max-width: 60%; height: 28px; padding: 0 6px; font-size: 15px; font-weight: 600; border: 1px solid transparent; border-radius: 6px; background: none; color: #fff; cursor: text; }
+#ed-canvas .grp-t:focus { outline: none; border-color: rgb(255 255 255 / .5); background: rgb(0 0 0 / .2); }
+#ed-canvas .grp-colors { display: flex; gap: 4px; }
+#ed-canvas .grp-c { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid rgb(255 255 255 / .3); background: var(--c); cursor: pointer; }
+#ed-canvas .grp .sw { margin-right: 2px; }
+#ed-canvas .grp .sw input:disabled + span { opacity: .4; }
+#ed-canvas .grp.off { border-style: dashed; background: color-mix(in srgb, var(--g) 4%, transparent); }
+#ed-canvas .grp.off .grp-h { background: color-mix(in srgb, var(--g) 14%, transparent); }
+#ed-canvas .grp.off .grp-t { color: rgb(255 255 255 / .55); }
+#ed-canvas .grp-x { width: 26px; height: 26px; border: none; border-radius: 6px; background: none; color: #fff; font-size: 16px; cursor: pointer; }
+#ed-canvas .grp-x:hover { background: rgb(0 0 0 / .3); }
+#ed-canvas .grp-body { position: absolute; inset: 40px 0 0 0; }
+#ed-canvas .grp.solo .grp-x { display: none; }
+#ed-canvas .grp-sort { display: grid; place-items: center; width: 26px; height: 26px; border: none; border-radius: 6px; background: none; color: rgb(255 255 255 / .8); cursor: pointer; }
+#ed-canvas .grp-sort:hover { color: #fff; background: rgb(0 0 0 / .3); }
+#ed-canvas .grp-sort svg { position: static; }
+
+@media (max-width: 900px) {
+  .ed-bar { overflow-x: auto; }
+  .ed-btn { padding: 0 8px; }
+  .ed-yaml { position: absolute; inset: 0; width: auto; max-width: none; }
+  .ed-notes { max-width: calc(100% - 32px); bottom: 220px; }
+}
+
+/* a step dragged onto a wire goes in between: the wire lights up, the node pops in */
+#ed-canvas .connection.insert-at .main-path { stroke: #60a5fa !important; stroke-width: 6px; opacity: 1; stroke-dasharray: 10 6; animation: wire-march .5s linear infinite; }
+@keyframes wire-march { to { stroke-dashoffset: -16; } }
+#ed-canvas .drawflow-node.inserting { box-shadow: 0 0 0 2px #60a5fa, 0 18px 40px rgb(0 0 0 / .55); }
+#ed-canvas .drawflow-node.dropped-in { animation: node-in .35s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes node-in { from { transform: scale(.94); } to { transform: scale(1); } }
+
+/* light mode: the canvas is light, nodes stay dark; group headers need dark text */
+html:not(.dark) #ed-canvas .grp-h { background: color-mix(in srgb, var(--g) 22%, white); }
+html:not(.dark) #ed-canvas .grp-t { color: color-mix(in srgb, var(--g) 55%, black); }
+html:not(.dark) #ed-canvas .grp-t:focus { border-color: color-mix(in srgb, var(--g) 50%, transparent); background: rgb(255 255 255 / .6); }
+html:not(.dark) #ed-canvas .grp-n, html:not(.dark) #ed-canvas .grp-h .grip, html:not(.dark) #ed-canvas .grp-sort, html:not(.dark) #ed-canvas .grp-x { color: color-mix(in srgb, var(--g) 45%, #3f3f46); }
+html:not(.dark) #ed-canvas .grp.off .grp-t { color: color-mix(in srgb, var(--g) 30%, #71717a); }
+html:not(.dark) #ed-canvas .connection.t-flow .main-path { stroke: #71717a; }
+
+/* light mode: nodes, menus and the YAML panel turn light too; node headers keep their colors */
+html:not(.dark) .ed, html:not(.dark) .ph-ghost {
+  --node-bg: #ffffff; --node-fg: #18181b; --node-muted: #71717a; --node-line: #e4e4e7; --field-bg: #f4f4f5;
+  --pop-bg: rgb(255 255 255 / .97); --hover: rgb(0 0 0 / .05); --line-soft: rgb(0 0 0 / .08);
+  --piece-fg: #0369a1; --call-fg: #6d28d9; --code-bg: #ffffff; --code-side: #fafafa; --code-fg: #3f3f46; --switch-off: #d4d4d8;
+  --y-str: #15803d; --y-num: #b45309; --y-bool: #be185d; --y-punct: #a1a1aa; --y-com: #a1a1aa;
+}
+html:not(.dark) #ed-canvas .drawflow-node { box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 8px 24px rgb(0 0 0 / .08); }
+html:not(.dark) .ed-pop, html:not(.dark) .ed-sub { box-shadow: 0 18px 40px rgb(0 0 0 / .14), 0 2px 6px rgb(0 0 0 / .06); }
+html:not(.dark) .ed-tip { box-shadow: 0 10px 28px rgb(0 0 0 / .12); }
+html:not(.dark) .ph-ghost { background: #e0f2fe; box-shadow: 0 0 0 1px rgb(14 165 233 / .4) inset, 0 8px 22px rgb(0 0 0 / .15); }
+html:not(.dark) .ed-trash { color: #b91c1c; }
+html:not(.dark) .ed-trash.hot { color: #fff; }
+html:not(.dark) .ed-custom input { background: #f4f4f5; }
+html:not(.dark) .ed-yaml-main header, html:not(.dark) .ed-files { border-color: rgb(0 0 0 / .08); }
+html:not(.dark) .ed-file { color: #52525b; }
+html:not(.dark) .ed-file.new { color: #15803d; } html:not(.dark) .ed-file.changed { color: #a16207; } html:not(.dark) .ed-file.deleted { color: #b91c1c; }
+
+/* motion: quick, springy, and only where something appears or moves */
+@keyframes ed-pop-in { from { opacity: 0; transform: scale(.96) translateY(-4px); } }
+@keyframes ed-sub-in { from { opacity: 0; transform: translateX(-6px); } }
+@keyframes ed-sub-in-flip { from { opacity: 0; transform: translateX(6px); } }
+@keyframes ed-fade-in { from { opacity: 0; } }
+@keyframes ed-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes ed-slide-in { from { opacity: .4; transform: translateX(24px); } }
+@keyframes ed-born { from { opacity: 0; transform: scale(.94); } }
+.ed-pop { transform-origin: 0 0; animation: ed-pop-in .18s cubic-bezier(.2, .9, .3, 1.15); }
+.ed-mw.open > .ed-sub { animation: ed-sub-in .16s cubic-bezier(.2, .8, .2, 1); }
+.ed-pop.flip .ed-mw.open > .ed-sub { animation-name: ed-sub-in-flip; }
+.ed-tip { animation: ed-fade-in .14s .12s both; }
+.ed-notes { animation: ed-rise .22s cubic-bezier(.2, .8, .2, 1); }
+.ed-yaml { animation: ed-slide-in .24s cubic-bezier(.2, .8, .2, 1); }
+.ed-wire-x { animation: ed-born .16s cubic-bezier(.3, 1.4, .5, 1); }
+#ed-canvas .drawflow-node.born { animation: ed-born .26s cubic-bezier(.3, 1.3, .5, 1); }
+.ed-tool, .ed-btn, .ed-save, .ed-mi, .ed-file, .ed-zoom button, #ed-canvas .pick, #ed-canvas .tag-x, #ed-canvas .grp-sort, #ed-canvas .grp-x { transition: background-color .14s, color .14s, border-color .14s, opacity .14s; }
+.ed-tool:active:not(:disabled), .ed-btn:active:not(:disabled), .ed-save:active:not(:disabled) { transform: scale(.96); }
+#ed-canvas .sw span::after { transition: transform .28s cubic-bezier(.3, 1.4, .5, 1); }
+#ed-canvas .sw input:active + span::after { width: 22px; }
+#ed-canvas .sw input:checked:active + span::after { transform: translateX(12px); }
+#ed-canvas .grp { transition: background-color .2s, border-color .2s; }
+#ed-canvas .drawflow-node.muted { transition: opacity .2s, filter .2s; }
+@media (prefers-reduced-motion: reduce) { .ed *, .ed *::after, .ph-ghost { animation: none !important; transition: none !important; } }
+
+/* after Save: the command that writes the changes, to run on the proxy */
+.ed-confirm { position: absolute; left: 50%; top: 16px; z-index: 25; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; transform: translateX(-50%);
+  border-radius: 12px; border: 1px solid var(--line-soft); background: var(--pop-bg); color: var(--node-fg); box-shadow: 0 18px 40px rgb(0 0 0 / .35); backdrop-filter: blur(12px);
+  animation: ed-drop-in .24s cubic-bezier(.2, .9, .3, 1.15); white-space: nowrap; }
+@keyframes ed-drop-in { from { opacity: 0; transform: translate(-50%, -10px); } }
+.ed-confirm-t { font-size: 13px; color: var(--node-muted); }
+.ed-confirm code { padding: 5px 10px; border-radius: 7px; font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--field-bg); color: var(--node-fg); user-select: all; }
+.ed-confirm .ed-btn { height: 30px; }
+.ed-confirm-x { display: grid; place-items: center; width: 30px; height: 30px; border: none; border-radius: 7px; background: none; color: var(--node-muted); cursor: pointer; }
+.ed-confirm-x:hover { background: var(--hover); color: var(--node-fg); }

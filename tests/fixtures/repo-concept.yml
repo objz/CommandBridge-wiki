@@ -1,0 +1,104 @@
+version: 4  # The configuration version. Must be 4 for the current schema.
+
+name: eco-give  # The canonical name of the script and the command. This will be the primary label on the proxy.
+description: Simple demo script that proxies an /eco command to a backend server  # A short description shown in /help.
+enabled: true  # When false, the script is ignored and nothing is registered.
+aliases: [eco]  # Aliases for the command; must be a list even if you only have one.
+
+permissions:
+  enabled: true  # If true, the proxy will check commandbridge.command.<name> before executing the command.
+  silent: false  # When true, lack of permission fails silently instead of sending an error message.
+
+# The register section tells CB on which clients and in which context to register this command.
+# Each entry consists of:
+#   id:       the client identifier from your clients config
+#   location: VELOCITY or BACKEND, specifying whether to register the command on the proxy or on a backend.
+# If you have multiple proxies or backends you can register on more than one.
+register:
+  - id: "client-1"
+    location: VELOCITY  # Register on the Velocity proxy.
+
+defaults:
+  # These defaults are inherited by every command in the `commands` list unless overridden locally.
+  # Fields annotated with @Merge in the commands block (run-as, execute, server, delay, cooldown)
+  # are inherited from defaults when the command does not specify them.
+  run-as: CONSOLE  # Options are CONSOLE, PLAYER or OPERATOR. Determines the executor context on the backend.
+  # Where to execute the command by default. Each entry has an `id` and a `location`. Multiple targets are allowed.
+  execute:
+    - id: "client-1"
+      location: BACKEND  # Forward the command to this backend server.
+  # Settings that control player-presence checks and scheduling behaviour.
+  server:
+    target-required: true  # If true, abort if the target player is not online on the execution target. Defaults to false.
+    schedule-online: true  # If true, queue the command until the target comes online on the execution target. Defaults to false.
+    player-arg: player  # References an arg name (must be a player-resolvable type: STRING, PLAYERS, or OFFLINE_PLAYER) to identify the player for target-required and schedule-online checks.
+  delay: 0s  # Delay before forwarding the command. Zero disables the delay.
+  cooldown: 0s  # Cooldown per player between uses. Zero disables rate limiting.
+
+# Argument definitions.
+# Each argument must have:
+#   name:        the placeholder used in the command template (for example ${player})
+#   type:        one of the values from the ArgType enum (see below). Defaults to STRING.
+#   required:    whether the user must supply this argument. Defaults to false.
+#   suggestions: optional list of tab-complete suggestions for this argument
+#
+# Valid types as of this version:
+#
+# Cross-platform (VELOCITY + BACKEND):
+#   STRING         # A single token. Player-resolvable.
+#   INTEGER        # Whole numbers.
+#   BOOLEAN        # true or false.
+#   DOUBLE         # Floating-point numbers.
+#   TEXT           # The rest of the input line as a single string, preserving spaces and quotes.
+#   GREEDY_STRING  # Consumes all remaining input as a raw string.
+#   OFFLINE_PLAYER # An offline player name. Player-resolvable. Suggests known players on both platforms.
+#
+# Backend only:
+#   RANGE          # A range like 1..10 (uses DoubleRangeArgument, no min/max support yet).
+#   ENTITIES       # Select one or more entities (entity selector syntax).
+#   ENTITY_TYPE    # The type of an entity (e.g. zombie).
+#   WORLD          # A Minecraft world name.
+#   LOCATION       # A 3D location (x, y, z).
+#   LOCATION_2D    # A 2D location (x, z).
+#   ANGLE          # A rotation angle.
+#   ROTATION       # A full rotation (yaw + pitch).
+#   ITEM_STACK     # An item stack.
+#   ENCHANTMENT    # An enchantment.
+#   POTION_EFFECT  # A potion effect.
+#   SOUND          # A sound identifier.
+#   BIOME          # A biome identifier.
+#
+# Backend (with optional Velocity support via PacketEvents):
+#   PLAYERS        # Select one or more players (entity selector syntax). Player-resolvable.
+#   TIME           # A time value (ticks or duration).
+#
+# Proxy only:
+#   SERVER         # A Velocity server name.
+#
+# Types marked "Player-resolvable" can be referenced by the server.player-arg setting (STRING, PLAYERS, OFFLINE_PLAYER).
+# Types with "optional Velocity support" work on the proxy only when the PacketEvents integration is available.
+# The PlatformProcessor ensures you do not use a backend-only type for a proxy-registered command.
+args:
+  - name: player
+    required: true
+    type: PLAYERS  # Use the PLAYERS selector to pick a player or group of players.
+
+  - name: amount
+    required: true
+    type: RANGE  # A numeric range argument.
+
+commands:
+  # The list of commands to run. The proxy will process them in order.
+  # Each command can override any of the defaults (run-as, execute, server, delay, cooldown).
+  # When a field is not specified, it is inherited from defaults via @Merge.
+  - command: "eco give ${player} ${amount}"
+    # Overrides for this command only:
+    run-as: CONSOLE
+    execute:
+      - id: "client-1"
+        location: BACKEND
+    server:
+      target-required: false  # Override defaults: do not abort if the target player is offline.
+      schedule-online: false  # Do not schedule; run immediately if possible.
+      # player-arg not set here, so inherited from defaults via merge.
+    delay: 2s  # Wait two seconds before sending the command to the backend.

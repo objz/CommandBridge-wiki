@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf _site",
+    "test": "node --test tests/",
     "dev": "eleventy --serve & npx tailwindcss -i ./src/styles/main.css -o ./_site/styles.css --watch",
     "build": "ELEVENTY_PRODUCTION=true eleventy && NODE_ENV=production npx tailwindcss -i ./src/styles/main.css -o ./_site/styles.css --minify"
   },
@@ -34,6 +35,7 @@
     "canvas-sketch-util": "^1.10.0",
     "d3-array": "^3.2.4",
     "d3-geo": "^3.1.1",
+    "drawflow": "0.0.60",
     "eleventy-plugin-toc": "^1.1.5",
     "glsl-noise": "^0.0.0",
     "lucide": "^0.507.0",
@@ -42,6 +44,7 @@
     "theatre": "^0.2.3",
     "three": "^0.176.0",
     "topojson-client": "^3.1.0",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "yaml": "2.6.1"
   }
 }

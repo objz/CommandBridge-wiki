@@ -1,0 +1,30 @@
+version: 4
+name: lobby
+description: Send the player to the lobby
+enabled: true
+aliases: [hub]
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "survival-1"
+    location: BACKEND
+
+defaults:
+  run-as: PLAYER
+  execute:
+    - id: "proxy-1"
+      location: VELOCITY
+  server:
+    target-required: false
+    schedule-online: false
+    player-arg: ""
+  delay: 0s
+  cooldown: 0s
+
+args: []
+
+commands:
+  - command: "server lobby"

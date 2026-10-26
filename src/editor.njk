@@ -1,0 +1,153 @@
+---
+layout: layouts/base.njk
+title: Script Editor
+permalink: /editor/
+description: "Build CommandBridge scripts as a node graph, live on your proxy."
+hideFooter: true
+eleventyExcludeFromCollections: true
+---
+
+<link rel="stylesheet" href="/js/drawflow.css"/>
+<link rel="stylesheet" href="/lib/editor/editor.css"/>
+<style>html, body { overflow: hidden; } /* the editor fills the window; typing near the bottom must not scroll the page */</style>
+<script src="/js/drawflow.js"></script>
+<script src="/lib/editor/editor.js"></script>
+
+<div x-data="cbEditor()" class="ed">
+  <div class="ed-bar" x-show="status !== 'nolink'">
+    <div class="ed-seg" role="group" aria-label="Tool">
+      <button class="ed-tool" :aria-pressed="tool === 'select'" @click="setTool('select')" title="Select (V): drag on the canvas to select nodes" aria-label="Select tool">{% lucide "mouse-pointer-2", { "class": "h-4 w-4" } %}</button>
+      <button class="ed-tool" :aria-pressed="tool === 'grab'" @click="setTool('grab')" title="Grab (H): drag to move the view" aria-label="Grab tool">{% lucide "hand", { "class": "h-4 w-4" } %}</button>
+    </div>
+    <button class="ed-btn ed-addbtn" @mousedown.stop @click="pop ? pop = null : addMenu($event)" :disabled="status !== 'online'" title="Add a node or server (A), or right-click the canvas">{% lucide "plus", { "class": "h-4 w-4" } %}Add{% lucide "chevron-down", { "class": "h-3.5 w-3.5 opacity-60" } %}</button>
+
+    <div class="ed-seg" role="group" aria-label="Edit">
+      <button class="ed-tool" @click="undo()" :disabled="!canUndo" title="Undo (Ctrl+Z)" aria-label="Undo">{% lucide "undo-2", { "class": "h-4 w-4" } %}</button>
+      <button class="ed-tool" @click="redo()" :disabled="!canRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">{% lucide "redo-2", { "class": "h-4 w-4" } %}</button>
+      <button class="ed-tool" @click="newGroup()" :disabled="!selectionSize" title="Group the selected scripts (Ctrl+G)">{% lucide "group", { "class": "h-4 w-4" } %}Group</button>
+      <button class="ed-tool" @click="deleteSelection()" :disabled="!selectionSize" title="Delete the selection (Del)" aria-label="Delete">{% lucide "trash", { "class": "h-4 w-4" } %}</button>
+      <button class="ed-tool" @click="tidy()" :disabled="status !== 'online'" title="Sort: lay every script out again so wires don't cross nodes (Ctrl+Z undoes it)">{% lucide "layout-grid", { "class": "h-4 w-4" } %}Sort</button>
+    </div>
+
+    <span class="ed-spacer"></span>
+    <span class="ed-status" :class="status === 'closed' && 'ed-status-err'" x-show="status !== 'online'" x-text="statusText()"></span>
+    <div class="ed-seg" role="group" aria-label="View" x-show="status === 'online'">
+      <button class="ed-tool" :aria-pressed="showMinimap" @click="showMinimap = !showMinimap; $nextTick(() => drawMinimap())" title="Minimap" aria-label="Minimap">{% lucide "map", { "class": "h-4 w-4" } %}</button>
+      <button class="ed-tool" :aria-pressed="showYaml" @click="showYaml = !showYaml" title="Show the YAML of the selected script">{% lucide "file-code", { "class": "h-4 w-4" } %}YAML</button>
+    </div>
+    <button class="ed-btn" @click="rebuild()" x-show="changes()" title="Throw away unsaved changes">Revert</button>
+    <span class="ed-savewrap" x-show="status === 'online'" :data-tip="saveTip()" @click="blocking().length && revealProblem()">
+      <button class="ed-save" @click="save()" :disabled="!changes() || busy || !!confirmCode || blocking().length > 0" :class="blocking().length && 'blocked'"
+              x-text="busy ? 'Checking…' : confirmCode ? 'Waiting for confirm' : changes() ? `Save ${changes()} ${changes() === 1 ? 'change' : 'changes'}` : 'Saved'"></button>
+    </span>
+  </div>
+
+  <div class="ed-tip" x-show="tip" x-cloak :class="tip?.err && 'err'" :style="tip && `top:${tip.y}px;${tip.right ? 'right' : 'left'}:${tip.x}px`" x-text="tip?.text"></div>
+
+  <div class="ed-work">
+   <div class="ed-stage">
+    <textarea class="ed-keys" aria-hidden="true" tabindex="-1" autocomplete="off"></textarea>
+    <div id="ed-canvas" x-ignore></div>
+
+    <div class="ed-corner" x-show="status === 'online'">
+      <canvas id="ed-minimap" width="240" height="150" x-show="showMinimap" @mousedown.prevent="minimapJump($event)" title="Click or drag to move the view"></canvas>
+      <div class="ed-zoom">
+        <button @click="zoomBy(1 / 1.2)" aria-label="Zoom out">−</button>
+        <span x-text="zoom + '%'"></span>
+        <button @click="zoomBy(1.2)" aria-label="Zoom in">+</button>
+        <button @click="fit()" title="Fit everything (F)" aria-label="Fit">{% lucide "maximize", { "class": "h-3.5 w-3.5" } %}</button>
+      </div>
+    </div>
+
+    {% macro menuItem(v) %}
+      <button class="ed-mi" role="menuitem" :class="{ danger: {{ v }}.danger, muted: {{ v }}.muted, checked: {{ v }}.check }" :disabled="!!{{ v }}.disabled" @click="runPop({{ v }})">
+        <span class="ed-mi-i" :style="({{ v }}.color || {{ v }}.kind) && `--c:${ {{ v }}.color || color({{ v }}.kind) }`" x-html="{{ v }}.icon || icon({{ v }}.kind)"></span>
+        <span class="ed-mi-l" x-text="{{ v }}.label"></span>
+        <small class="ed-mi-h" x-show="{{ v }}.hint" x-text="{{ v }}.hint"></small>
+        <span class="ed-mi-ok" x-show="{{ v }}.check">{% lucide "check", { "class": "h-4 w-4" } %}</span>
+        <kbd x-show="{{ v }}.keys" x-text="{{ v }}.keys"></kbd>
+        <span class="ed-mi-more" x-show="{{ v }}.sub">{% lucide "chevron-right", { "class": "h-4 w-4" } %}</span>
+      </button>
+    {% endmacro %}
+    {% macro menuEntry(v) %}
+      <template x-if="{{ v }}.section"><p class="ed-pop-s" x-text="{{ v }}.section"></p></template>
+      <template x-if="{{ v }}.sep"><hr></template>
+      <template x-if="{{ v }}.custom">
+        <form class="ed-custom" @submit.prevent="customServer($event, {{ v }})">
+          <input name="sid" placeholder="Custom id" autocomplete="off" spellcheck="false" aria-label="Custom server id" @input="$el.classList.remove('bad')">
+          <button value="BACKEND" title="Add as backend" aria-label="Add as backend" style="--c:#f59e0b" x-html="srvIcon('BACKEND')"></button>
+          <button value="VELOCITY" title="Add as Velocity proxy" aria-label="Add as Velocity proxy" style="--c:#60a5fa" x-html="srvIcon('VELOCITY')"></button>
+        </form>
+      </template>
+      <template x-if="{{ v }}.label">{{ menuItem(v) }}</template>
+    {% endmacro %}
+    <div class="ed-pop" x-show="pop" x-cloak :class="{ flip: pop?.flip, scroll: pop?.scroll }" :style="pop && `left:${pop.x}px;top:${pop.y}px;${pop.width ? `width:${pop.width}px` : ''}`" role="menu"
+         @mousedown.stop @mousedown.outside="pop = null" @contextmenu.prevent @mousemove="aimMove($event)">
+      <p class="ed-pop-t" x-show="pop?.title" x-text="pop?.title"></p>
+      <template x-for="(item, i) in pop?.items || []">
+        <div class="ed-mw" :class="{ open: pop?.open === i }" @mouseenter="aim(i)">
+          {{ menuEntry("item") }}
+          <template x-if="item.sub">
+            <div class="ed-sub" role="menu"><template x-for="s in item.sub"><div>{{ menuEntry("s") }}</div></template></div>
+          </template>
+        </div>
+      </template>
+    </div>
+    <button class="ed-wire-x" x-show="wireX" x-cloak :style="wireX && `left:${wireX.x}px;top:${wireX.y}px`" @mousedown.stop @click="deleteWire()" title="Delete this connection (Del)" aria-label="Delete connection">{% lucide "trash", { "class": "h-3.5 w-3.5" } %}</button>
+
+    <div class="ed-confirm" x-show="confirmCode" x-cloak role="status">
+      <span class="ed-confirm-t">Confirm on the server to save</span>
+      <code x-text="'/cb editor confirm ' + confirmCode"></code>
+      <button class="ed-btn" @click="copyConfirm()" x-text="copied ? 'Copied' : 'Copy'"></button>
+      <button class="ed-confirm-x" @click="cancelStage()" title="Take the changes back" aria-label="Cancel">{% lucide "x", { "class": "h-4 w-4" } %}</button>
+    </div>
+
+    <div class="ed-notes" x-show="results.length || problems.some((p) => !p.pinned)" x-cloak role="status">
+      <template x-for="r in results"><p :class="r.ok ? (r.warning ? 'ed-warn' : 'ed-ok') : 'ed-err'"><span x-text="r.text"></span>
+        <button class="ed-more" x-show="r.restored" @click="discardDraft()">Discard them</button></p></template>
+      <template x-for="p in problems.filter((p) => p.blocking && !p.pinned)"><p class="ed-err" x-text="p.text"></p></template>
+      <button class="ed-more" x-show="problems.some((p) => !p.blocking && !p.pinned)" @click="showWarnings = !showWarnings"
+              x-text="`${problems.filter((p) => !p.blocking && !p.pinned).length} unchanged scripts can't be read`"></button>
+      <template x-if="showWarnings"><div><template x-for="p in problems.filter((p) => !p.blocking && !p.pinned)"><p class="ed-muted" x-text="p.text"></p></template></div></template>
+    </div>
+
+   </div>
+
+    <aside class="ed-yaml" x-show="showYaml && status === 'online'" x-cloak>
+      <div class="ed-yaml-grip" @mousedown.prevent="resizeYaml($event)" title="Drag to resize"></div>
+      <nav class="ed-files" aria-label="Script files">
+        <p class="ed-files-h">{% lucide "folder-open", { "class": "h-3.5 w-3.5" } %}scripts</p>
+        <template x-for="f in yamlFiles()" :key="f.file">
+          <button class="ed-file" :class="[f.state, yamlFile() === f.file && 'on']" @click="yamlPick = f.file" :title="f.file + (f.state === 'saved' ? '' : ' (' + f.state + ')')">
+            <span class="ed-file-i" x-html="fileIcon()"></span><span class="ed-file-n" x-text="f.file"></span><span class="ed-file-s" x-text="{ new: 'A', changed: 'M', deleted: 'D' }[f.state] || ''"></span>
+          </button>
+        </template>
+      </nav>
+      <div class="ed-yaml-main">
+        <header><span x-text="yamlFile() ? 'scripts/' + yamlFile() : 'No script'"></span><small x-text="{ new: 'new file', changed: 'modified', deleted: 'deleted on save', unread: 'not readable' }[yamlState()] || ''"></small></header>
+        <p class="ed-yaml-err" x-show="yamlError || yamlLineMsg()" x-text="yamlLineMsg() || yamlError"></p>
+        <div class="ed-yaml-body"><pre class="ed-yaml-n" x-html="yamlGutter()"></pre>
+          <div class="ed-yaml-edit">
+            <pre class="ed-yaml-code" aria-hidden="true" x-html="yamlHtml() + '\n'"></pre>
+            <pre class="ed-yaml-lint" aria-hidden="true" x-html="yamlLintHtml()"></pre>
+            <textarea class="ed-yaml-ta" spellcheck="false" wrap="off" autocomplete="off" aria-label="YAML of the script" :readonly="!yamlEditable()"
+                      x-effect="if (document.activeElement !== $el) $el.value = yamlText()"
+                      @input="yamlInput($event); yamlComplete($event.target); yamlCaret($event.target)" @keydown="yamlKey($event)"
+                      @click="yamlSugg = null; yamlCaret($event.target)" @keyup="yamlCaret($event.target)"
+                      @blur="setTimeout(() => { if (document.activeElement !== $el) { yamlSugg = null; yamlApply(); } }, 120)"></textarea>
+            <div class="ed-ycmp" x-show="yamlSugg" x-cloak :style="yamlSugg && `left:${yamlSugg.x}px;top:${yamlSugg.y}px`" role="listbox" @mousedown.prevent>
+              <template x-for="(it, i) in yamlSugg?.items || []">
+                <button :class="i === yamlSugg.sel && 'on'" @click="yamlAccept(i)" role="option"><span x-text="it.label"></span><small x-text="it.kind"></small></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="ed-landing" x-show="status === 'nolink'" x-cloak>
+      <p>Run <code>/cb editor</code> on your proxy and open the link it gives you.</p>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,47 @@
+version: 4
+name: netban
+description: Ban a player on all servers
+enabled: true
+aliases: [nban]
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "proxy-1"
+    location: VELOCITY
+
+defaults:
+  run-as: CONSOLE
+  execute:
+    - id: "survival-1"
+      location: BACKEND
+    - id: "lobby-1"
+      location: BACKEND
+  server:
+    target-required: false
+    schedule-online: false
+    player-arg: ""
+  delay: 0s
+  cooldown: 0s
+
+args:
+  - name: target
+    required: true
+    type: PLAYERS
+    suggestions: []
+
+  - name: reason
+    required: false
+    type: GREEDY_STRING
+    suggestions: []
+
+commands:
+  - command: "ban ${target} ${reason}"
+
+  - command: "say ${target} has been banned: ${reason}"
+    execute:
+      - id: "admin-1"
+        location: BACKEND
+    run-as: CONSOLE
