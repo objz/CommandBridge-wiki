@@ -22,7 +22,7 @@
   <link rel="canonical" href="{{ site.url + page.url }}"/>
   {% if appPage %}
   {# scripts only from this site, connections only to this site and the relay; Alpine needs eval, the layout has inline scripts #}
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' wss://cb.objz.dev ws://localhost:8787 ws://localhost:8080; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cb.objz.dev data: blob:; connect-src 'self' wss://cb.objz.dev ws://localhost:8787 ws://localhost:8080; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   {% endif %}
   <script>
