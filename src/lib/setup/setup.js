@@ -51,6 +51,8 @@ function cbSetup() {
     copied: "",
     newRow: null,   // { id, address } while adding a server
     waiting: false, // a plan was sent, the codes aren't back yet
+    editorBusy: false,
+    editorError: "",
 
     init() {
       const relay = window.cbRelay(location.hash);
@@ -241,6 +243,13 @@ function cbSetup() {
       this.relay.send({ type: "stage" });
     },
 
+    // the proxy opens an editor session and sends back its link
+    openEditor() {
+      this.editorBusy = true;
+      this.editorError = "";
+      this.relay.send({ type: "editor" });
+    },
+
     async copy(text) {
       await navigator.clipboard?.writeText(text).catch(() => {});
       this.copied = text;
@@ -286,6 +295,11 @@ function cbSetup() {
       } else if (msg.type === "paired") {
         this.paired = { ...this.paired, [msg.id]: { platform: msg.platform, version: msg.version } };
         delete this.codes[msg.id];
+      } else if (msg.type === "editor") {
+        location.href = msg.url;
+      } else if (msg.type === "editor-error") {
+        this.editorBusy = false;
+        this.editorError = `The proxy couldn't open the editor: ${msg.error}. Run /cb editor instead.`;
       } else if (msg.type === "staged") {
         this.staged = msg.code;
       } else if (msg.type === "applied") {

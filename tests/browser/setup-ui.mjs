@@ -33,6 +33,7 @@ proxy.onmessage = (e) => {
     state();
   }
   if (m.type === "stage") { staged = "q8n2fl"; sendP({ type: "staged", code: staged }); }
+  if (m.type === "editor") sendP({ type: "editor", url: "http://localhost:8080/editor/" });
   if (m.type === "unstage") { staged = null; state(); }
 };
 await new Promise((r) => (proxy.onopen = r));
@@ -148,7 +149,9 @@ try {
 
   sendP({ type: "applied", restartNeeded: true, errors: [], configs: { creative: "client-id: creative\n" } });
   await page.waitForTimeout(400);
-  check("restart hint", (await page.locator(".setup-restart").textContent().catch(() => "")).includes("Restart the proxy to switch to the new connection settings."));
+  check("restart note", (await page.locator(".setup-restart").textContent().catch(() => "")).includes("CommandBridge restarted with the new settings"));
+  check("velocity.toml is named only when servers were added", (await page.locator('[data-step="apply"] .why:visible').textContent()).includes("added creative to velocity.toml"));
+  check("the end offers the editor and the docs", await page.locator(".setup-editor:visible").count() === 1 && await page.locator('a[href="/docs/"]:visible').count() === 1);
   check("download for unpaired servers", await page.locator(".setup-download").count() === 1 &&
     (await page.locator(".setup-download").textContent()).includes("download their configs") &&
     await page.locator('.setup-unpaired .pair-row[data-id="creative"] code').count() === 1);
@@ -157,6 +160,10 @@ try {
   const file = await dl;
   check("the download is the server's config", file?.suggestedFilename() === "creative-config.yml", file?.suggestedFilename());
   await shot("5-applied");
+
+  await page.locator(".setup-editor").click();
+  const opened = await page.waitForURL("**/editor/", { timeout: 5000 }).then(() => true, () => false);
+  check("the editor button opens the link the proxy sends", opened, page.url());
 
   // a new link pasted into the same tab only changes the #fragment; the page has to follow it
   await page.goto(`http://localhost:8080/setup/#${"0".repeat(32)}:${crypto.randomBytes(32).toString("base64url")}`);

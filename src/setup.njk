@@ -184,7 +184,7 @@ eleventyExcludeFromCollections: true
         <section class="q" data-step="apply" x-show="step === 'apply'" :class="enter('apply')">
           <h1 class="ask" x-text="applied ? 'Applied' : 'Ready to apply'"></h1>
           <p class="why" x-show="!applied">Nothing changes until you confirm in the proxy console.</p>
-          <p class="why" x-show="applied && !applied.errors.length">The proxy saved its config and velocity.toml.</p>
+          <p class="why" x-show="applied && !applied.errors.length" x-text="added().length ? 'The proxy saved its config and added ' + added().map((s) => s.id).join(', ') + ' to velocity.toml.' : 'The proxy saved its config.'"></p>
           <dl class="sum">
             <dt>Proxy</dt><dd x-text="a.serverId"></dd>
             <dt>Connection</dt><dd x-text="a.endpointType === 'WEBSOCKET' ? `WebSocket at ${a.address}:${a.port}` : `Redis at ${a.redis.host}:${a.redis.port}`"></dd>
@@ -203,7 +203,7 @@ eleventyExcludeFromCollections: true
           <template x-if="applied">
             <div class="setup-result" role="status">
               <template x-for="e in applied.errors"><p class="setup-err" x-text="e"></p></template>
-              <p class="setup-restart" x-show="applied.restartNeeded">Restart the proxy to switch to the new connection settings.</p>
+              <p class="setup-restart" x-show="applied.restartNeeded">CommandBridge restarted with the new settings. Your servers reconnect on their own.</p>
               <template x-if="Object.keys(applied.configs).length">
                 <div class="setup-unpaired">
                   <p x-text="Object.keys(applied.configs).length === 1 ? 'One server hasn\'t paired yet. Its code still works:' : 'These servers haven\'t paired yet. Their codes still work:'"></p>
@@ -230,6 +230,12 @@ eleventyExcludeFromCollections: true
         </section>
 
         <p class="setup-err" x-show="err" x-text="err" role="alert"></p>
+
+        <div class="actions" x-show="applied">
+          <button class="button setup-editor" @click="openEditor()" :disabled="editorBusy" x-text="editorBusy ? 'Opening the editor…' : 'Open the script editor'"></button>
+          <a class="button-outline" href="/docs/">Read the docs</a>
+        </div>
+        <p class="setup-err" x-show="editorError" x-text="editorError"></p>
 
         <div class="actions" x-show="!applied">
           <button class="button btn-next" @click="next()" :disabled="nextDisabled()" x-show="step !== 'apply'" x-text="nextLabel()"></button>
