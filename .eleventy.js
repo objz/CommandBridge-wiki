@@ -115,6 +115,9 @@ module.exports = function(eleventyConfig) {
      "node_modules/d3-geo/dist/d3-geo.min.js": "js/d3-geo.js",
      "node_modules/topojson-client/dist/topojson-client.min.js": "js/topojson-client.js",
      "node_modules/world-atlas/land-110m.json": "land-110m.json",
+     "node_modules/yaml/browser/dist": "js/yaml",
+     "node_modules/drawflow/dist/drawflow.min.js": "js/drawflow.js",
+     "node_modules/drawflow/dist/drawflow.min.css": "js/drawflow.css",
      "src/lib": "/lib",
   });
 

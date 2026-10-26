@@ -20,6 +20,11 @@
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)"/>
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
   <link rel="canonical" href="{{ site.url + page.url }}"/>
+  {% if appPage %}
+  {# scripts only from this site, connections only to this site and the relay; Alpine needs eval, the layout has inline scripts #}
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://cb.objz.dev data: blob:; connect-src 'self' wss://cb.objz.dev ws://localhost:8787 ws://localhost:8080; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  {% endif %}
   <script>
     (function () {
       try {
@@ -176,7 +181,8 @@
   {% endif %}
   {% endif %}
   <script src="/js/alpine.js" defer></script>
-  {% include "partials/analytics.njk" %}
+  {# the editor and the setup carry a secret in the link: no third-party scripts there #}
+  {% if not appPage %}{% include "partials/analytics.njk" %}{% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -191,7 +197,7 @@
   {% if not hideFooter %}
   {% include "partials/footer.njk" %}
   {% endif %}
-  {% include "partials/cookie-banner.njk" %}
+  {% if not appPage %}{% include "partials/cookie-banner.njk" %}{% endif %}
 </body>
 
 </html>

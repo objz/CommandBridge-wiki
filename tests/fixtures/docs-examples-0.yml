@@ -1,0 +1,38 @@
+version: 4
+name: alert
+description: Broadcast an alert to all servers
+enabled: true
+aliases: []
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "proxy-1"
+    location: VELOCITY
+
+defaults:
+  run-as: CONSOLE
+  execute:
+    - id: "lobby"
+      location: BACKEND
+    - id: "survival"
+      location: BACKEND
+    - id: "minigames"
+      location: BACKEND
+  server:
+    target-required: false
+    schedule-online: false
+    player-arg: ""
+  delay: 0s
+  cooldown: 0s
+
+args:
+  - name: message
+    required: true
+    type: GREEDY_STRING
+    suggestions: []
+
+commands:
+  - command: "say [Alert]: ${message}"

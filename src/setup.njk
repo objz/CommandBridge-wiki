@@ -1,0 +1,228 @@
+---
+layout: layouts/base.njk
+title: Network Setup
+permalink: /setup/
+description: "Set up your CommandBridge network from the browser."
+hideFooter: true
+eleventyExcludeFromCollections: true
+appPage: true
+---
+
+{% macro pairRows(list) %}
+<ul class="list">
+  <template x-for="s in {{ list }}" :key="s.id">
+    <li class="pair-row" :data-id="s.id">
+      <div class="pair-head">
+        <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
+        <span class="srow-id" x-text="s.id"></span>
+        <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'"><svg x-show="paired[s.id]" class="pair-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span x-text="paired[s.id] ? (software(s) || 'connected') : codes[s.id] ? 'waiting' : 'no code'"></span></span>
+      </div>
+      <template x-if="codes[s.id] && !paired[s.id]">
+        <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
+          <button class="button-outline" @click="copy('cbc pair ' + codes[s.id])" x-text="copied === 'cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
+      </template>
+    </li>
+  </template>
+</ul>
+{% endmacro %}
+
+<link rel="stylesheet" href="/lib/setup/setup.css"/>
+<script src="/lib/editor/relay.js"></script>
+<script src="/lib/setup/setup.js"></script>
+
+<div x-data="cbSetup()" class="su" @keydown.window="keydown($event)" @input="if (err && step !== 'servers') err = check()">
+
+  <div class="su-note" x-show="status !== 'online' && !applied" x-cloak role="status">
+    <template x-if="status === 'connecting'">
+      <div>
+        <p class="su-note-t">Connecting to your proxy…</p>
+        <p x-show="slow">This is taking longer than it should. Check that the proxy is still running. If it restarted, run <code>/cb setup</code> for a new link.</p>
+      </div>
+    </template>
+    <template x-if="status === 'closed' || status === 'nolink'">
+      <div class="setup-nolink">
+        <p class="su-note-t">Set up your network</p>
+        <p>Run <code>/cb setup</code> on your proxy and open the link it gives you.</p>
+      </div>
+    </template>
+  </div>
+
+  <template x-if="a && (status === 'online' || applied)">
+    <div class="su-wrap">
+      <div class="su-main">
+
+        <nav class="su-progress" aria-label="Steps">
+          <ol>
+            <template x-for="s in steps()" :key="s.k">
+              <li><button :class="[isDone(s.k) && 'done', step === s.k && 'on']" @click="go(s.k)" :disabled="!canGo(s.k)"
+                          :title="s.t + (isDone(s.k) && s.s ? ': ' + s.s : '')" :aria-label="s.t" :aria-current="step === s.k ? 'step' : null"></button></li>
+            </template>
+          </ol>
+          <p x-text="step === 'done' ? 'Done' : `Step ${index() + 1} of ${steps().length}`"></p>
+        </nav>
+
+        <!-- name -->
+        <section class="q" data-step="name" x-show="step === 'name'" :class="enter('name')">
+          <h1 class="ask">What's this proxy called?</h1>
+          <p class="why">Your servers and scripts use this name for the proxy.</p>
+          <div class="field-row">
+            <input class="field" type="text" data-f="serverId" x-model="a.serverId" :class="err && 'bad'" spellcheck="false" autocomplete="off" aria-label="Proxy name">
+            <span class="def" x-show="a.serverId === 'proxy-1'">default</span>
+          </div>
+        </section>
+
+        <!-- WebSocket or Redis -->
+        <section class="q" data-step="type" x-show="step === 'type'" :class="enter('type')">
+          <h1 class="ask">How do your servers connect to the proxy?</h1>
+          <div class="opts" role="radiogroup">
+            <label class="opt"><input type="radio" name="s-type" value="WEBSOCKET" data-f="endpointType" x-model="a.endpointType">
+              <span><b>WebSocket<span class="def">default</span></b><small>Servers connect straight to the proxy. Pick this unless you already run Redis.</small></span></label>
+            <label class="opt"><input type="radio" name="s-type" value="REDIS" data-f="endpointType" x-model="a.endpointType">
+              <span><b>Redis</b><small>The proxy and your servers meet on a Redis server you run.</small></span></label>
+          </div>
+        </section>
+
+        <!-- port -->
+        <section class="q" data-step="port" x-show="step === 'port'" :class="enter('port')">
+          <h1 class="ask">Which port do your servers connect to?</h1>
+          <p class="why">The proxy listens on this port. Open it in your firewall or host panel.</p>
+          <div class="field-row">
+            <input class="field field-short" type="text" inputmode="numeric" data-f="port" x-model.number="a.port" :class="err && 'bad'" autocomplete="off" aria-label="Port">
+            <span class="def" x-show="a.port === 8765">default</span>
+          </div>
+        </section>
+
+        <!-- address, or the Redis login -->
+        <section class="q" data-step="address" x-show="step === 'address'" :class="enter('address')">
+          <template x-if="a.endpointType === 'WEBSOCKET'">
+            <div>
+              <h1 class="ask">What address do your servers connect to?</h1>
+              <p class="why">The address of this machine as your servers see it. Behind Docker or a host panel, that's the public address.</p>
+              <input class="field" type="text" data-f="address" x-model="a.address" :class="err && 'bad'" placeholder="play.example.net" spellcheck="false" autocomplete="off" aria-label="Address">
+            </div>
+          </template>
+          <template x-if="a.endpointType === 'REDIS'">
+            <div>
+              <h1 class="ask">Where is your Redis server?</h1>
+              <p class="why">The proxy and every server log in here. Leave the password empty to keep the current one.</p>
+              <div class="fields">
+                <div class="fields-row fields-hostport">
+                  <label>Host<input class="field" type="text" data-f="redis-host" x-model="a.redis.host" :class="err && 'bad'" spellcheck="false" autocomplete="off"></label>
+                  <label><span>Port<span class="def" x-show="a.redis.port === 6379">default</span></span><input class="field" type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></label>
+                </div>
+                <div class="fields-row">
+                  <label>Username<input class="field" type="text" data-f="redis-user" x-model="a.redis.username" spellcheck="false" autocomplete="off"></label>
+                  <label>Password<input class="field" type="password" data-f="redis-pass" x-model="a.redis.password" placeholder="unchanged" autocomplete="new-password"></label>
+                </div>
+              </div>
+            </div>
+          </template>
+        </section>
+
+        <!-- encryption -->
+        <section class="q" data-step="tls" x-show="step === 'tls'" :class="enter('tls')">
+          <h1 class="ask">How should the connection be secured?</h1>
+          <div class="opts" role="radiogroup">
+            <label class="opt"><input type="radio" name="s-tls" value="TOFU" data-f="tlsMode" x-model="a.tlsMode">
+              <span><b>On first use<span class="def">default</span></b><small>Each server trusts the proxy's certificate the first time it connects, and only that one after.</small></span></label>
+            <label class="opt"><input type="radio" name="s-tls" value="STRICT" data-f="tlsMode" x-model="a.tlsMode">
+              <span><b>Strict</b><small>The proxy uses a certificate from your own keystore, and servers check it.</small></span></label>
+            <label class="opt"><input type="radio" name="s-tls" value="PLAIN" data-f="tlsMode" x-model="a.tlsMode">
+              <span><b>Off</b><small>No encryption. Only for servers on the same machine or a private network.</small></span></label>
+          </div>
+        </section>
+
+        <!-- keystore, for strict -->
+        <section class="q" data-step="keystore" x-show="step === 'keystore'" :class="enter('keystore')">
+          <h1 class="ask">Where is your keystore?</h1>
+          <p class="why">The keystore file on the proxy's machine. Leave the password empty to keep the current one.</p>
+          <div class="fields">
+            <label>Path<input class="field" type="text" data-f="ks-path" x-model="a.keystore.path" :class="err && 'bad'" placeholder="plugins/commandbridge/keystore.p12" spellcheck="false" autocomplete="off"></label>
+            <div class="fields-row fields-typepass">
+              <label><span>Type<span class="def" x-show="a.keystore.type === 'PKCS12'">default</span></span><select class="field" x-model="a.keystore.type"><option>PKCS12</option><option>JKS</option></select></label>
+              <label>Password<input class="field" type="password" data-f="ks-pass" x-model="a.keystore.password" placeholder="unchanged" autocomplete="new-password"></label>
+            </div>
+          </div>
+        </section>
+
+        <!-- servers -->
+        <section class="q" data-step="servers" x-show="step === 'servers'" :class="enter('servers')">
+          <h1 class="ask">Which servers run CommandBridge?</h1>
+          <p class="why">These come from your velocity.toml. Turn off servers without CommandBridge, and add the ones Velocity doesn't know yet. Enter adds a server and opens the next row.</p>
+          <ul class="list">
+            <template x-for="s in a.servers" :key="s.id">
+              <li class="srow" :class="!s.on && 'off'">
+                <input type="checkbox" x-model="s.on" :aria-label="'Use ' + s.id">
+                <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
+                <span class="srow-id" x-text="s.id"></span>
+                <span class="srow-addr" x-text="s.address"></span>
+                <button class="srow-x" x-show="s.isNew" @click="removeRow(s)" :aria-label="'Remove ' + s.id" title="Remove">×</button>
+              </li>
+            </template>
+            <template x-if="newRow">
+              <li class="srow srow-new">
+                <input class="field" type="text" data-f="new-id" x-model="newRow.id" placeholder="name, like survival" spellcheck="false" autocomplete="off" aria-label="Server name">
+                <input class="field" type="text" data-f="new-address" x-model="newRow.address" placeholder="10.0.0.13:25565" spellcheck="false" autocomplete="off" aria-label="Server address">
+              </li>
+            </template>
+          </ul>
+          <button class="link srow-add" x-show="!newRow" @click="startRow()" x-text="a.servers.some((s) => s.isNew) ? 'Add another server' : 'Add a server'"></button>
+          <template x-for="p in problems"><p class="setup-err" x-text="p"></p></template>
+          <p class="hint" x-show="added().length" x-text="added().map((s) => s.id).join(', ') + (added().length === 1 ? ' goes' : ' go') + ' into velocity.toml when you apply.'"></p>
+          <p class="hint" x-show="connectionChanged() && known.some((s) => s.connected)">The connection changes, so every server pairs again, the connected ones too.</p>
+        </section>
+
+        <!-- apply -->
+        <section class="q" data-step="apply" x-show="step === 'apply'" :class="enter('apply')">
+          <h1 class="ask">Ready to apply</h1>
+          <p class="why">Nothing changes until you confirm in the proxy console. Your servers get their pairing codes after that.</p>
+          <dl class="sum">
+            <dt>Proxy</dt><dd x-text="a.serverId"></dd>
+            <dt>Connection</dt><dd x-text="a.endpointType === 'WEBSOCKET' ? `WebSocket at ${a.address}:${a.port}` : `Redis at ${a.redis.host}:${a.redis.port}`"></dd>
+            <dt>Encryption</dt><dd x-text="{ TOFU: 'on first use', PLAIN: 'off', STRICT: 'strict' }[a.tlsMode]"></dd>
+            <dt>Servers</dt><dd x-text="picked().map((s) => s.id).join(', ') || 'none'"></dd>
+            <dt>velocity.toml</dt><dd x-text="added().length ? 'adds ' + added().map((s) => s.id).join(', ') : 'unchanged'"></dd>
+          </dl>
+          <div class="confirm setup-confirm">
+            <p>Run this in the proxy console:</p>
+            <div class="cmd" x-show="staged"><code x-text="staged ? '/cb setup confirm ' + staged : ''"></code>
+              <button class="button-outline" @click="copy('cb setup confirm ' + staged)" x-text="copied === 'cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
+            <p class="hint" x-show="!staged">Getting a code from the proxy…</p>
+          </div>
+        </section>
+
+        <!-- pairing, once the proxy is set up -->
+        <section class="q" data-step="pairing" x-show="step === 'pairing'" :class="enter('pairing')">
+          <h1 class="ask">Pair your servers</h1>
+          <p class="why">The proxy is set up. Run each command in that server's console. A code works once and expires after 30 minutes.</p>
+          <template x-for="e in applied?.errors || []"><p class="setup-err" x-text="e"></p></template>
+          <p class="hint setup-restart" x-show="applied?.restartNeeded">CommandBridge restarted with the new settings. Servers that were connected reconnect on their own.</p>
+          {{ pairRows("picked()") }}
+        </section>
+
+        <!-- done -->
+        <section class="q" data-step="done" x-show="step === 'done'" :class="enter('done')">
+          <h1 class="ask">Your network is set up</h1>
+          <p class="why" x-text="pairedCount() === picked().length ? 'Every server is paired and connected.' : `${pairedCount()} of ${picked().length} servers are paired. The others can still pair with their codes until they expire.`"></p>
+          <template x-if="unpaired().length">
+            {{ pairRows("unpaired()") }}
+          </template>
+          <div class="actions">
+            <button class="button setup-editor" @click="openEditor()" :disabled="editorBusy" x-text="editorBusy ? 'Opening the editor…' : 'Open the script editor'"></button>
+            <a class="button-outline" href="/docs/">Read the docs</a>
+          </div>
+          <p class="setup-err" x-show="editorError" x-text="editorError"></p>
+        </section>
+
+        <p class="setup-err" x-show="err" x-text="err" role="alert"></p>
+
+        <div class="actions" x-show="step !== 'done'">
+          <button class="button btn-next" @click="next()" :disabled="nextDisabled()" x-show="step !== 'apply'" x-text="nextLabel()"></button>
+          <button class="button-outline setup-later" x-show="step === 'pairing' && pairedCount() < picked().length" @click="finish()">Pair the rest later</button>
+          <button class="button-outline setup-back" x-show="index() > 0 && step !== 'pairing'" @click="back()">Back</button>
+        </div>
+      </div>
+
+    </div>
+  </template>
+</div>

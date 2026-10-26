@@ -1,0 +1,7 @@
+/editor/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+
+/setup/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'

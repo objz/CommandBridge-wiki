@@ -6,3 +6,4 @@ package-lock.json
 !.gitignore
 !.eleventy.js
 !.nvmrc
+!src/docs/

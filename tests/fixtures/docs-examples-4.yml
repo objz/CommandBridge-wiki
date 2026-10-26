@@ -1,0 +1,36 @@
+version: 4
+name: claim-reward
+description: Claim your daily reward
+enabled: true
+aliases: [reward]
+
+permissions:
+  enabled: true
+  silent: false
+
+register:
+  - id: "proxy-1"
+    location: VELOCITY
+
+defaults:
+  run-as: CONSOLE
+  execute:
+    - id: "survival-1"
+      location: BACKEND
+  server:
+    target-required: false
+    schedule-online: true
+    player-arg: "player"
+  delay: 0s
+  cooldown: 24h
+
+args:
+  - name: player
+    required: true
+    type: OFFLINE_PLAYER
+    suggestions: []
+
+commands:
+  - command: "say ${player} is claiming their daily reward..."
+  - command: "give ${player} diamond 5"
+    delay: 30s
