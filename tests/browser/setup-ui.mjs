@@ -65,14 +65,14 @@ try {
   check("asks for the port", (await ask()) === "Which port do your servers connect to?", await ask());
   one &&= (await nodes()) === 1;
   await enter();
-  check("asks for the address", (await ask()) === "Which address do your servers use to reach the proxy?", await ask());
+  check("asks for the address", (await ask()) === "What address do your servers connect to?", await ask());
   one &&= (await nodes()) === 1;
 
   await page.locator('[data-f="address"]').fill("0.0.0.0");
   await enter();
   check("zero address is refused", (await page.locator(".setup-err:visible").textContent().catch(() => "")).includes("Servers can't reach 0.0.0.0"),
     await page.locator(".setup-err").allTextContents());
-  check("stays on the address", (await ask()) === "Which address do your servers use to reach the proxy?");
+  check("stays on the address", (await ask()) === "What address do your servers connect to?");
   await page.locator('[data-f="address"]').fill("play.example.net");
   await enter();
   check("asks about encryption", (await ask()) === "How should the connection be secured?", await ask());
@@ -132,12 +132,18 @@ try {
   await page.waitForTimeout(400);
   check("restart hint", (await page.locator(".setup-restart").textContent().catch(() => "")).includes("Restart the proxy to switch to the new connection settings."));
   check("download for unpaired servers", await page.locator(".setup-download").count() === 1 &&
-    (await page.locator(".setup-download").textContent()).includes("Download the configs instead"));
+    (await page.locator(".setup-download").textContent()).includes("download their configs") &&
+    await page.locator('.setup-unpaired .pair-row[data-id="creative"] code').count() === 1);
   const dl = page.waitForEvent("download", { timeout: 3000 }).catch(() => null);
   await page.locator(".setup-download").click();
   const file = await dl;
   check("the download is the server's config", file?.suggestedFilename() === "creative-config.yml", file?.suggestedFilename());
   await shot("5-applied");
+
+  // a new link pasted into the same tab only changes the #fragment; the page has to follow it
+  await page.goto(`http://localhost:8080/setup/#${"0".repeat(32)}:${crypto.randomBytes(32).toString("base64url")}`);
+  const ended = await page.waitForFunction(() => document.querySelector(".su-note-t")?.offsetParent && document.querySelector(".su-note-t").textContent === "This setup has ended", null, { timeout: 8000 }).then(() => true, () => false);
+  check("a new link in the same tab is followed", ended, await page.locator(".su-note").innerText().catch(() => ""));
 
   // without a link the page says where to get one
   await page.goto("http://localhost:8080/setup/");

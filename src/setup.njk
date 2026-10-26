@@ -11,7 +11,7 @@ eleventyExcludeFromCollections: true
 <script src="/lib/editor/relay.js"></script>
 <script src="/lib/setup/setup.js"></script>
 
-<div x-data="cbSetup()" class="su" @keydown="keydown($event)">
+<div x-data="cbSetup()" class="su" @keydown.window="keydown($event)">
 
   <div class="su-note" x-show="status !== 'online' && !applied" x-cloak role="status">
     <template x-if="status === 'connecting'">
@@ -80,7 +80,7 @@ eleventyExcludeFromCollections: true
         <section class="q" data-step="address" x-show="step === 'address'">
           <template x-if="a.endpointType === 'WEBSOCKET'">
             <div>
-              <h1 class="ask">Which address do your servers use to reach the proxy?</h1>
+              <h1 class="ask">What address do your servers connect to?</h1>
               <p class="why">The address of this machine as your servers see it. Behind Docker or a host panel, that's the public address.</p>
               <input class="field" type="text" data-f="address" x-model="a.address" :class="err && 'bad'" placeholder="play.example.net" spellcheck="false" autocomplete="off" aria-label="Address">
             </div>
@@ -90,10 +90,14 @@ eleventyExcludeFromCollections: true
               <h1 class="ask">Where is your Redis server?</h1>
               <p class="why">The proxy and every server log in here. Leave the password empty to keep the current one.</p>
               <div class="fields">
-                <label>Host<input class="field" type="text" data-f="redis-host" x-model="a.redis.host" :class="err && 'bad'" spellcheck="false" autocomplete="off"></label>
-                <label>Port<input class="field field-short" type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></label>
-                <label>Username<input class="field" type="text" data-f="redis-user" x-model="a.redis.username" spellcheck="false" autocomplete="off"></label>
-                <label>Password<input class="field" type="password" data-f="redis-pass" x-model="a.redis.password" placeholder="unchanged" autocomplete="new-password"></label>
+                <div class="fields-row fields-hostport">
+                  <label>Host<input class="field" type="text" data-f="redis-host" x-model="a.redis.host" :class="err && 'bad'" spellcheck="false" autocomplete="off"></label>
+                  <label>Port<input class="field" type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></label>
+                </div>
+                <div class="fields-row">
+                  <label>Username<input class="field" type="text" data-f="redis-user" x-model="a.redis.username" spellcheck="false" autocomplete="off"></label>
+                  <label>Password<input class="field" type="password" data-f="redis-pass" x-model="a.redis.password" placeholder="unchanged" autocomplete="new-password"></label>
+                </div>
               </div>
             </div>
           </template>
@@ -118,8 +122,10 @@ eleventyExcludeFromCollections: true
           <p class="why">The keystore file on the proxy's machine. Leave the password empty to keep the current one.</p>
           <div class="fields">
             <label>Path<input class="field" type="text" data-f="ks-path" x-model="a.keystore.path" :class="err && 'bad'" placeholder="plugins/commandbridge/keystore.p12" spellcheck="false" autocomplete="off"></label>
-            <label>Type<select class="field field-short" x-model="a.keystore.type"><option>PKCS12</option><option>JKS</option></select></label>
-            <label>Password<input class="field" type="password" data-f="ks-pass" x-model="a.keystore.password" placeholder="unchanged" autocomplete="new-password"></label>
+            <div class="fields-row fields-typepass">
+              <label>Type<select class="field" x-model="a.keystore.type"><option>PKCS12</option><option>JKS</option></select></label>
+              <label>Password<input class="field" type="password" data-f="ks-pass" x-model="a.keystore.password" placeholder="unchanged" autocomplete="new-password"></label>
+            </div>
           </div>
         </section>
 
@@ -174,6 +180,8 @@ eleventyExcludeFromCollections: true
         <!-- apply -->
         <section class="q" data-step="apply" x-show="step === 'apply'">
           <h1 class="ask" x-text="applied ? 'Applied' : 'Ready to apply'"></h1>
+          <p class="why" x-show="!applied">Nothing changes until you confirm in the proxy console.</p>
+          <p class="why" x-show="applied && !applied.errors.length">The proxy saved its config and velocity.toml.</p>
           <dl class="sum">
             <dt>Proxy</dt><dd x-text="a.serverId"></dd>
             <dt>Connection</dt><dd x-text="a.endpointType === 'WEBSOCKET' ? `WebSocket at ${a.address}:${a.port}` : `Redis at ${a.redis.host}:${a.redis.port}`"></dd>
@@ -183,20 +191,36 @@ eleventyExcludeFromCollections: true
           </dl>
           <template x-if="!applied">
             <div class="confirm setup-confirm">
-              <p>Run this in the proxy console to apply it:</p>
+              <p>Run this in the proxy console:</p>
               <div class="cmd" x-show="staged"><code x-text="staged ? '/cb setup confirm ' + staged : ''"></code>
                 <button class="button-outline" @click="copy('/cb setup confirm ' + staged)" x-text="copied === '/cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button></div>
-              <p class="hint" x-show="!staged">Making a code…</p>
+              <p class="hint" x-show="!staged">Getting a code from the proxy…</p>
             </div>
           </template>
           <template x-if="applied">
             <div class="setup-result" role="status">
-              <p x-show="!applied.errors.length">The proxy saved its config and velocity.toml.</p>
               <template x-for="e in applied.errors"><p class="setup-err" x-text="e"></p></template>
               <p class="setup-restart" x-show="applied.restartNeeded">Restart the proxy to switch to the new connection settings.</p>
               <template x-if="Object.keys(applied.configs).length">
-                <p class="hint"><span x-text="Object.keys(applied.configs).join(', ') + (Object.keys(applied.configs).length === 1 ? ' has not paired yet. Pair it with its code, or' : ' have not paired yet. Pair them with their codes, or')"></span>
-                  <button class="link setup-download" @click="download()">Download the configs instead</button></p>
+                <div class="setup-unpaired">
+                  <p x-text="Object.keys(applied.configs).length === 1 ? 'One server hasn\'t paired yet. Its code still works:' : 'These servers haven\'t paired yet. Their codes still work:'"></p>
+                  <ul class="list">
+            <template x-for="s in picked().filter((s) => applied.configs[s.id])" :key="s.id">
+              <li class="pair-row" :data-id="s.id">
+                <div class="pair-head">
+                  <img class="logo" :src="logo(s)" alt="" :class="logoClass(s)">
+                  <span class="srow-id" x-text="s.id"></span>
+                  <span class="pair-state" :class="paired[s.id] ? 'ok' : 'wait'" x-text="paired[s.id] ? (software(s) || 'paired') : codes[s.id] ? 'waiting' : 'no code'"></span>
+                </div>
+                <template x-if="codes[s.id] && !paired[s.id]">
+                  <div class="cmd"><code x-text="'/cbc pair ' + codes[s.id]"></code>
+                    <button class="button-outline" @click="copy('/cbc pair ' + codes[s.id])" x-text="copied === '/cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div>
+                </template>
+              </li>
+            </template>
+          </ul>
+                  <p class="hint">Or <button class="link setup-download" @click="download()">download their configs</button> and put each one in that server's plugins/commandbridge folder.</p>
+                </div>
               </template>
             </div>
           </template>

@@ -124,6 +124,8 @@ function cbSetup() {
 
     keydown(e) {
       if (e.key !== "Enter" || e.isComposing) return;
+      // Enter anywhere on the page continues, except on the site's own links and buttons
+      if (e.target !== document.body && !e.target.closest(".su")) return;
       if (e.target.matches("[data-f=new-id], [data-f=new-address]")) { e.preventDefault(); this.err = this.addRow(); return; }
       if (e.target.closest("button")) return;
       e.preventDefault();

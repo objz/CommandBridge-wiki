@@ -1,9 +1,13 @@
 // The page's end of a proxy session on cb.objz.dev: the link's #id:secret names the relay channel and signs
 // every message, so the relay only forwards. Used by the editor and the setup page.
 
+// a new link in the same tab only changes the #fragment, which doesn't reload the page;
+// without this the page would keep talking to the old, ended session
+window.addEventListener("hashchange", () => location.reload());
+
 window.cbRelay = (hash) => {
   const [id, secret] = String(hash).replace(/^#/, "").split(":");
-  if (!/^[0-9a-f]{32}$/.test(id || "") || !secret) return null;
+  if (!/^[0-9a-f]{32}$/.test(id || "") || !/^[A-Za-z0-9_-]{43}$/.test(secret || "")) return null;
   const base = location.hostname === "localhost" ? "ws://localhost:8787/api/editor/" : "wss://cb.objz.dev/api/editor/";
   const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const unb64url = (t) => Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
