@@ -267,53 +267,47 @@ function cbSetup() {
 
     /* ================= the network drawing ================= */
 
-    // the proxy on top, the servers below; it fills in as questions are answered and outlines
-    // what the current question is about
+    // drawn like the homepage globe: the proxy on top, servers below, thin lines between them.
+    // A label turns to full color when the current question is about it.
     diagram() {
       const a = this.a;
       if (!a) return "";
-      const W = 440, step = this.step, past = (k) => this.index() > this.steps().findIndex((s) => s.k === k);
+      const W = 520, step = this.step, past = (k) => this.index() > this.steps().findIndex((s) => s.k === k);
+      const on = (yes) => (yes ? " on" : "");
+      const marker = (x, y) => `<rect class="marker" x="${x - 8}" y="${y - 5}" width="16" height="10" rx="2.5"/><line class="marker-dash" x1="${x - 3.5}" y1="${y}" x2="${x + 3.5}" y2="${y}"/>`;
       const ws = a.endpointType === "WEBSOCKET";
-      const where = ws ? (a.address.trim() ? `${a.address.trim()}:${a.port}` : `port ${a.port}`) : `Redis ${a.redis.host}:${a.redis.port}`;
-      const hl = (on) => (on ? " hl" : "");
-      const px = 90, pw = 260, py = 20, ph = 78;
+      const where = ws ? (a.address.trim() ? `${a.address.trim()}:${a.port}` : `port ${a.port}`) : `Redis at ${a.redis.host}:${a.redis.port}`;
+      const tls = { TOFU: "encrypted on first use", PLAIN: "not encrypted", STRICT: "strict encryption" }[a.tlsMode];
+      const P = { x: W / 2, y: 112 };
 
-      // servers: up to six, three to a row
-      const all = a.servers.slice(0, 6), more = a.servers.length - all.length;
-      const bw = 124, bh = 60, gap = 14;
+      // servers on one row, two when there are more than five
+      const all = a.servers.slice(0, 10), rows = all.length > 5 ? 2 : 1;
       const placed = all.map((s, i) => {
-        const row = Math.floor(i / 3), inRow = Math.min(3, all.length - row * 3), col = i % 3;
-        const x0 = (W - (inRow * bw + (inRow - 1) * gap)) / 2;
-        return { s, x: x0 + col * (bw + gap), y: 210 + row * (bh + 26) };
+        const row = rows === 2 && i >= Math.ceil(all.length / 2) ? 1 : 0;
+        const inRow = rows === 2 ? (row ? all.length - Math.ceil(all.length / 2) : Math.ceil(all.length / 2)) : all.length;
+        const col = row ? i - Math.ceil(all.length / 2) : i;
+        const span = Math.min(W - 80, inRow * 110);
+        return { s, x: W / 2 - span / 2 + (inRow === 1 ? span / 2 : (span / (inRow - 1)) * col), y: 300 + row * 96 };
       });
-      const H = placed.length ? placed.at(-1).y + bh + (more > 0 ? 30 : 6) : 200;
+      const H = 300 + (rows - 1) * 96 + 60;
       let out = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Your network">`;
 
       for (const { s, x, y } of placed) {
         if (!s.on) continue;
-        const sx = x + bw / 2, my = py + ph, mid = (my + y) / 2;
         const solid = this.paired[s.id] || (s.connected && !past("servers"));
-        out += `<path class="wire${solid ? "" : " dashed"}${hl(step === "pairing")}" data-id="${esc(s.id)}" d="M 220 ${my} C 220 ${mid}, ${sx} ${mid}, ${sx} ${y}"/>`;
+        out += `<path class="wire${solid ? "" : " dashed"}${on(step === "pairing" && this.paired[s.id])}" data-id="${esc(s.id)}" d="M ${P.x} ${P.y} Q ${(P.x + x) / 2} ${y - 40}, ${x} ${y}"/>`;
       }
-      out += `<circle class="port" cx="220" cy="${py + ph}" r="4"/>`;
+      out += marker(P.x, P.y) +
+        `<text class="name" x="${P.x}" y="${P.y - 66}" text-anchor="middle">${esc(clip(a.serverId || "proxy", 28))}</text>` +
+        `<text class="${on(["type", "port", "address"].includes(step)).trim()}" x="${P.x}" y="${P.y - 44}" text-anchor="middle">${esc(clip(where, 34))}</text>` +
+        `<text class="${on(step === "tls" || step === "keystore").trim()}" x="${P.x}" y="${P.y - 24}" text-anchor="middle">${tls}</text>`;
       for (const { s, x, y } of placed) {
-        const ok = this.paired[s.id] || (s.connected && !past("servers"));
-        const state = this.paired[s.id] ? "paired" : past("servers") ? (this.codes[s.id] ? "waiting" : "not paired") : s.connected ? "connected" : clip(s.address, 17);
-        out += `<g class="srv${s.on ? "" : " off"}${hl(step === "servers")}" data-id="${esc(s.id)}">` +
-          `<rect class="box" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="10"/><rect class="bar" x="${x}" y="${y + 14}" width="3" height="${bh - 28}" rx="1.5"/>` +
-          `<image href="${this.logo(s)}" x="${x + 12}" y="${y + 12}" width="16" height="16" class="${this.logoClass(s)}"/>` +
-          `<text class="t" x="${x + 34}" y="${y + 25}">${esc(clip(s.id, 11))}</text>` +
-          `<text class="m${ok ? " ok" : ""}" x="${x + 12}" y="${y + 47}">${esc(state)}</text></g>`;
+        const state = this.paired[s.id] ? (this.software(s) || "paired") : past("servers") ? (this.codes[s.id] ? "waiting" : "not paired") : s.connected ? "connected" : "";
+        out += `<g class="srv${s.on ? "" : " off"}" data-id="${esc(s.id)}">${marker(x, y)}` +
+          `<text class="${on(s.on && (step === "servers" || this.paired[s.id])).trim()}" x="${x}" y="${y + 26}" text-anchor="middle">${esc(clip(s.id, 14))}</text>` +
+          (state ? `<text x="${x}" y="${y + 44}" text-anchor="middle" style="font-size:12px">${esc(state)}</text>` : "") + `</g>`;
       }
-      if (more > 0) out += `<text class="m" x="220" y="${H - 8}" text-anchor="middle">and ${more} more</text>`;
-
-      out += `<g class="proxy"><rect class="box" x="${px}" y="${py}" width="${pw}" height="${ph}" rx="12"/><rect class="bar" x="${px}" y="${py + 16}" width="3" height="${ph - 32}" rx="1.5"/>` +
-        `<image href="/lib/editor/logos/velocity.svg" x="${px + 16}" y="${py + 15}" width="18" height="18" class="white"/>` +
-        `<text class="t${hl(step === "name")}" x="${px + 42}" y="${py + 29}">${esc(clip(a.serverId || "proxy", 22))}</text>` +
-        `<text class="m${hl(["type", "port", "address"].includes(step))}" x="${px + 16}" y="${py + 58}">${esc(clip(where, 24))}</text>` +
-        `<g class="lock${hl(step === "tls" || step === "keystore")}" transform="translate(${px + pw - 82} ${py + 47})">` +
-        `<rect x="0" y="5" width="9" height="7" rx="1.5"/><path d="M2 5 V3 a2.5 2.5 0 0 1 5 0${a.tlsMode === "PLAIN" ? "" : " V5"}"/>` +
-        `<text class="m" x="14" y="11.5">${TLS[a.tlsMode]}</text></g></g>`;
+      if (a.servers.length > all.length) out += `<text x="${W / 2}" y="${H - 4}" text-anchor="middle">and ${a.servers.length - all.length} more</text>`;
       return out + "</svg>";
     },
   };

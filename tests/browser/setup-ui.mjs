@@ -81,8 +81,7 @@ try {
   check("asks for the servers", (await ask()) === "Which servers run CommandBridge?", await ask());
   one &&= (await nodes()) === 1;
   check("asks one question per screen", one);
-  check("finished steps show their answer", (await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title))).includes("Address: play.example.net"),
-    await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title)));
+  check("finished steps show in the drawing", (await page.locator(".su-net").textContent()).includes("play.example.net:8765"), await page.locator(".su-net").textContent());
 
   // add a server Velocity doesn't have yet
   await page.locator(".srow-add").click();
@@ -102,6 +101,7 @@ try {
   await shot("3-pairing");
   if (SHOTS) {
     await page.evaluate(() => document.documentElement.classList.remove("dark"));
+    await page.waitForTimeout(500);
     await shot("3-pairing-light");
     await page.evaluate(() => document.documentElement.classList.add("dark"));
   }
