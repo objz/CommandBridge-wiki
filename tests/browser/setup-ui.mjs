@@ -48,7 +48,7 @@ const url = `http://localhost:8080/setup/#${id}:${secret.toString("base64url")}`
 await page.goto(url);
 await page.evaluate(() => document.querySelector("[x-data*=cookie], .cookie, #cookie-banner")?.remove());
 const shot = (n) => SHOTS && page.screenshot({ path: `${SHOTS}/${n}.png` });
-const nodes = () => page.locator("#ed-canvas .drawflow-node:visible").count();
+const nodes = () => page.locator(".q:visible").count();
 const ask = () => page.locator(".ask:visible").first().textContent().catch(() => "");
 const enter = async () => { await page.keyboard.press("Enter"); await page.waitForTimeout(250); };
 
@@ -81,32 +81,37 @@ try {
   check("asks for the servers", (await ask()) === "Which servers run CommandBridge?", await ask());
   one &&= (await nodes()) === 1;
   check("asks one question per screen", one);
-  check("finished steps show their answer", (await page.locator(".setup-steps .done small").allTextContents()).includes("play.example.net"),
-    await page.locator(".setup-steps .done small").allTextContents());
+  check("finished steps show their answer", (await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title))).includes("Address: play.example.net"),
+    await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title)));
 
   // add a server Velocity doesn't have yet
   await page.locator(".srow-add").click();
   await page.locator('[data-f="new-id"]').fill("creative");
   await page.locator('[data-f="new-address"]').fill("10.0.0.13:25565");
   await shot("2-servers");
-  await page.locator(".ed-save").click();
+  await page.locator(".btn-next").click();
   await page.waitForFunction(() => [...document.querySelectorAll(".ask")].some((e) => e.offsetParent && e.textContent === "Pair your servers"), null, { timeout: 5000 }).catch(() => {});
   const sent = plans.at(-1);
   check("enter keeps the default port", sent?.port === 8765, JSON.stringify(sent));
   check("the plan marks the added server", sent?.servers.some((s) => s.id === "creative" && s.addToVelocity) && sent.servers.some((s) => s.id === "lobby" && !s.addToVelocity), JSON.stringify(sent?.servers));
   check("reaches pairing", (await ask()) === "Pair your servers", await ask());
-  const cmds = await page.locator(".pair-node code").allTextContents();
+  const cmds = await page.locator(".pair-row code").allTextContents();
   check("pairing shows a code per server", cmds.some((c) => c.startsWith("/cbc pair ") && c.includes("7KQM-4XR2-")) &&
-    (await page.locator('.pair-node[data-id="survival"] code').count()) === 1 && (await page.locator('.pair-node[data-id="lobby"] code').count()) === 0, JSON.stringify(cmds));
-  check("a waiting wire is dashed", await page.locator('.pair-wire[data-id="survival"].dashed').count() === 1);
+    (await page.locator('.pair-row[data-id="survival"] code').count()) === 1 && (await page.locator('.pair-row[data-id="lobby"] code').count()) === 0, JSON.stringify(cmds));
+  check("a waiting wire is dashed", await page.locator('.su-net .wire[data-id="survival"].dashed').count() === 1);
   await shot("3-pairing");
+  if (SHOTS) {
+    await page.evaluate(() => document.documentElement.classList.remove("dark"));
+    await shot("3-pairing-light");
+    await page.evaluate(() => document.documentElement.classList.add("dark"));
+  }
 
   sendP({ type: "paired", id: "survival", platform: "PAPER", version: "1.21.4" });
   paired.survival = { platform: "PAPER", version: "1.21.4" }; delete codes.survival;
   await page.waitForTimeout(400);
-  check("paired switches the server", (await page.locator('.pair-node[data-id="survival"] .badge').textContent()).trim() === "paired" &&
-    await page.locator('.pair-wire[data-id="survival"].dashed').count() === 0);
-  check("paired shows the software", (await page.locator('.pair-node[data-id="survival"]').textContent()).includes("Paper 1.21.4"));
+  check("paired switches the server", await page.locator('.pair-row[data-id="survival"] .pair-state.ok').count() === 1 &&
+    await page.locator('.su-net .wire[data-id="survival"].dashed').count() === 0);
+  check("paired shows the software", (await page.locator('.pair-row[data-id="survival"]').textContent()).includes("Paper 1.21.4"));
 
   await page.reload();
   await page.evaluate(() => document.querySelector("[x-data*=cookie], .cookie, #cookie-banner")?.remove());
@@ -114,12 +119,12 @@ try {
     .catch(async (e) => { throw new Error(e.message + " status: " + await page.locator(".ed-status").textContent()); });
   await page.waitForTimeout(300);
   check("reload lands on the same step", (await ask()) === "Pair your servers", await ask());
-  check("reload keeps the code", (await page.locator('.pair-node[data-id="creative"] code').textContent().catch(() => "")).startsWith("/cbc pair "));
+  check("reload keeps the code", (await page.locator('.pair-row[data-id="creative"] code').textContent().catch(() => "")).startsWith("/cbc pair "));
 
   await page.locator(".setup-later").click();
   await page.waitForTimeout(400);
   check("asks to apply", (await ask()) === "Ready to apply", await ask());
-  check("apply shows the confirm command", (await page.locator(".ed-confirm code").textContent().catch(() => "")) === "/cb setup confirm q8n2fl");
+  check("apply shows the confirm command", (await page.locator(".setup-confirm code").textContent().catch(() => "")) === "/cb setup confirm q8n2fl");
   check("no download before applying", await page.locator(".setup-download").count() === 0);
   await shot("4-apply");
 

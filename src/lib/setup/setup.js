@@ -3,11 +3,16 @@
 
 const LOGOS = { PAPER: "paper.svg", FOLIA: "folia.svg", VELOCITY: "velocity.svg", FORGE: "forge.svg", SPIGOT: "spigot.svg", BUKKIT: "spigot.svg", FABRIC: "fabric.png" };
 const TLS = { TOFU: "first use", PLAIN: "off", STRICT: "strict" };
+// these logos are drawn in white, so light mode turns them dark
+const WHITE = new Set(["paper.svg", "velocity.svg"]);
 const PLATFORM = { PAPER: "Paper", FOLIA: "Folia", BUKKIT: "Bukkit", SPIGOT: "Spigot", FORGE: "Forge", FABRIC: "Fabric", VELOCITY: "Velocity" };
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clip = (v, n) => (String(v).length > n ? String(v).slice(0, n - 1) + "…" : String(v));
 
 function cbSetup() {
   return {
     status: "connecting", // connecting | online | closed | nolink
+    slow: false,    // still connecting after a while
     closeReason: "",
     relay: null,
     current: null,
@@ -23,7 +28,6 @@ function cbSetup() {
     copied: "",
     newRow: null,   // { id, address } while adding a server
     waiting: false, // a plan was sent, the codes aren't back yet
-    wires: [],
 
     init() {
       const relay = window.cbRelay(location.hash);
@@ -32,11 +36,12 @@ function cbSetup() {
       relay.onMessage = (msg) => this.receive(msg);
       relay.onClose = (reason) => { this.status = "closed"; this.closeReason = reason; };
       this.relay = relay.connect();
-      window.addEventListener("resize", () => this.layoutWires());
+      setTimeout(() => { this.slow = this.status === "connecting"; }, 8000);
     },
 
-    statusText() {
-      return { connecting: "Connecting…", closed: "Session ended: " + this.closeReason }[this.status] ?? "";
+    closedText() {
+      const r = this.closeReason.trim();
+      return /new (one|link)/i.test(r) ? r : `${r ? r.replace(/\.?$/, ".") + " " : ""}Run /cb setup on your proxy for a new link.`;
     },
 
     /* ================= steps ================= */
@@ -58,9 +63,10 @@ function cbSetup() {
     },
     index() { return this.steps().findIndex((s) => s.k === this.step); },
     isDone(k) { return this.steps().findIndex((s) => s.k === k) < this.index(); },
+    canGo(k) { return this.isDone(k) && !this.applied; },
 
     go(k) {
-      if (!this.isDone(k) || this.step === "apply" && this.applied) return;
+      if (!this.canGo(k)) return;
       if (this.step === "apply" && this.staged) this.relay.send({ type: "unstage" });
       this.err = "";
       this.step = k;
@@ -95,7 +101,6 @@ function cbSetup() {
         const left = this.picked().length - this.pairedCount();
         return left ? `Waiting for ${left} ${left === 1 ? "server" : "servers"}` : "Continue";
       }
-      if (this.step === "apply") return this.applied ? "Applied" : "Waiting for confirm";
       return "Continue";
     },
 
@@ -116,11 +121,7 @@ function cbSetup() {
     },
 
     focus() {
-      this.$nextTick(() => {
-        const q = document.querySelector(`#ed-canvas [data-step="${this.step}"]`);
-        q?.querySelector("input[type=text], input:checked")?.focus();
-        this.layoutWires();
-      });
+      this.$nextTick(() => document.querySelector(`.q[data-step="${this.step}"]`)?.querySelector("input[type=text], input:checked")?.focus());
     },
 
     keydown(e) {
@@ -135,15 +136,12 @@ function cbSetup() {
 
     picked() { return this.a ? this.a.servers.filter((s) => s.on) : []; },
     pairedCount() { return this.picked().filter((s) => this.paired[s.id]).length; },
-    logo(s) {
-      const p = this.paired[s.id]?.platform || s.platform;
-      return "/lib/editor/logos/" + (LOGOS[p] || "paper.svg");
-    },
-    hasLogo(s) { return !!LOGOS[this.paired[s.id]?.platform || s.platform]; },
+    platformOf(s) { return this.paired[s.id]?.platform || s.platform; },
+    logo(s) { return "/lib/editor/logos/" + (LOGOS[this.platformOf(s)] || "paper.svg"); },
+    logoClass(s) { return [WHITE.has(this.logo(s).split("/").pop()) && "white", !this.platformOf(s) && "unknown"].filter(Boolean).join(" "); },
     software(s) {
       const p = this.paired[s.id];
-      if (!p) return "run in its console";
-      return [PLATFORM[p.platform] || p.platform, p.version].filter(Boolean).join(" ") || "paired";
+      return p ? [PLATFORM[p.platform] || p.platform, p.version].filter(Boolean).join(" ") : "";
     },
     added() { return this.picked().filter((s) => s.isNew); },
 
@@ -238,7 +236,6 @@ function cbSetup() {
       } else if (msg.type === "paired") {
         this.paired = { ...this.paired, [msg.id]: { platform: msg.platform, version: msg.version } };
         delete this.codes[msg.id];
-        this.$nextTick(() => this.layoutWires());
       } else if (msg.type === "staged") {
         this.staged = msg.code;
       } else if (msg.type === "applied") {
@@ -249,7 +246,7 @@ function cbSetup() {
 
     answersFrom(msg) {
       const c = msg.current, p = msg.plan;
-      const fromToml = (msg.servers || []).map((s) => ({ id: s.id, address: s.address, on: true, isNew: false, platform: s.platform }));
+      const fromToml = (msg.servers || []).map((s) => ({ id: s.id, address: s.address, on: true, isNew: false, platform: s.platform, connected: s.connected }));
       const servers = p
         ? [...fromToml.map((s) => ({ ...s, on: p.servers.some((x) => x.id === s.id) })),
            ...p.servers.filter((x) => x.addToVelocity).map((x) => ({ id: x.id, address: x.address, on: true, isNew: true, platform: null }))]
@@ -268,28 +265,56 @@ function cbSetup() {
       };
     },
 
-    /* ================= the network drawing on the pairing screen ================= */
+    /* ================= the network drawing ================= */
 
-    // <template> doesn't work inside <svg>, so the paths are written out
-    wiresSvg() {
-      const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-      return this.wires.map((w) => `<path class="pair-wire${this.paired[w.id] ? "" : " dashed"}" data-id="${esc(w.id)}" d="${w.d}"></path>`).join("");
-    },
+    // the proxy on top, the servers below; it fills in as questions are answered and outlines
+    // what the current question is about
+    diagram() {
+      const a = this.a;
+      if (!a) return "";
+      const W = 440, step = this.step, past = (k) => this.index() > this.steps().findIndex((s) => s.k === k);
+      const ws = a.endpointType === "WEBSOCKET";
+      const where = ws ? (a.address.trim() ? `${a.address.trim()}:${a.port}` : `port ${a.port}`) : `Redis ${a.redis.host}:${a.redis.port}`;
+      const hl = (on) => (on ? " hl" : "");
+      const px = 90, pw = 260, py = 20, ph = 78;
 
-    layoutWires() {
-      if (this.step !== "pairing") return;
-      // measured a frame later, once the pairing screen is shown and laid out
-      this.$nextTick(() => requestAnimationFrame(() => {
-        const canvas = document.getElementById("ed-canvas"), proxy = canvas?.querySelector(".pair-proxy");
-        if (!proxy) return;
-        const box = canvas.getBoundingClientRect(), pr = proxy.getBoundingClientRect();
-        const dx = canvas.scrollLeft - box.left, dy = canvas.scrollTop - box.top;
-        const x1 = pr.left + dx, y1 = pr.top + dy + 57;
-        this.wires = [...canvas.querySelectorAll(".pair-node")].map((n) => {
-          const r = n.getBoundingClientRect(), x0 = r.right + dx, y0 = r.top + dy + 57, mid = (x0 + x1) / 2;
-          return { id: n.dataset.id, d: `M ${x0} ${y0} C ${mid} ${y0}, ${mid} ${y1}, ${x1} ${y1}` };
-        });
-      }));
+      // servers: up to six, three to a row
+      const all = a.servers.slice(0, 6), more = a.servers.length - all.length;
+      const bw = 124, bh = 60, gap = 14;
+      const placed = all.map((s, i) => {
+        const row = Math.floor(i / 3), inRow = Math.min(3, all.length - row * 3), col = i % 3;
+        const x0 = (W - (inRow * bw + (inRow - 1) * gap)) / 2;
+        return { s, x: x0 + col * (bw + gap), y: 210 + row * (bh + 26) };
+      });
+      const H = placed.length ? placed.at(-1).y + bh + (more > 0 ? 30 : 6) : 200;
+      let out = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Your network">`;
+
+      for (const { s, x, y } of placed) {
+        if (!s.on) continue;
+        const sx = x + bw / 2, my = py + ph, mid = (my + y) / 2;
+        const solid = this.paired[s.id] || (s.connected && !past("servers"));
+        out += `<path class="wire${solid ? "" : " dashed"}${hl(step === "pairing")}" data-id="${esc(s.id)}" d="M 220 ${my} C 220 ${mid}, ${sx} ${mid}, ${sx} ${y}"/>`;
+      }
+      out += `<circle class="port" cx="220" cy="${py + ph}" r="4"/>`;
+      for (const { s, x, y } of placed) {
+        const ok = this.paired[s.id] || (s.connected && !past("servers"));
+        const state = this.paired[s.id] ? "paired" : past("servers") ? (this.codes[s.id] ? "waiting" : "not paired") : s.connected ? "connected" : clip(s.address, 17);
+        out += `<g class="srv${s.on ? "" : " off"}${hl(step === "servers")}" data-id="${esc(s.id)}">` +
+          `<rect class="box" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="10"/><rect class="bar" x="${x}" y="${y + 14}" width="3" height="${bh - 28}" rx="1.5"/>` +
+          `<image href="${this.logo(s)}" x="${x + 12}" y="${y + 12}" width="16" height="16" class="${this.logoClass(s)}"/>` +
+          `<text class="t" x="${x + 34}" y="${y + 25}">${esc(clip(s.id, 11))}</text>` +
+          `<text class="m${ok ? " ok" : ""}" x="${x + 12}" y="${y + 47}">${esc(state)}</text></g>`;
+      }
+      if (more > 0) out += `<text class="m" x="220" y="${H - 8}" text-anchor="middle">and ${more} more</text>`;
+
+      out += `<g class="proxy"><rect class="box" x="${px}" y="${py}" width="${pw}" height="${ph}" rx="12"/><rect class="bar" x="${px}" y="${py + 16}" width="3" height="${ph - 32}" rx="1.5"/>` +
+        `<image href="/lib/editor/logos/velocity.svg" x="${px + 16}" y="${py + 15}" width="18" height="18" class="white"/>` +
+        `<text class="t${hl(step === "name")}" x="${px + 42}" y="${py + 29}">${esc(clip(a.serverId || "proxy", 22))}</text>` +
+        `<text class="m${hl(["type", "port", "address"].includes(step))}" x="${px + 16}" y="${py + 58}">${esc(clip(where, 24))}</text>` +
+        `<g class="lock${hl(step === "tls" || step === "keystore")}" transform="translate(${px + pw - 82} ${py + 47})">` +
+        `<rect x="0" y="5" width="9" height="7" rx="1.5"/><path d="M2 5 V3 a2.5 2.5 0 0 1 5 0${a.tlsMode === "PLAIN" ? "" : " V5"}"/>` +
+        `<text class="m" x="14" y="11.5">${TLS[a.tlsMode]}</text></g></g>`;
+      return out + "</svg>";
     },
   };
 }
