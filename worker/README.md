@@ -30,6 +30,8 @@ The bundled bearer token is public client identification, not proof that a proxy
 
 From `worker/`, run `node --test test/worker-security.test.mjs` with Node 22.13+ for isolated upload bounds, relay size and closing-socket checks. Against `npx wrangler dev --port 8787`, run `node test/editor-relay.mjs` and `node test/pair-relay.mjs` for live local WebSocket checks.
 
+Run `node test/sustained-load.mjs --self-test` without network traffic, then `node test/sustained-load.mjs 300` against the local development server. It measures 100 encrypted round trips per second across 10 editor sessions with 1 KiB payloads for five minutes. The summary reports loss, duplicates, errors and round-trip latency. Non-loopback destinations are refused. This checks local relay forwarding, not production Cloudflare capacity or dump/database throughput.
+
 Deploy this service separately with `npx wrangler deploy` from `worker/`. Moving it from the plugin repo does not change its worker name, Durable Object migrations, or D1 binding.
 
 ## Database
