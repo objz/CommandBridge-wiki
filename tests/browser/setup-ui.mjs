@@ -60,6 +60,8 @@ try {
   await shot("1-name");
   await enter();
   check("asks how servers connect", (await ask()) === "How do your servers connect to the proxy?", await ask());
+  check("the default choice is marked", (await page.locator('[data-step="type"] .opt:has([value="WEBSOCKET"]) .def').count()) === 1);
+  check("a new screen slides in forward", await page.locator('[data-step="type"].in-fwd').count() === 1);
   one &&= (await nodes()) === 1;
   await enter();
   check("asks for the port", (await ask()) === "Which port do your servers connect to?", await ask());
@@ -73,6 +75,11 @@ try {
   check("zero address is refused", (await page.locator(".setup-err:visible").textContent().catch(() => "")).includes("Servers can't reach 0.0.0.0"),
     await page.locator(".setup-err").allTextContents());
   check("stays on the address", (await ask()) === "What address do your servers connect to?");
+  const addressError = async (v) => { await page.locator('[data-f="address"]').fill(v); await enter(); return page.locator(".setup-err:visible").textContent().catch(() => ""); };
+  check("a broken IP is refused", (await addressError("999.1.1.1")).includes("0 to 255"));
+  check("a protocol is refused", (await addressError("ws://play.example.net")).includes("ws://"));
+  check("a port in the address is refused", (await addressError("play.example.net:8765")).includes("port"));
+  check("spaces are refused", (await addressError("play example")).includes("isn't a valid address"));
   await page.locator('[data-f="address"]').fill("play.example.net");
   await enter();
   check("asks about encryption", (await ask()) === "How should the connection be secured?", await ask());
@@ -84,10 +91,19 @@ try {
   check("finished steps show their answer", (await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title))).includes("Address: play.example.net"),
     await page.locator(".su-progress button.done").evaluateAll((b) => b.map((x) => x.title)));
 
-  // add a server Velocity doesn't have yet
+  // add servers Velocity doesn't have yet; the address starts as the proxy's, on the next free port
   await page.locator(".srow-add").click();
+  check("a new server gets the proxy's address", await page.locator('[data-f="new-address"]').inputValue() === "play.example.net:30067",
+    await page.locator('[data-f="new-address"]').inputValue());
   await page.locator('[data-f="new-id"]').fill("creative");
+  await page.locator('[data-f="new-address"]').fill("10.0.0.13:99999");
+  await enter();
+  check("a bad server port is refused", (await page.locator(".setup-err:visible").textContent().catch(() => "")).includes("1 and 65535"));
   await page.locator('[data-f="new-address"]').fill("10.0.0.13:25565");
+  await enter();
+  check("enter adds the server and opens the next one", await page.locator('[data-step="servers"] .srow-id', { hasText: "creative" }).count() === 1 &&
+    await page.locator('[data-f="new-id"]').inputValue() === "" && await page.locator('[data-f="new-address"]').inputValue() === "play.example.net:30067",
+    JSON.stringify([await page.locator('.srow-id').allTextContents(), await page.locator('[data-f="new-id"]').inputValue().catch((e) => e.message.slice(0, 60)), await page.locator('[data-f="new-address"]').inputValue().catch(() => "-")]));
   await shot("2-servers");
   await page.locator(".btn-next").click();
   await page.waitForFunction(() => [...document.querySelectorAll(".ask")].some((e) => e.offsetParent && e.textContent === "Pair your servers"), null, { timeout: 5000 }).catch(() => {});
@@ -95,6 +111,8 @@ try {
   check("enter keeps the default port", sent?.port === 8765, JSON.stringify(sent));
   check("the plan marks the added server", sent?.servers.some((s) => s.id === "creative" && s.addToVelocity) && sent.servers.some((s) => s.id === "lobby" && !s.addToVelocity), JSON.stringify(sent?.servers));
   check("reaches pairing", (await ask()) === "Pair your servers", await ask());
+  check("an empty extra row isn't sent", !sent?.servers.some((s) => !s.id));
+  check("pairing has a back button", await page.locator(".setup-back:visible").count() === 1);
   const cmds = await page.locator(".pair-row code").allTextContents();
   check("pairing shows a code per server", cmds.some((c) => c.startsWith("/cbc pair ") && c.includes("7KQM-4XR2-")) &&
     (await page.locator('.pair-row[data-id="survival"] code').count()) === 1 && (await page.locator('.pair-row[data-id="lobby"] code').count()) === 0, JSON.stringify(cmds));

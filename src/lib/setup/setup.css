@@ -17,15 +17,20 @@
 .su-main { display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 32rem; padding: 3rem 0; }
 
 /* progress: one bar per step; a finished one goes back to that step */
-.su-progress { margin-bottom: 2rem; }
+.su-progress { margin-bottom: 1.5rem; }
 .su-progress ol { display: flex; gap: 4px; }
 .su-progress li { flex: 1; }
-.su-progress button { display: block; width: 100%; height: 4px; padding: 0; border: none; border-radius: 2px; background: hsl(var(--border)); }
-.su-progress button.done { background: hsl(var(--foreground) / 0.55); cursor: pointer; }
-.su-progress button.done:hover, .su-progress button.on { background: hsl(var(--foreground)); }
+/* the bar is 4px, the button around it 20px, so it's easy to hit */
+.su-progress button { display: block; width: 100%; height: 20px; padding: 8px 0; border: none; background: none; }
+.su-progress button::after { content: ""; display: block; height: 4px; border-radius: 2px; background: hsl(var(--border));
+  transition: background-color 350ms ease, transform 350ms cubic-bezier(.2, .8, .2, 1); }
+.su-progress button.done { cursor: pointer; }
+.su-progress button.done::after { background: hsl(var(--foreground) / 0.55); }
+.su-progress button.done:hover::after { background: hsl(var(--foreground)); transform: scaleY(1.5); }
+.su-progress button.on::after { background: hsl(var(--foreground)); }
 .su-progress button:disabled { cursor: default; }
 .su-progress button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
-.su-progress p { margin-top: 0.625rem; font-size: 0.875rem; color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums; }
+.su-progress p { margin-top: 0.25rem; font-size: 0.875rem; color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums; }
 
 /* the question */
 .ask { font-size: clamp(1.875rem, 3.2vw, 2.5rem); line-height: 1.08; letter-spacing: -0.04em; font-weight: 600; text-wrap: balance; margin-bottom: 0.75rem; }
@@ -33,13 +38,17 @@
 .q > .ask + .opts { margin-top: 1.5rem; }
 
 .field { width: 100%; height: 2.75rem; padding: 0 0.875rem; font: inherit; border-radius: calc(var(--radius) - 4px);
-  border: 1px solid hsl(var(--input)); background: hsl(var(--background)); color: hsl(var(--foreground)); }
+  border: 1px solid hsl(var(--input)); background: hsl(var(--background)); color: hsl(var(--foreground));
+  transition: border-color 200ms ease, box-shadow 200ms ease; }
 .field:focus { outline: none; box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring)); }
 .field.bad { border-color: var(--bad); }
 .field.bad:focus { box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px var(--bad); }
 .field-short { width: 8.5rem; font-variant-numeric: tabular-nums; }
 .field-row { display: flex; align-items: center; gap: 0.75rem; }
 .field-note { font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
+/* marks the value CommandBridge ships with */
+.def { margin-left: 0.5rem; font-size: 0.75rem; font-weight: 400; color: hsl(var(--muted-foreground)); white-space: nowrap; }
+.field-row .def { margin-left: 0; }
 .fields { display: grid; gap: 1rem; }
 .fields label { display: grid; gap: 0.375rem; font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
 .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
@@ -48,7 +57,8 @@
 
 /* a choice, listed like the docs navigation: the picked one in full color on a heavier line */
 .opts { border-left: 1px solid hsl(var(--border)); }
-.opt { position: relative; display: block; padding: 0.625rem 0 0.625rem 1rem; margin-left: -1px; border-left: 2px solid transparent; cursor: pointer; color: hsl(var(--muted-foreground)); }
+.opt { position: relative; display: block; padding: 0.625rem 0 0.625rem 1rem; margin-left: -1px; border-left: 2px solid transparent; cursor: pointer; color: hsl(var(--muted-foreground));
+  transition: color 200ms ease, border-color 250ms ease, background-color 200ms ease; }
 .opt:hover { color: hsl(var(--foreground)); }
 .opt:has(input:checked) { border-left-color: hsl(var(--primary)); color: hsl(var(--foreground)); }
 .opt:has(input:focus-visible) { background: hsl(var(--accent) / 0.5); }
@@ -101,3 +111,23 @@ html:not(.dark) .su .white.unknown { filter: invert(1) grayscale(1); }
 .srow-add { margin-top: 1rem; font-size: 0.9375rem; }
 
 @media (max-width: 639px) { .su-main { justify-content: flex-start; padding: 1.5rem 0 3rem; } }
+
+/* motion: a screen slides in from the side you're heading to; new things fade up into place */
+@keyframes su-in-fwd { from { opacity: 0; transform: translateX(24px); } }
+@keyframes su-in-back { from { opacity: 0; transform: translateX(-24px); } }
+@keyframes su-rise { from { opacity: 0; transform: translateY(6px); } }
+@keyframes su-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.q.in-fwd { animation: su-in-fwd 380ms cubic-bezier(.2, .8, .2, 1); }
+.q.in-back { animation: su-in-back 380ms cubic-bezier(.2, .8, .2, 1); }
+.su-wrap, .su-note > div { animation: su-rise 450ms cubic-bezier(.2, .8, .2, 1); }
+.setup-err { animation: su-rise 220ms ease-out; }
+.field.bad { animation: su-shake 260ms ease-in-out; }
+.list > li, .cmd, .setup-result > *, .setup-confirm .cmd { animation: su-rise 300ms cubic-bezier(.2, .8, .2, 1) backwards; }
+.pair-state { transition: color 300ms ease; }
+.pair-state.ok { animation: su-rise 300ms cubic-bezier(.2, .8, .2, 1); }
+.def { animation: su-rise 250ms ease-out; }
+.actions .button, .actions .button-outline { transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease, transform 120ms ease; }
+.actions .button:active:not(:disabled), .actions .button-outline:active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .su *, .su-wrap, .su-note > div { animation: none !important; transition: none !important; }
+}

@@ -7,6 +7,30 @@ const TLS = { TOFU: "first use", PLAIN: "off", STRICT: "strict" };
 const WHITE = new Set(["paper.svg", "velocity.svg"]);
 const PLATFORM = { PAPER: "Paper", FOLIA: "Folia", BUKKIT: "Bukkit", SPIGOT: "Spigot", FORGE: "Forge", FABRIC: "Fabric", VELOCITY: "Velocity" };
 
+const IPV4 = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const HOSTNAME = /^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+
+// what's wrong with an address servers should connect to, or "" when it's an IP address or a hostname
+function hostProblem(host) {
+  const h = host.trim();
+  if (!h) return "Enter the address.";
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(h)) return `Leave out ${h.split("//")[0]}//, only the address.`;
+  if (h === "0.0.0.0") return "Servers can't reach 0.0.0.0. Use the address they connect to.";
+  if (/^\[?[0-9a-f]*:[0-9a-f:]*\]?$/i.test(h) && h.split(":").length > 2) return ""; // IPv6
+  if (/:\d*$/.test(h)) return "Leave out the port, only the address.";
+  if (/^[\d.]+$/.test(h)) return IPV4.test(h) ? "" : "That isn't a valid IP address. Each of the four parts goes from 0 to 255.";
+  return HOSTNAME.test(h) ? "" : "That isn't a valid address. Use an IP like 203.0.113.7 or a name like play.example.net.";
+}
+
+// a server's host:port
+function serverAddressProblem(address) {
+  const a = address.trim(), colon = a.lastIndexOf(":");
+  if (colon < 0) return "Write the address as host:port, like 10.0.0.13:25565.";
+  const port = a.slice(colon + 1);
+  if (!/^\d+$/.test(port) || +port < 1 || +port > 65535) return "The port must be between 1 and 65535.";
+  return hostProblem(a.slice(0, colon));
+}
+
 function cbSetup() {
   return {
     status: "connecting", // connecting | online | closed | nolink
@@ -17,6 +41,7 @@ function cbSetup() {
     known: [],      // servers from velocity.toml: { id, address, connected, platform }
     a: null,        // the answers
     step: "name",
+    dir: 1,         // 1 going forward, -1 going back; picks the direction a screen slides in from
     err: "",        // what's wrong with the answer on this screen
     problems: [],   // what the proxy said about the plan
     codes: {},
@@ -67,9 +92,13 @@ function cbSetup() {
       if (!this.canGo(k)) return;
       if (this.step === "apply" && this.staged) this.relay.send({ type: "unstage" });
       this.err = "";
+      this.dir = this.steps().findIndex((s) => s.k === k) < this.index() ? -1 : 1;
       this.step = k;
       this.focus();
     },
+
+    // the class that slides a screen in when it shows
+    enter(k) { return this.step === k ? (this.dir < 0 ? "in-back" : "in-fwd") : ""; },
 
     back() {
       const st = this.steps(), i = this.index();
@@ -78,10 +107,16 @@ function cbSetup() {
 
     next() {
       if (this.status !== "online" || this.nextDisabled()) return;
+      if (this.step === "servers" && this.newRow) {
+        // an untouched extra row is just closed; a filled one is added first
+        if (!this.newRow.id.trim()) this.newRow = null;
+        else if ((this.err = this.addRow())) return;
+      }
       this.err = this.check();
       if (this.err) return;
       if (this.step === "servers") { this.sendPlan(); return; }
       const st = this.steps(), i = this.index();
+      this.dir = 1;
       this.step = st[i + 1].k;
       if (this.step === "apply") this.relay.send({ type: "stage" });
       this.focus();
@@ -107,14 +142,10 @@ function cbSetup() {
       const a = this.a;
       if (this.step === "name" && !/^[a-z0-9-]{1,32}$/.test(a.serverId)) return "Use a to z, 0 to 9 and dashes, up to 32 characters.";
       if (this.step === "port" && !(a.port >= 1 && a.port <= 65535)) return "The port must be between 1 and 65535.";
-      if (this.step === "address" && a.endpointType === "WEBSOCKET") {
-        if (!a.address.trim()) return "Enter the address servers use to reach the proxy.";
-        if (a.address.trim() === "0.0.0.0") return "Servers can't reach 0.0.0.0. Use the address they connect to.";
-      }
-      if (this.step === "address" && a.endpointType === "REDIS" && (!a.redis.host.trim() || !(a.redis.port >= 1 && a.redis.port <= 65535)))
-        return "Enter the Redis host and a port between 1 and 65535.";
+      if (this.step === "address" && a.endpointType === "WEBSOCKET") return hostProblem(a.address);
+      if (this.step === "address" && a.endpointType === "REDIS")
+        return hostProblem(a.redis.host) || (a.redis.port >= 1 && a.redis.port <= 65535 ? "" : "The Redis port must be between 1 and 65535.");
       if (this.step === "keystore" && !a.keystore.path.trim()) return "Enter the path of the keystore file.";
-      if (this.step === "servers" && this.newRow && (this.newRow.id || this.newRow.address)) return this.addRow() || "";
       return "";
     },
 
@@ -126,7 +157,12 @@ function cbSetup() {
       if (e.key !== "Enter" || e.isComposing) return;
       // Enter anywhere on the page continues, except on the site's own links and buttons
       if (e.target !== document.body && !e.target.closest(".su")) return;
-      if (e.target.matches("[data-f=new-id], [data-f=new-address]")) { e.preventDefault(); this.err = this.addRow(); return; }
+      if (e.target.matches("[data-f=new-id], [data-f=new-address]")) {
+        e.preventDefault();
+        this.err = this.addRow();
+        if (!this.err) this.startRow(); // straight on to the next one
+        return;
+      }
       if (e.target.closest("button")) return;
       e.preventDefault();
       this.next();
@@ -145,14 +181,26 @@ function cbSetup() {
     },
     added() { return this.picked().filter((s) => s.isNew); },
 
-    startRow() { this.newRow = { id: "", address: "" }; this.$nextTick(() => document.querySelector("[data-f=new-id]")?.focus()); },
+    // a new server most likely runs where the proxy does, on the port after the highest one in use
+    suggestedAddress() {
+      const a = this.a;
+      const host = a.endpointType === "WEBSOCKET" && !hostProblem(a.address) ? a.address.trim() : a.servers[0]?.address.replace(/:\d+$/, "") || "127.0.0.1";
+      const ports = a.servers.map((s) => +s.address.split(":").pop()).filter((n) => n > 0 && n < 65535);
+      return `${host}:${ports.length ? Math.max(...ports) + 1 : 25566}`;
+    },
+    startRow() {
+      this.newRow = { id: "", address: this.suggestedAddress() };
+      this.$nextTick(() => document.querySelector("[data-f=new-id]")?.focus());
+    },
     addRow() {
       const r = this.newRow;
       if (!r) return "";
       const id = r.id.trim(), address = r.address.trim();
-      if (!id || !address) return "A new server needs a name and an address.";
+      if (!id) return "Give the new server a name, the same one it has in velocity.toml.";
+      if (!/^[A-Za-z0-9._-]{1,32}$/.test(id)) return "A server name can use letters, digits, dots, dashes and underscores.";
       if (this.a.servers.some((s) => s.id === id)) return `There is already a server called ${id}.`;
-      if (!/^[^\s:]+:\d{1,5}$/.test(address)) return "Write the address as host:port, like 10.0.0.13:25565.";
+      const problem = serverAddressProblem(address);
+      if (problem) return problem;
       this.a.servers.push({ id, address, on: true, isNew: true, platform: null });
       this.newRow = null;
       return "";
@@ -188,6 +236,7 @@ function cbSetup() {
     },
 
     later() {
+      this.dir = 1;
       this.step = "apply";
       this.relay.send({ type: "stage" });
     },
@@ -225,6 +274,7 @@ function cbSetup() {
           setInterval(() => this.relay.send({ type: "ping" }), 60_000);
         } else if (this.waiting) {
           this.waiting = false;
+          this.dir = 1;
           this.step = "pairing";
         }
         this.status = "online";

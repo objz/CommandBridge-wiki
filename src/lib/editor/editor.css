@@ -38,7 +38,12 @@
 
 /* ---------------- work area ---------------- */
 .ed-work { position: relative; flex: 1; display: flex; min-height: 0; }
-.ed-landing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: hsl(var(--muted-foreground)); background: hsl(var(--background)); }
+.ed-landing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; text-align: center;
+  font-size: 1rem; line-height: 1.5; color: hsl(var(--muted-foreground)); background: hsl(var(--background)); }
+/* same as the setup page's notice */
+.ed-landing > div { max-width: 28rem; }
+.ed-landing code { font-size: 0.9em; }
+.ed-landing-t { margin-bottom: 0.5rem; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; color: hsl(var(--foreground)); }
 .ed-stage { position: relative; flex: 1; display: flex; min-width: 0; }
 .ed-keys { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; resize: none; pointer-events: none; }
 /* the YAML panel: files on the left with what saving does to each, the chosen file on the right */

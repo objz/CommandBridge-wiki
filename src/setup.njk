@@ -11,7 +11,7 @@ eleventyExcludeFromCollections: true
 <script src="/lib/editor/relay.js"></script>
 <script src="/lib/setup/setup.js"></script>
 
-<div x-data="cbSetup()" class="su" @keydown.window="keydown($event)">
+<div x-data="cbSetup()" class="su" @keydown.window="keydown($event)" @input="if (err && step !== 'servers') err = check()">
 
   <div class="su-note" x-show="status !== 'online' && !applied" x-cloak role="status">
     <template x-if="status === 'connecting'">
@@ -49,35 +49,38 @@ eleventyExcludeFromCollections: true
         </nav>
 
         <!-- name -->
-        <section class="q" data-step="name" x-show="step === 'name'">
+        <section class="q" data-step="name" x-show="step === 'name'" :class="enter('name')">
           <h1 class="ask">What's this proxy called?</h1>
           <p class="why">Your servers and scripts use this name for the proxy.</p>
-          <input class="field" type="text" data-f="serverId" x-model="a.serverId" :class="err && 'bad'" spellcheck="false" autocomplete="off" aria-label="Proxy name">
+          <div class="field-row">
+            <input class="field" type="text" data-f="serverId" x-model="a.serverId" :class="err && 'bad'" spellcheck="false" autocomplete="off" aria-label="Proxy name">
+            <span class="def" x-show="a.serverId === 'proxy-1'">default</span>
+          </div>
         </section>
 
         <!-- WebSocket or Redis -->
-        <section class="q" data-step="type" x-show="step === 'type'">
+        <section class="q" data-step="type" x-show="step === 'type'" :class="enter('type')">
           <h1 class="ask">How do your servers connect to the proxy?</h1>
           <div class="opts" role="radiogroup">
             <label class="opt"><input type="radio" name="s-type" value="WEBSOCKET" data-f="endpointType" x-model="a.endpointType">
-              <span><b>WebSocket</b><small>Servers connect straight to the proxy. Pick this unless you already run Redis.</small></span></label>
+              <span><b>WebSocket<span class="def">default</span></b><small>Servers connect straight to the proxy. Pick this unless you already run Redis.</small></span></label>
             <label class="opt"><input type="radio" name="s-type" value="REDIS" data-f="endpointType" x-model="a.endpointType">
               <span><b>Redis</b><small>The proxy and your servers meet on a Redis server you run.</small></span></label>
           </div>
         </section>
 
         <!-- port -->
-        <section class="q" data-step="port" x-show="step === 'port'">
+        <section class="q" data-step="port" x-show="step === 'port'" :class="enter('port')">
           <h1 class="ask">Which port do your servers connect to?</h1>
           <p class="why">The proxy listens on this port. Open it in your firewall or host panel.</p>
           <div class="field-row">
             <input class="field field-short" type="text" inputmode="numeric" data-f="port" x-model.number="a.port" :class="err && 'bad'" autocomplete="off" aria-label="Port">
-            <span class="field-note" x-show="a.port === 8765">default</span>
+            <span class="def" x-show="a.port === 8765">default</span>
           </div>
         </section>
 
         <!-- address, or the Redis login -->
-        <section class="q" data-step="address" x-show="step === 'address'">
+        <section class="q" data-step="address" x-show="step === 'address'" :class="enter('address')">
           <template x-if="a.endpointType === 'WEBSOCKET'">
             <div>
               <h1 class="ask">What address do your servers connect to?</h1>
@@ -92,7 +95,7 @@ eleventyExcludeFromCollections: true
               <div class="fields">
                 <div class="fields-row fields-hostport">
                   <label>Host<input class="field" type="text" data-f="redis-host" x-model="a.redis.host" :class="err && 'bad'" spellcheck="false" autocomplete="off"></label>
-                  <label>Port<input class="field" type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></label>
+                  <label><span>Port<span class="def" x-show="a.redis.port === 6379">default</span></span><input class="field" type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></label>
                 </div>
                 <div class="fields-row">
                   <label>Username<input class="field" type="text" data-f="redis-user" x-model="a.redis.username" spellcheck="false" autocomplete="off"></label>
@@ -104,11 +107,11 @@ eleventyExcludeFromCollections: true
         </section>
 
         <!-- encryption -->
-        <section class="q" data-step="tls" x-show="step === 'tls'">
+        <section class="q" data-step="tls" x-show="step === 'tls'" :class="enter('tls')">
           <h1 class="ask">How should the connection be secured?</h1>
           <div class="opts" role="radiogroup">
             <label class="opt"><input type="radio" name="s-tls" value="TOFU" data-f="tlsMode" x-model="a.tlsMode">
-              <span><b>On first use</b><small>Each server trusts the proxy's certificate the first time it connects, and only that one after.</small></span></label>
+              <span><b>On first use<span class="def">default</span></b><small>Each server trusts the proxy's certificate the first time it connects, and only that one after.</small></span></label>
             <label class="opt"><input type="radio" name="s-tls" value="STRICT" data-f="tlsMode" x-model="a.tlsMode">
               <span><b>Strict</b><small>The proxy uses a certificate from your own keystore, and servers check it.</small></span></label>
             <label class="opt"><input type="radio" name="s-tls" value="PLAIN" data-f="tlsMode" x-model="a.tlsMode">
@@ -117,22 +120,22 @@ eleventyExcludeFromCollections: true
         </section>
 
         <!-- keystore, for strict -->
-        <section class="q" data-step="keystore" x-show="step === 'keystore'">
+        <section class="q" data-step="keystore" x-show="step === 'keystore'" :class="enter('keystore')">
           <h1 class="ask">Where is your keystore?</h1>
           <p class="why">The keystore file on the proxy's machine. Leave the password empty to keep the current one.</p>
           <div class="fields">
             <label>Path<input class="field" type="text" data-f="ks-path" x-model="a.keystore.path" :class="err && 'bad'" placeholder="plugins/commandbridge/keystore.p12" spellcheck="false" autocomplete="off"></label>
             <div class="fields-row fields-typepass">
-              <label>Type<select class="field" x-model="a.keystore.type"><option>PKCS12</option><option>JKS</option></select></label>
+              <label><span>Type<span class="def" x-show="a.keystore.type === 'PKCS12'">default</span></span><select class="field" x-model="a.keystore.type"><option>PKCS12</option><option>JKS</option></select></label>
               <label>Password<input class="field" type="password" data-f="ks-pass" x-model="a.keystore.password" placeholder="unchanged" autocomplete="new-password"></label>
             </div>
           </div>
         </section>
 
         <!-- servers -->
-        <section class="q" data-step="servers" x-show="step === 'servers'">
+        <section class="q" data-step="servers" x-show="step === 'servers'" :class="enter('servers')">
           <h1 class="ask">Which servers run CommandBridge?</h1>
-          <p class="why">These come from your velocity.toml. Turn off servers without CommandBridge, or add one Velocity doesn't know yet.</p>
+          <p class="why">These come from your velocity.toml. Turn off servers without CommandBridge, and add the ones Velocity doesn't know yet. Enter adds a server and opens the next row.</p>
           <ul class="list">
             <template x-for="s in a.servers" :key="s.id">
               <li class="srow" :class="!s.on && 'off'">
@@ -145,19 +148,19 @@ eleventyExcludeFromCollections: true
             </template>
             <template x-if="newRow">
               <li class="srow srow-new">
-                <input class="field" type="text" data-f="new-id" x-model="newRow.id" placeholder="name" spellcheck="false" autocomplete="off" aria-label="Server name">
+                <input class="field" type="text" data-f="new-id" x-model="newRow.id" placeholder="name, like survival" spellcheck="false" autocomplete="off" aria-label="Server name">
                 <input class="field" type="text" data-f="new-address" x-model="newRow.address" placeholder="10.0.0.13:25565" spellcheck="false" autocomplete="off" aria-label="Server address">
               </li>
             </template>
           </ul>
-          <button class="link srow-add" x-show="!newRow" @click="startRow()">Add a server</button>
+          <button class="link srow-add" x-show="!newRow" @click="startRow()" x-text="a.servers.some((s) => s.isNew) ? 'Add another server' : 'Add a server'"></button>
           <template x-for="p in problems"><p class="setup-err" x-text="p"></p></template>
           <p class="hint" x-show="added().length" x-text="added().map((s) => s.id).join(', ') + (added().length === 1 ? ' goes' : ' go') + ' into velocity.toml when you apply.'"></p>
           <p class="hint" x-show="connectionChanged() && known.some((s) => s.connected)">The connection changes, so every server pairs again, the connected ones too.</p>
         </section>
 
         <!-- pairing -->
-        <section class="q" data-step="pairing" x-show="step === 'pairing'">
+        <section class="q" data-step="pairing" x-show="step === 'pairing'" :class="enter('pairing')">
           <h1 class="ask">Pair your servers</h1>
           <p class="why">Run each command in that server's console. A code works once and expires after 30 minutes.</p>
           <ul class="list">
@@ -178,7 +181,7 @@ eleventyExcludeFromCollections: true
         </section>
 
         <!-- apply -->
-        <section class="q" data-step="apply" x-show="step === 'apply'">
+        <section class="q" data-step="apply" x-show="step === 'apply'" :class="enter('apply')">
           <h1 class="ask" x-text="applied ? 'Applied' : 'Ready to apply'"></h1>
           <p class="why" x-show="!applied">Nothing changes until you confirm in the proxy console.</p>
           <p class="why" x-show="applied && !applied.errors.length">The proxy saved its config and velocity.toml.</p>
@@ -231,7 +234,7 @@ eleventyExcludeFromCollections: true
         <div class="actions" x-show="!applied">
           <button class="button btn-next" @click="next()" :disabled="nextDisabled()" x-show="step !== 'apply'" x-text="nextLabel()"></button>
           <button class="button-outline setup-later" x-show="step === 'pairing' && pairedCount() < picked().length" @click="later()">Pair the rest later</button>
-          <button class="button-outline setup-back" x-show="index() > 0 && step !== 'pairing'" @click="back()">Back</button>
+          <button class="button-outline setup-back" x-show="index() > 0" @click="back()">Back</button>
         </div>
       </div>
 
