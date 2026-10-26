@@ -1,12 +1,6 @@
 // CommandBridge script editor: every script as a node graph, live on the proxy through the relay.
 // The YAML side lives in script-yaml.js; positions and groups go to the proxy's editor-layout.json.
 
-const RELAY = location.hostname === "localhost"
-  ? "ws://localhost:8787/api/editor/"
-  : "wss://cb.objz.dev/api/editor/";
-
-const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const unb64url = (t) => Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const splitList = (v) => String(v ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const isZero = (v) => v != null && /^\s*0+(\.0+)?\s*(ms|s|m|h)?\s*$/i.test(String(v));
@@ -298,32 +292,22 @@ function cbEditor() {
     pop: null,       // { x, y, title, items: [{ label, hint, kind, keys, run, sub }] } for port and context menus
     tool: "select",  // left-drag on the canvas: "select" draws a selection box, "grab" pans
     wireX: null,     // { x, y } of the delete button on a selected wire
-    ws: null, key: null, sendSeq: 0, recvSeq: 0,
-    conn: Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join(""),
-    queue: Promise.resolve(),
+    relay: null,
     justSaved: [],
     deferred: false,
     removingNodes: false,
     dragId: 0,
 
-    // WebCrypto is async; chain sends and receives so sequence numbers stay in order
-    enqueue(fn) { this.queue = this.queue.then(fn).catch((e) => console.error(e)); },
-
     async init() {
-      const [id, secret] = location.hash.slice(1).split(":");
-      if (!/^[0-9a-f]{32}$/.test(id || "") || !secret) { this.status = "nolink"; return; }
+      const relay = window.cbRelay(location.hash);
+      if (!relay) { this.status = "nolink"; return; }
       [YAML, conv] = await Promise.all([import("/js/yaml/index.js"), import("/lib/editor/script-yaml.js")]);
       window.cbArgTypes = conv.ARG_TYPES;
       this.setupCanvas();
-      this.key = await crypto.subtle.importKey("raw", unb64url(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
-      this.ws = new WebSocket(RELAY + id + "/ws?role=editor");
-      this.ws.onopen = () => this.send({ type: "hello" });
-      this.ws.onmessage = (e) => this.enqueue(() => this.receive(e.data));
-      this.ws.onclose = (e) => {
-        this.status = "closed";
-        // 1006 without a reason means the relay refused the connection or was unreachable
-        this.closeReason = e.reason || (e.code === 1006 ? "could not join the session" : "code " + e.code);
-      };
+      relay.onOpen = () => this.send({ type: "hello" });
+      relay.onMessage = (msg) => this.receive(msg);
+      relay.onClose = (reason) => { this.status = "closed"; this.closeReason = reason; };
+      this.relay = relay.connect();
       window.addEventListener("beforeunload", (e) => { if (this.changes()) e.preventDefault(); });
     },
 
@@ -2748,23 +2732,10 @@ function cbEditor() {
     /* ================= connection ================= */
 
     send(msg) {
-      this.enqueue(async () => {
-        const body = JSON.stringify(msg);
-        const seq = ++this.sendSeq;
-        const mac = await crypto.subtle.sign("HMAC", this.key, new TextEncoder().encode(`editor\n${this.conn}\n${seq}\n${body}`));
-        this.ws.send(JSON.stringify({ conn: this.conn, seq, body, mac: b64url(mac) }));
-      });
+      this.relay.send(msg);
     },
 
-    async receive(frame) {
-      const { conn, seq, body, mac } = JSON.parse(frame);
-      // replies are bound to this page load, so old proxy messages can't be replayed into it
-      const ok = typeof body === "string" && conn === this.conn && seq > this.recvSeq &&
-        await crypto.subtle.verify("HMAC", this.key, unb64url(mac), new TextEncoder().encode(`proxy\n${conn}\n${seq}\n${body}`));
-      if (!ok) { console.warn("Dropped an unsigned or replayed message"); return; }
-      this.recvSeq = seq;
-      const msg = JSON.parse(body);
-
+    receive(msg) {
       if (msg.type === "state") {
         const first = this.status !== "online";
         // files we just saved or deleted changed because of us; anything else changed on the proxy

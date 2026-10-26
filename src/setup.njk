@@ -1,0 +1,270 @@
+---
+layout: layouts/base.njk
+title: Network Setup
+permalink: /setup/
+description: "Set up your CommandBridge network from the browser."
+hideFooter: true
+eleventyExcludeFromCollections: true
+---
+
+<link rel="stylesheet" href="/lib/editor/editor.css"/>
+<link rel="stylesheet" href="/lib/setup/setup.css"/>
+<style>html, body { overflow: hidden; }</style>
+<script src="/lib/editor/relay.js"></script>
+<script src="/lib/setup/setup.js"></script>
+
+<div x-data="cbSetup()" class="ed setup" @keydown="keydown($event)">
+  <div class="ed-bar" x-show="status !== 'nolink'">
+    <span class="setup-who"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span x-text="a ? 'Setting up ' + a.serverId : 'Setup'"></span></span>
+    <span class="ed-spacer"></span>
+    <span class="ed-status" :class="status === 'closed' && 'ed-status-err'" x-show="status !== 'online'" x-text="statusText()"></span>
+    <template x-if="status === 'online'">
+      <span class="setup-nav">
+        <button class="ed-btn" x-show="index() > 0 && step !== 'pairing' && !applied" @click="back()">Back</button>
+        <button class="ed-btn setup-later" x-show="step === 'pairing' && pairedCount() < picked().length" @click="later()" title="Codes stay valid for 30 minutes; pair the rest after applying">Pair later</button>
+        <button class="ed-save" @click="next()" :disabled="nextDisabled()" x-text="nextLabel()"></button>
+      </span>
+    </template>
+  </div>
+
+  <div class="ed-work" x-show="status !== 'nolink'">
+    <nav class="setup-steps ed-files" aria-label="Steps" x-show="a">
+      <template x-for="(s, i) in steps()" :key="s.k">
+        <button class="ed-file" :class="[isDone(s.k) && 'done', step === s.k && 'on']" @click="go(s.k)" :disabled="!isDone(s.k) || !!applied">
+          <span class="setup-mark" x-html="isDone(s.k) ? '✓' : i + 1"></span>
+          <span class="ed-file-n"><span x-text="s.t"></span><small x-show="isDone(s.k) || step === s.k" x-text="s.s"></small></span>
+        </button>
+      </template>
+    </nav>
+
+    <div class="ed-stage">
+      <div id="ed-canvas">
+        <template x-if="a">
+          <div>
+            <!-- 1: name -->
+            <section class="setup-q" data-step="name" x-show="step === 'name'">
+              <p class="ask">What's this proxy called?</p>
+              <p class="ask-why">Your servers and scripts know the proxy by this name.</p>
+              <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk">this proxy</span></div>
+                <div class="sec"><div class="fr"><span class="fl">name</span><div class="fc"><input type="text" data-f="serverId" x-model="a.serverId" :class="err && 'bad'" spellcheck="false" autocomplete="off"></div></div></div>
+              </div></div>
+              <p class="setup-err" x-show="err" x-text="err"></p>
+              <p class="hint"><b>Enter</b>keep and continue</p>
+            </section>
+
+            <!-- 2: WebSocket or Redis -->
+            <section class="setup-q" data-step="type" x-show="step === 'type'">
+              <p class="ask">How do your servers connect to the proxy?</p>
+              <p class="ask-why" x-text="a.endpointType === 'WEBSOCKET' ? 'Each server connects straight to the proxy. Pick this unless you already run Redis.' : 'The proxy and your servers meet on a Redis server you already run.'"></p>
+              <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span></div>
+                <div class="sec"><div class="fr"><span class="fl">connection</span><div class="fc">
+                  <div class="seg" style="--n:2"><i class="seg-thumb"></i>
+                    <label><input type="radio" name="s-type" value="WEBSOCKET" data-f="endpointType" x-model="a.endpointType"><span>WebSocket</span></label>
+                    <label><input type="radio" name="s-type" value="REDIS" data-f="endpointType" x-model="a.endpointType"><span>Redis</span></label>
+                  </div>
+                </div></div></div>
+              </div></div>
+              <p class="hint"><b>Enter</b>keep and continue</p>
+            </section>
+
+            <!-- 3: port -->
+            <section class="setup-q" data-step="port" x-show="step === 'port'">
+              <p class="ask">Which port do your servers connect to?</p>
+              <p class="ask-why">The proxy listens for your servers on this port. Keep the default unless another program on the machine uses it.</p>
+              <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span></div>
+                <div class="sec"><div class="fr"><span class="fl">port</span><div class="fc"><input type="text" inputmode="numeric" data-f="port" x-model.number="a.port" :class="err && 'bad'" autocomplete="off"><span class="setup-def" x-show="a.port === 8765">default</span></div></div></div>
+              </div></div>
+              <p class="setup-err" x-show="err" x-text="err"></p>
+              <p class="hint">Open this port in your firewall or host panel.</p>
+            </section>
+
+            <!-- 4: address, or the Redis login -->
+            <section class="setup-q" data-step="address" x-show="step === 'address'">
+              <template x-if="a.endpointType === 'WEBSOCKET'">
+                <div>
+                  <p class="ask">Which address do your servers use to reach the proxy?</p>
+                  <p class="ask-why">Behind Docker or a host panel, this is the public address of the machine. Your servers can't connect to 0.0.0.0.</p>
+                  <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                    <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span></div>
+                    <div class="sec">
+                      <div class="fr"><span class="fl">address</span><div class="fc"><input type="text" data-f="address" x-model="a.address" :class="err && 'bad'" placeholder="play.example.net" spellcheck="false" autocomplete="off"></div></div>
+                      <div class="fr"><span class="fl">port</span><div class="fc"><span class="setup-ro" x-text="a.port"></span></div></div>
+                    </div>
+                  </div></div>
+                </div>
+              </template>
+              <template x-if="a.endpointType === 'REDIS'">
+                <div>
+                  <p class="ask">Where is your Redis server?</p>
+                  <p class="ask-why">The proxy and every server log in to this Redis server. Leave the password empty to keep the one the proxy has.</p>
+                  <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                    <div class="nh">{% lucide "database", { "class": "h-4 w-4" } %}<span class="nk">Redis</span></div>
+                    <div class="sec">
+                      <div class="fr"><span class="fl">host</span><div class="fc"><input type="text" data-f="redis-host" x-model="a.redis.host" :class="err && 'bad'" spellcheck="false" autocomplete="off"></div></div>
+                      <div class="fr"><span class="fl">port</span><div class="fc"><input type="text" inputmode="numeric" data-f="redis-port" x-model.number="a.redis.port" autocomplete="off"></div></div>
+                      <div class="fr"><span class="fl">username</span><div class="fc"><input type="text" data-f="redis-user" x-model="a.redis.username" spellcheck="false" autocomplete="off"></div></div>
+                      <div class="fr"><span class="fl">password</span><div class="fc"><input type="password" data-f="redis-pass" x-model="a.redis.password" placeholder="unchanged" autocomplete="new-password"></div></div>
+                    </div>
+                  </div></div>
+                </div>
+              </template>
+              <p class="setup-err" x-show="err" x-text="err"></p>
+              <p class="hint"><b>Enter</b>continue</p>
+            </section>
+
+            <!-- 5: encryption -->
+            <section class="setup-q" data-step="tls" x-show="step === 'tls'">
+              <p class="ask">How should the connection be secured?</p>
+              <p class="ask-why" x-text="{ TOFU: 'Each server remembers the proxy the first time it connects and refuses anyone else after that.', PLAIN: 'No encryption. Only for servers on the same machine or a private network.', STRICT: 'The proxy uses a certificate from your own keystore, and every server checks it.' }[a.tlsMode]"></p>
+              <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span></div>
+                <div class="sec"><div class="fr"><span class="fl">encryption</span><div class="fc">
+                  <div class="seg" style="--n:3"><i class="seg-thumb"></i>
+                    <label><input type="radio" name="s-tls" value="TOFU" data-f="tlsMode" x-model="a.tlsMode"><span>first use</span></label>
+                    <label><input type="radio" name="s-tls" value="PLAIN" data-f="tlsMode" x-model="a.tlsMode"><span>off</span></label>
+                    <label><input type="radio" name="s-tls" value="STRICT" data-f="tlsMode" x-model="a.tlsMode"><span>strict</span></label>
+                  </div>
+                </div></div></div>
+              </div></div>
+              <p class="hint"><b>Enter</b>keep and continue</p>
+            </section>
+
+            <!-- 5b: keystore, for strict -->
+            <section class="setup-q" data-step="keystore" x-show="step === 'keystore'">
+              <p class="ask">Where is your keystore?</p>
+              <p class="ask-why">The file on the proxy's machine that holds its certificate. Leave the password empty to keep the current one.</p>
+              <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                <div class="nh">{% lucide "key-round", { "class": "h-4 w-4" } %}<span class="nk">Keystore</span></div>
+                <div class="sec">
+                  <div class="fr"><span class="fl">path</span><div class="fc"><input type="text" data-f="ks-path" x-model="a.keystore.path" :class="err && 'bad'" placeholder="plugins/commandbridge/keystore.p12" spellcheck="false" autocomplete="off"></div></div>
+                  <div class="fr"><span class="fl">type</span><div class="fc">
+                    <div class="seg" style="--n:2"><i class="seg-thumb"></i>
+                      <label><input type="radio" name="s-kst" value="PKCS12" x-model="a.keystore.type"><span>PKCS12</span></label>
+                      <label><input type="radio" name="s-kst" value="JKS" x-model="a.keystore.type"><span>JKS</span></label>
+                    </div>
+                  </div></div>
+                  <div class="fr"><span class="fl">password</span><div class="fc"><input type="password" data-f="ks-pass" x-model="a.keystore.password" placeholder="unchanged" autocomplete="new-password"></div></div>
+                </div>
+              </div></div>
+              <p class="setup-err" x-show="err" x-text="err"></p>
+            </section>
+
+            <!-- 6: servers -->
+            <section class="setup-q" data-step="servers" x-show="step === 'servers'">
+              <p class="ask">Which servers run CommandBridge?</p>
+              <p class="ask-why">These are the servers in your velocity.toml. Turn off the ones without CommandBridge, or add a server Velocity doesn't have yet.</p>
+              <div class="drawflow-node cb-server"><div class="drawflow_content_node">
+                <div class="nh">{% lucide "server", { "class": "h-4 w-4" } %}<span class="nk">Servers</span><span class="setup-badge" x-text="`${picked().length} of ${a.servers.length}`"></span></div>
+                <div>
+                  <template x-for="s in a.servers" :key="s.id">
+                    <div class="srow" :class="!s.on && 'off'">
+                      <label class="sw"><input type="checkbox" x-model="s.on" :aria-label="'Use ' + s.id"><span></span></label>
+                      <img class="logo" :src="logo(s)" alt="" :class="!s.platform && 'unknown'">
+                      <span class="srow-id" x-text="s.id"></span>
+                      <span class="srow-addr" x-text="s.address"></span>
+                      <button class="srow-x" x-show="s.isNew" @click="removeRow(s)" :aria-label="'Remove ' + s.id">{% lucide "x", { "class": "h-3.5 w-3.5" } %}</button>
+                    </div>
+                  </template>
+                  <template x-if="newRow">
+                    <div class="srow srow-new">
+                      <span></span><span></span>
+                      <div class="fc"><input type="text" data-f="new-id" x-model="newRow.id" placeholder="name" spellcheck="false" autocomplete="off"></div>
+                      <div class="fc"><input type="text" data-f="new-address" x-model="newRow.address" placeholder="10.0.0.13:25565" spellcheck="false" autocomplete="off"></div>
+                    </div>
+                  </template>
+                  <button class="srow-add" x-show="!newRow" @click="startRow()">{% lucide "plus", { "class": "h-3.5 w-3.5" } %}Add a server</button>
+                </div>
+              </div></div>
+              <p class="setup-err" x-show="err" x-text="err"></p>
+              <template x-for="p in problems"><p class="setup-err" x-text="p"></p></template>
+              <p class="hint" x-show="added().length" x-text="added().map((s) => s.id).join(', ') + (added().length === 1 ? ' is new: it goes' : ' are new: they go') + ' into velocity.toml when you apply.'"></p>
+              <p class="hint" x-show="connectionChanged() && known.some((s) => s.connected)">The connection changes, so every server pairs again, the connected ones too.</p>
+            </section>
+
+            <!-- 7: pairing, drawn as the network -->
+            <section class="setup-net" data-step="pairing" x-show="step === 'pairing'" x-effect="step === 'pairing' && layoutWires()">
+              <div class="setup-head">
+                <p class="ask">Pair your servers</p>
+                <p class="ask-why">Run each command in that server's console. A code works once and runs out after 30 minutes.</p>
+              </div>
+              <svg class="setup-wires" aria-hidden="true" x-html="wiresSvg()"></svg>
+              <div class="setup-cols">
+                <div class="setup-col">
+                  <template x-for="s in picked()" :key="s.id">
+                    <div class="drawflow-node cb-server pair-node" :data-id="s.id"><div class="drawflow_content_node">
+                      <div class="nh"><img class="logo" :src="logo(s)" alt="" :class="!paired[s.id] && 'unknown'"><span class="nk" x-text="s.id"></span>
+                        <span class="setup-badge badge" :class="paired[s.id] ? 'live' : 'wait'" x-text="paired[s.id] ? 'paired' : 'waiting'"></span></div>
+                      <div class="np"><div class="pr"><span class="srv-k" x-text="software(s)"></span><span>proxy</span></div></div>
+                      <template x-if="codes[s.id] && !paired[s.id]">
+                        <div class="sec"><div class="setup-code"><code x-text="'/cbc pair ' + codes[s.id]"></code>
+                          <button class="ed-btn" @click="copy('/cbc pair ' + codes[s.id])" x-text="copied === '/cbc pair ' + codes[s.id] ? 'Copied' : 'Copy'"></button></div></div>
+                      </template>
+                      <span class="setup-port"></span>
+                    </div></div>
+                  </template>
+                </div>
+                <div class="setup-col">
+                  <div class="drawflow-node cb-server proxy pair-proxy"><div class="drawflow_content_node">
+                    <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span><span class="setup-badge">this proxy</span></div>
+                    <div class="np"><div class="pr"><span>servers</span><span x-text="`${pairedCount()} of ${picked().length} paired`"></span></div></div>
+                    <div class="sec"><p class="hint">Each server gets the shared secret while it pairs, so the secret never shows up in a console.</p></div>
+                    <span class="setup-port in"></span>
+                  </div></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 8: apply -->
+            <section class="setup-apply" data-step="apply" x-show="step === 'apply'">
+              <div class="ed-confirm" x-show="staged && !applied" role="status">
+                <span class="ed-confirm-t">Confirm in the proxy console to apply</span>
+                <code x-text="'/cb setup confirm ' + staged"></code>
+                <button class="ed-btn" @click="copy('/cb setup confirm ' + staged)" x-text="copied === '/cb setup confirm ' + staged ? 'Copied' : 'Copy'"></button>
+              </div>
+              <div class="setup-head">
+                <p class="ask" x-text="applied ? 'Applied' : 'Ready to apply'"></p>
+                <p class="ask-why" x-show="!applied">Applying writes the proxy's config and velocity.toml. Paired servers already have their config and connect once the proxy runs on it.</p>
+              </div>
+              <div class="setup-sum">
+                <div class="drawflow-node cb-server proxy"><div class="drawflow_content_node">
+                  <div class="nh"><img class="logo" src="/lib/editor/logos/velocity.svg" alt=""><span class="nk" x-text="a.serverId"></span></div>
+                  <div class="setup-kv">
+                    <span>connection</span><span x-text="a.endpointType === 'WEBSOCKET' ? `WebSocket, ${a.address}:${a.port}` : `Redis, ${a.redis.host}:${a.redis.port}`"></span>
+                    <span>encryption</span><span x-text="{ TOFU: 'first use', PLAIN: 'off', STRICT: 'strict' }[a.tlsMode]"></span>
+                    <span>velocity.toml</span><span x-text="added().length ? 'adds ' + added().map((s) => s.id).join(', ') : 'unchanged'"></span>
+                  </div>
+                </div></div>
+                <div class="drawflow-node cb-server"><div class="drawflow_content_node">
+                  <div class="nh">{% lucide "server", { "class": "h-4 w-4" } %}<span class="nk" x-text="`${picked().length} ${picked().length === 1 ? 'server' : 'servers'}`"></span></div>
+                  <div class="setup-kv">
+                    <template x-for="s in picked()" :key="s.id">
+                      <span style="display:contents"><span x-text="s.id"></span><span x-text="(paired[s.id] ? 'paired' : 'not paired yet') + ', ' + s.address"></span></span>
+                    </template>
+                  </div>
+                </div></div>
+              </div>
+              <template x-if="applied">
+                <div class="setup-result" role="status">
+                  <p class="ed-ok" x-show="!applied.errors.length">The proxy saved its config and velocity.toml.</p>
+                  <template x-for="e in applied.errors"><p class="setup-err" x-text="e"></p></template>
+                  <p class="setup-restart" x-show="applied.restartNeeded">Restart the proxy to switch to the new connection settings.</p>
+                  <template x-if="Object.keys(applied.configs).length">
+                    <p class="hint"><span x-text="Object.keys(applied.configs).join(', ') + (Object.keys(applied.configs).length === 1 ? ' has not paired yet. Pair it with its code, or' : ' have not paired yet. Pair them with their codes, or')"></span>
+                      <button class="ed-btn setup-download" @click="download()">Download the configs instead</button></p>
+                  </template>
+                </div>
+              </template>
+            </section>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <div class="ed-landing setup-nolink" x-show="status === 'nolink'" x-cloak>
+    <p>Run <code>/cb setup</code> on your proxy and open the link it gives you.</p>
+  </div>
+</div>
